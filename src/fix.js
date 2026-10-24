@@ -1,5 +1,4 @@
 import path from 'node:path';
-import YAML from 'yaml';
 import { normalizeLabel } from './parse.js';
 import { STATE_MARKS } from './parse.js';
 import { aggregateState, linkTarget } from './model.js';
@@ -201,13 +200,29 @@ function ensureTitleAlias(node, lines) {
   if (!fm?.data || fm.error || !node.title) return;
   const title = normalizeLabel(node.title);
   if (title === node.id || node.aliases.some((a) => normalizeLabel(a) === title)) return;
-  const doc = YAML.parseDocument(lines.slice(1, fm.end).join('\n'));
-  const aliases = doc.get('aliases');
-  if (YAML.isSeq(aliases)) aliases.add(node.title);
-  else if (typeof aliases === 'string') doc.set('aliases', [aliases, node.title]);
-  else doc.set('aliases', [node.title]);
-  const yaml = doc.toString({ lineWidth: 0 }).replace(/\n$/, '');
-  lines.splice(1, fm.end - 1, ...yaml.split('\n'));
+
+  // Edit only the aliases lines, so the rest of the frontmatter keeps its formatting.
+  const value = /^[\w .()/-]+$/.test(node.title) && !/^\s|\s$/.test(node.title)
+    ? node.title
+    : JSON.stringify(node.title);
+  const at = lines.findIndex((l, i) => i > 0 && i < fm.end && /^aliases:/.test(l));
+  if (at === -1) {
+    lines.splice(fm.end, 0, `aliases: [${value}]`);
+    return;
+  }
+  const rest = lines[at].slice('aliases:'.length).trim();
+  const flow = rest.match(/^\[(.*)\]\s*(#.*)?$/);
+  if (flow) {
+    const items = flow[1].trim();
+    lines[at] = `aliases: [${items ? `${items}, ` : ''}${value}]${flow[2] ? ` ${flow[2]}` : ''}`;
+  } else if (rest && !rest.startsWith('#')) {
+    lines[at] = `aliases: [${rest}, ${value}]`;
+  } else {
+    let last = at;
+    while (last + 1 < fm.end && /^\s*-\s/.test(lines[last + 1])) last++;
+    const indent = lines[last].match(/^\s*/)[0] || '  ';
+    lines.splice(last + 1, 0, `${indent}- ${value}`);
+  }
 }
 
 function stripBlock(text, name) {

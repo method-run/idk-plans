@@ -197,3 +197,14 @@ test('a blocked tag counts as blocked in rollups but leaves parent marks alone',
   assert.equal(m.nodes.get('a').rollup.system.states.blocked, 1);
   assert.ok(!m.problems.some((p) => p.rule === 'task-parent-mismatch'));
 });
+
+test('title alias edits keep frontmatter formatting', () => {
+  const text = (aliases) => `---\nid: trust\ntitle: Trust store\nsummary: >-\n  Line one.\n  Line two.\nparent: root\n${aliases}---\n# Trust\n`;
+  const run = (aliases) => {
+    const m = model([node('root'), ['trust.md', text(aliases)]]);
+    return fixDocument(m, m.nodes.get('trust')).split('---')[1];
+  };
+  assert.match(run('aliases: [peers]\n'), /\n  Line one\.\n  Line two\.\n[\s\S]*aliases: \[peers, Trust store\]\n/);
+  assert.match(run('aliases:\n  - peers\n'), /aliases:\n  - peers\n  - Trust store\n/);
+  assert.match(run(''), /parent: root\naliases: \[Trust store\]\n/);
+});
