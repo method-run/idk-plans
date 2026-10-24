@@ -231,3 +231,7 @@ test('tree tags: one per place in each tree, primary first, user tags kept', () 
   const off = model(files, { ...cfg, tags: false });
   assert.doesNotMatch(fixDocument(off, off.nodes.get('trust')), /system\/gateway/);
 });
+
+test('config keeps the site section', () => {
+  assert.deepEqual(resolveConfig({ site: { title: 'T', sourceUrl: 'https://x' } }).site, { title: 'T', sourceUrl: 'https://x' });
+});
