@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "idk-plans configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "include": { "type": "array", "items": { "type": "string" } },
+    "exclude": { "type": "array", "items": { "type": "string" } },
+    "root": {
+      "type": "object",
+      "required": ["file", "id"],
+      "properties": { "file": { "type": "string" }, "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" } }
+    },
+    "trees": {
+      "type": "object",
+      "propertyNames": { "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+      "additionalProperties": {
+        "type": "object",
+        "properties": { "title": { "type": "string" }, "primary": { "type": "boolean" } }
+      }
+    },
+    "rules": {
+      "type": "object",
+      "additionalProperties": {
+        "oneOf": [
+          { "enum": ["error", "warn", "info", "off"] },
+          { "type": "array", "prefixItems": [{ "enum": ["error", "warn", "info", "off"] }] }
+        ]
+      }
+    }
+  }
+}

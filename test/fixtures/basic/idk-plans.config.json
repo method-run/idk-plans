@@ -1,0 +1,4 @@
+{
+  "root": { "file": "README.md", "id": "demo" },
+  "trees": { "system": { "title": "System", "primary": true }, "concern": { "title": "Concerns" } }
+}

@@ -1,0 +1,31 @@
+{
+  "name": "idk-plans",
+  "version": "0.1.0",
+  "description": "Architecture docs and progress rollups kept in Markdown next to your code.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Pixelbandito",
+  "bin": {
+    "idk-plans": "bin/idk-plans.js"
+  },
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "schema",
+    "SPEC.md"
+  ],
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "check:self": "node bin/idk-plans.js check"
+  },
+  "dependencies": {
+    "picomatch": "^4.0.7",
+    "yaml": "^2.9.1"
+  }
+}
