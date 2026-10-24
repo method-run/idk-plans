@@ -168,6 +168,7 @@ export function fixDocument(model, node, options = { blocks: true, marks: true, 
   for (const e of edits) lines.splice(e.start, e.end - e.start + 1, ...e.lines);
   // Last, because it can change the number of frontmatter lines.
   ensureTitleAlias(node, lines);
+  if (model.config?.tags !== false) ensureTreeTags(model, node, lines);
 
   // Reference definitions, computed from the final text.
   const refsBlocks = existing.get('refs') ?? [];
@@ -223,6 +224,58 @@ function ensureTitleAlias(node, lines) {
     const indent = lines[last].match(/^\s*/)[0] || '  ';
     lines.splice(last + 1, 0, `${indent}- ${value}`);
   }
+}
+
+/**
+ * Each place of a node in each tree, as a nested tag: <tree>/<id>/.../<node id>.
+ * The primary tree comes first. Tree tops are not part of the path.
+ */
+export function treeTags(model, id) {
+  const { trees, primary } = model;
+  const names = [primary, ...Object.keys(trees).filter((t) => t !== primary)];
+  const tags = [];
+  for (const name of names) {
+    const tree = trees[name];
+    const paths = (cur, seen) => {
+      if (cur === tree.top) return [[]];
+      if (seen.has(cur)) return [];
+      const ps = tree.parents.get(cur) ?? [];
+      return ps.flatMap((p) => paths(p, new Set([...seen, cur])).map((path) => [...path, cur]));
+    };
+    for (const path of paths(id, new Set())) {
+      if (path.length) tags.push([name, ...path].join('/'));
+    }
+  }
+  return [...new Set(tags)];
+}
+
+/** Write the tree tags into the frontmatter `tags`, keeping tags that the tool does not own. */
+function ensureTreeTags(model, node, lines) {
+  const fm = node.doc.frontmatter;
+  if (!fm?.data || fm.error) return;
+  const treeNames = Object.keys(model.trees);
+  let existing = fm.data.tags ?? [];
+  if (typeof existing === 'string') existing = existing.split(/[\s,]+/).filter(Boolean);
+  if (!Array.isArray(existing)) return;
+  existing = existing.map((t) => String(t).replace(/^#/, ''));
+  const own = (t) => treeNames.includes(t.split('/')[0]);
+  const desired = [...treeTags(model, node.id), ...existing.filter((t) => !own(t))];
+  if (desired.join('\n') === existing.join('\n')) return;
+
+  const end = lines.findIndex((l, i) => i > 0 && (l.trim() === '---' || l.trim() === '...'));
+  const at = lines.findIndex((l, i) => i > 0 && i < end && /^tags:/.test(l));
+  if (at === -1) {
+    if (desired.length) lines.splice(end, 0, `tags: [${desired.join(', ')}]`);
+    return;
+  }
+  let last = at;
+  const block = !lines[at].slice('tags:'.length).trim();
+  if (block) while (last + 1 < end && /^\s*-\s/.test(lines[last + 1])) last++;
+  const indent = block && last > at ? lines[at + 1].match(/^\s*/)[0] : '  ';
+  const replacement = !desired.length ? []
+    : block ? ['tags:', ...desired.map((t) => `${indent}- ${t}`)]
+    : [`tags: [${desired.join(', ')}]`];
+  lines.splice(at, last - at + 1, ...replacement);
 }
 
 function stripBlock(text, name) {

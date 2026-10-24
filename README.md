@@ -19,6 +19,8 @@ progress that rolls up from tasks to the top of the project.
   links work on Codeberg and GitHub without a site build.
 - Generated blocks show progress, child pages, and diagram links. The Markdown
   stays readable without the tool.
+- For Obsidian: `fix` writes each page's place in every tree as nested tags
+  (`concern/security/peer-auth/trust-store`) and adds page titles to `aliases`.
 
 ## Use
 

@@ -492,6 +492,28 @@ links.
 A diagram should show one level: a node and its children, and the links
 between them. To show more detail, draw a diagram on the child's page.
 
+### 7.5 Tree tags
+
+`fix` writes each node's place in each tree into the frontmatter `tags`, as
+nested tags. A tag is the tree name, then the ids from the top of that tree
+down to the node:
+
+```yaml
+tags: [system/gateway/trust-store, concern/security/peer-auth/trust-store, feature/connect/add-a-friend/trust-store]
+```
+
+- Tags for the primary tree come first, then the other trees in the order of
+  the configuration. Tree tops are not in the path.
+- A node with two parents in a tree has two tags for that tree.
+- The tool owns only the tags whose first part is a tree name. It keeps all
+  other tags, after its own.
+- Do not rely on tag order. `parent` and `parents` are the source; tags are a
+  copy that tools such as Obsidian can use without idk-plans. In Obsidian, the
+  tag pane shows each tree, and `tag:#system/gateway` finds the whole gateway
+  branch.
+
+Set `"tags": false` in the configuration to turn this off.
+
 ## 8. Plans
 
 A plan describes work that is not finished. Plans go out of date quickly, so:
@@ -537,6 +559,7 @@ The configuration is `idk-plans.config.json` in the project root.
 | `exclude` | node_modules, dist, build, coverage, .git | Files not to scan. |
 | `root` | the node without a primary parent | The root file and id, if the root has no frontmatter. |
 | `trees` | `{ "system": { "primary": true } }` | The trees. Exactly one must be primary. |
+| `tags` | `true` | Write tree tags into frontmatter (7.5). |
 | `trees.<name>.groups` | `[]` | Paths of virtual nodes that this tree may use without a page (4.4). A one-id group sits at the top level of the tree. |
 | `rules` | see section 10 | Severity (`error`, `warn`, `info`, `off`) and options for each rule. |
 

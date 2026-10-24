@@ -69,6 +69,7 @@ export function resolveConfig(raw = {}) {
     root: raw.root ?? null,
     trees,
     primaryTree: primaries[0],
+    tags: raw.tags ?? true,
     rules,
   };
 }

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { parseMarkdown } from '../src/parse.js';
 import { buildModel, aggregateState } from '../src/model.js';
 import { resolveConfig } from '../src/config.js';
-import { fixDocument, rollupText } from '../src/fix.js';
+import { fixDocument, rollupText, treeTags } from '../src/fix.js';
 
 const TWO_TREES = { trees: { system: { primary: true }, concern: { title: 'Concerns' } } };
 
@@ -207,4 +207,21 @@ test('title alias edits keep frontmatter formatting', () => {
   assert.match(run('aliases: [peers]\n'), /\n  Line one\.\n  Line two\.\n[\s\S]*aliases: \[peers, Trust store\]\n/);
   assert.match(run('aliases:\n  - peers\n'), /aliases:\n  - peers\n  - Trust store\n/);
   assert.match(run(''), /parent: root\naliases: \[Trust store\]\n/);
+});
+
+test('tree tags: one per place in each tree, primary first, user tags kept', () => {
+  const files = [
+    node('root'),
+    node('gateway', { parent: 'root' }),
+    node('trust', { parent: 'gateway', parents: { concern: ['security.peer-auth', 'privacy'] }, tags: ['mine', 'concern/stale'] }),
+  ];
+  const cfg = { trees: { system: { primary: true }, concern: { groups: ['privacy'] } } };
+  const m = model(files, cfg);
+  assert.deepEqual(treeTags(m, 'trust'), ['system/gateway/trust', 'concern/security/peer-auth/trust', 'concern/privacy/trust']);
+  const fixed = fixDocument(m, m.nodes.get('trust'));
+  assert.match(fixed, /tags: \[system\/gateway\/trust, concern\/security\/peer-auth\/trust, concern\/privacy\/trust, mine\]/);
+  const m2 = model([files[0], files[1], ['trust.md', fixed]], cfg);
+  assert.equal(fixDocument(m2, m2.nodes.get('trust')), fixed);
+  const off = model(files, { ...cfg, tags: false });
+  assert.doesNotMatch(fixDocument(off, off.nodes.get('trust')), /system\/gateway/);
 });

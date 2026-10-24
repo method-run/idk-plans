@@ -395,7 +395,7 @@ export function buildModel({ config, parsed, exists }) {
     }
   }
 
-  return { nodes, trees, rootId, primary, byFile, labels, problems };
+  return { config, nodes, trees, rootId, primary, byFile, labels, problems };
 }
 
 function leafDescendants(tasks, task) {
