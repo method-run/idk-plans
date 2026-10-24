@@ -12,8 +12,9 @@ progress that rolls up from tasks to the top of the project.
 - Each doc page has an `id` and a `parent`, so the pages make a tree.
 - A page can also be in other trees, such as a "concerns" tree, with
   dot-separated paths: `parents: { concern: security.peer-auth }`.
-- Tasks are checkboxes: `[ ]` todo, `[/]` doing, `[!]` blocked, `[x]` done,
-  `[>]` deferred, `[-]` dropped. Progress rolls up through every tree.
+- Tasks are checkboxes: `[ ]` todo, `[/]` doing, `[x]` done,
+  `[>]` deferred, `[-]` dropped, and `#blocked` on an open task. Progress rolls
+  up through every tree.
 - Links use ids (`[trust-store]`). The tool writes the link targets, so the
   links work on Codeberg and GitHub without a site build.
 - Generated blocks show progress, child pages, and diagram links. The Markdown

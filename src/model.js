@@ -19,7 +19,6 @@ export function aggregateState(states) {
   const inScope = states.filter((s) => !OUT_OF_SCOPE.has(s));
   if (!inScope.length) return states.every((s) => s === 'dropped') ? 'dropped' : 'deferred';
   if (inScope.every((s) => s === 'done')) return 'done';
-  if (inScope.includes('blocked')) return 'blocked';
   if (inScope.some((s) => s === 'done' || s === 'doing')) return 'doing';
   return 'todo';
 }
@@ -247,12 +246,16 @@ export function buildModel({ config, parsed, exists }) {
 
     for (const task of docTasks) {
       if (!task.children.length) continue;
-      const leafStates = leafDescendants(docTasks, task).map((t) => t.state);
+      const leafStates = leafDescendants(docTasks, task).map((t) => t.markState);
       const expected = aggregateState(leafStates);
-      if (expected !== task.state) {
+      if (expected !== task.markState) {
         report('task-parent-mismatch', node.file, task.line,
-          `task is "${task.state}" but its subtasks make it "${expected}"`);
+          `task is "${task.markState}" but its subtasks make it "${expected}"`);
       }
+    }
+    for (const u of node.doc?.unknownMarks ?? []) {
+      report('unknown-mark', node.file, u.line,
+        `"[${u.mark}]" is not a task mark; use [ ] [/] [x] [>] [-], and #blocked for blocked`);
     }
 
     const counted = docTasks.filter((t) => !t.children.length);

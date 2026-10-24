@@ -26,6 +26,7 @@ export const DEFAULT_RULES = {
   'stale-generated': 'error',
   'bad-status': 'error',
   'task-parent-mismatch': 'warn',
+  'unknown-mark': 'warn',
   'summary-max-words': ['warn', 25],
   'plan-finished': 'warn',
   'unlinked-child': 'warn',

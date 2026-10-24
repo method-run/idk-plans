@@ -7,7 +7,7 @@ in plain Markdown files that live next to the code. A tool reads those files,
 checks them, keeps generated parts current, and can build a website from them.
 
 The files stay useful without the tool. Any Markdown viewer (Codeberg, GitHub,
-an editor) shows readable text, working links, and current progress.
+Obsidian, an editor) shows readable text, working links, and current progress.
 
 ## 1. Goals
 
@@ -94,6 +94,10 @@ section 4.
 **order**: a number that sets the position of the node among its siblings.
 Siblings with an order come first, from low to high. The other siblings follow,
 sorted by title.
+
+**aliases**: other names for the node. `fix` adds the `title` to `aliases`
+when it is not there, so that tools which show file names (for example
+Obsidian, where many pages are `README.md`) can find the page by its title.
 
 **code**: files or directories that this node describes. Paths start at the
 project root. The tool reports paths that do not exist.
@@ -225,20 +229,28 @@ A task is a list item that starts with a status mark in square brackets:
 - [ ] Rotate the key
 - [-] Store keys in the OS keychain
 - [>] Back up the key to a USB drive
-- [!] Import keys from v1 nodes
+- [ ] Import keys from v1 nodes #blocked until the v1 export format is known
 ```
 
 | Mark | State | Counts as |
 |---|---|---|
 | `[ ]` | todo | open |
 | `[/]` | doing | open |
-| `[!]` | blocked | open |
+| `[ ]` or `[/]` with `#blocked` | blocked | open |
 | `[x]` or `[X]` | done | done |
 | `[>]` | deferred | not in scope |
 | `[-]` | dropped | not in scope |
 
-Codeberg and GitHub show `[ ]` and `[x]` as checkboxes. They show the other
-marks as text, which is still easy to read.
+These marks follow common Obsidian conventions (the Tasks plugin and themes
+such as Minimal). Codeberg and GitHub show `[ ]` and `[x]` as checkboxes. They
+show the other marks as text, which is still easy to read.
+
+**Blocked** is not a mark, because no checkbox convention for it is common.
+Add the tag `#blocked` to an open task, and say what blocks it after the tag.
+Obsidian lists every blocked task under that tag.
+
+The tool reports a list item with any other mark (`unknown-mark`), so that a
+typo does not silently remove a task.
 
 Write a task as a result that someone can check, not as an activity.
 "Show the key fingerprint" is good. "Work on fingerprints" is not.
@@ -250,7 +262,8 @@ The tool ignores tasks inside code blocks and inside generated blocks.
 A task can have subtasks: list items with marks, indented under it.
 
 - Only tasks without subtasks are counted.
-- The mark on a task with subtasks is calculated from its subtasks. The tool
+- The mark on a task with subtasks is calculated from its subtasks. A
+  `#blocked` tag on a subtask does not change the calculation. The tool
   reports a mark that does not agree (`task-parent-mismatch`), and `fix`
   corrects it.
 
@@ -547,6 +560,7 @@ is not zero if it finds an error.
 | `stale-generated` | error | A generated block is not current. `fix` corrects it. |
 | `bad-status` | error | A node status is not allowed for that node (5.4). |
 | `task-parent-mismatch` | warn | A task mark does not agree with its subtasks. |
+| `unknown-mark` | warn | A list item has a mark in brackets that is not a task mark (5.1). |
 | `summary-max-words` | warn (25) | A sentence in `summary` has too many words. |
 | `plan-finished` | warn | A plan has no open tasks. |
 | `unlinked-child` | warn | A node's page has no link to one of its children in the primary tree. A `children` block counts as a link. |

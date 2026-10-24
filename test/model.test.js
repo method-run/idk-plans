@@ -27,14 +27,16 @@ test('parses task marks, nesting, and skips code blocks', () => {
   const doc = parseMarkdown('a.md', [
     '- [x] one',
     '- [/] two',
-    '  - [!] two a',
+    '  - [ ] two a #blocked waiting on b',
     '  - [>] two b',
     '```',
     '- [ ] not a task',
     '```',
     'Paragraph',
     '- [-] three',
+    '- [?] not a known mark',
   ].join('\n'));
+  assert.deepEqual(doc.unknownMarks.map((u) => u.mark), ['?']);
   assert.deepEqual(doc.tasks.map((t) => [t.state, t.parent]), [
     ['done', null], ['doing', null], ['blocked', 1], ['deferred', 1], ['dropped', null],
   ]);
@@ -48,7 +50,6 @@ test('task marks are not read as references', () => {
 test('aggregateState', () => {
   assert.equal(aggregateState(['done', 'done', 'dropped']), 'done');
   assert.equal(aggregateState(['done', 'todo']), 'doing');
-  assert.equal(aggregateState(['todo', 'blocked', 'done']), 'blocked');
   assert.equal(aggregateState(['dropped', 'deferred']), 'deferred');
   assert.equal(aggregateState(['todo']), 'todo');
 });
@@ -179,4 +180,20 @@ test('mermaid edge labels and virtual nodes do not become zoom links', () => {
     node('a', { parent: 'root' }), node('b', { parent: 'root' }), node('c', { parent: 'root', parents: { concern: 'grp.c' } }),
   ], TWO_TREES);
   assert.deepEqual(m.nodes.get('root').doc.mermaid[0].ids, ['a', 'c']);
+});
+
+test('fix adds the title to aliases without disturbing other frontmatter', () => {
+  const files = [node('root'), node('trust', { parent: 'root', title: 'Trust store', aliases: ['peers'] }, 'Body')];
+  const m = model(files);
+  const fixed = fixDocument(m, m.nodes.get('trust'));
+  assert.match(fixed, /aliases:.*peers.*Trust store/s);
+  assert.match(fixed, /^# trust$/m);
+  const m2 = model([files[0], ['trust.md', fixed]]);
+  assert.equal(fixDocument(m2, m2.nodes.get('trust')), fixed);
+});
+
+test('a blocked tag counts as blocked in rollups but leaves parent marks alone', () => {
+  const m = model([node('root'), node('a', { parent: 'root' }, '- [/] parent\n  - [x] one\n  - [ ] two #blocked')]);
+  assert.equal(m.nodes.get('a').rollup.system.states.blocked, 1);
+  assert.ok(!m.problems.some((p) => p.rule === 'task-parent-mismatch'));
 });

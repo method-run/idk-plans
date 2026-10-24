@@ -1,4 +1,6 @@
 import path from 'node:path';
+import YAML from 'yaml';
+import { normalizeLabel } from './parse.js';
 import { STATE_MARKS } from './parse.js';
 import { aggregateState, linkTarget } from './model.js';
 
@@ -103,7 +105,7 @@ export function fixDocument(model, node, options = { blocks: true, marks: true, 
       const line = lines[ref.line];
       if (ref.kind === 'full') lines[ref.line] = line.replace(`][${ref.raw}]`, `][${id}]`);
       else if (ref.kind === 'collapsed') lines[ref.line] = line.replace(`[${ref.raw}][]`, `[${ref.raw}][${id}]`);
-      else lines[ref.line] = line.replace(`[${ref.raw}]`, `[${id}]`);
+      else lines[ref.line] = line.replace(`[${ref.raw}]`, `[${ref.raw}][${id}]`);
     }
   }
 
@@ -111,16 +113,17 @@ export function fixDocument(model, node, options = { blocks: true, marks: true, 
     for (const task of doc.tasks) {
       if (!task.children.length) continue;
       const leaves = [];
-      const collect = (t) => (t.children.length ? t.children.forEach((i) => collect(doc.tasks[i])) : leaves.push(t.state));
+      const collect = (t) => (t.children.length ? t.children.forEach((i) => collect(doc.tasks[i])) : leaves.push(t.markState));
       collect(task);
       const expected = aggregateState(leaves);
-      if (expected !== task.state) {
+      if (expected !== task.markState) {
         lines[task.line] = lines[task.line].replace(`[${task.mark}]`, `[${STATE_MARKS[expected]}]`);
       }
     }
   }
 
   if (!options.blocks) return lines.join('\n');
+
 
   // Edits as { start, end (inclusive, or start-1 for insert), lines }.
   const edits = [];
@@ -164,6 +167,8 @@ export function fixDocument(model, node, options = { blocks: true, marks: true, 
   // Apply edits from the bottom up, so earlier line numbers stay valid.
   edits.sort((a, b) => b.start - a.start || b.end - a.end);
   for (const e of edits) lines.splice(e.start, e.end - e.start + 1, ...e.lines);
+  // Last, because it can change the number of frontmatter lines.
+  ensureTitleAlias(node, lines);
 
   // Reference definitions, computed from the final text.
   const refsBlocks = existing.get('refs') ?? [];
@@ -185,6 +190,24 @@ export function fixDocument(model, node, options = { blocks: true, marks: true, 
     if (defs.length) text += `\n\n${block('refs', defs).join('\n')}`;
   }
   return `${text}\n`;
+}
+
+/**
+ * Add the title to the frontmatter aliases, so that tools that show file names
+ * (such as Obsidian, where many pages are README.md) can find the page by title.
+ */
+function ensureTitleAlias(node, lines) {
+  const fm = node.doc.frontmatter;
+  if (!fm?.data || fm.error || !node.title) return;
+  const title = normalizeLabel(node.title);
+  if (title === node.id || node.aliases.some((a) => normalizeLabel(a) === title)) return;
+  const doc = YAML.parseDocument(lines.slice(1, fm.end).join('\n'));
+  const aliases = doc.get('aliases');
+  if (YAML.isSeq(aliases)) aliases.add(node.title);
+  else if (typeof aliases === 'string') doc.set('aliases', [aliases, node.title]);
+  else doc.set('aliases', [node.title]);
+  const yaml = doc.toString({ lineWidth: 0 }).replace(/\n$/, '');
+  lines.splice(1, fm.end - 1, ...yaml.split('\n'));
 }
 
 function stripBlock(text, name) {

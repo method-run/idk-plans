@@ -3,7 +3,6 @@ import YAML from 'yaml';
 export const MARK_STATES = {
   ' ': 'todo',
   '/': 'doing',
-  '!': 'blocked',
   'x': 'done',
   'X': 'done',
   '>': 'deferred',
@@ -11,11 +10,14 @@ export const MARK_STATES = {
 };
 
 export const STATE_MARKS = {
-  todo: ' ', doing: '/', blocked: '!', done: 'x', deferred: '>', dropped: '-',
+  todo: ' ', doing: '/', done: 'x', deferred: '>', dropped: '-',
 };
 
+// An open task with this tag is blocked. The mark stays [ ] or [/].
+export const BLOCKED_TAG = /(^|\s)#blocked\b/;
+
 const FENCE = /^\s*(`{3,}|~{3,})(.*)$/;
-const TASK = /^(\s*)(?:[-*+]|\d+[.)])\s+\[([ xX/!>-])\]\s+(.*)$/;
+const TASK = /^(\s*)(?:[-*+]|\d+[.)])\s+\[([^\]])\]\s+(.*)$/;
 const LIST_ITEM = /^(\s*)(?:[-*+]|\d+[.)])\s+/;
 const HEADING = /^(#{1,6})\s+(.*?)\s*#*\s*$/;
 const REF_DEF = /^\s{0,3}\[([^\]]+)\]:\s*(\S+)/;
@@ -67,6 +69,7 @@ export function parseMarkdown(file, text) {
     tasks: [],
     refsUsed: [],
     refDefs: new Map(),
+    unknownMarks: [],
     links: [],
     mermaid: [],
     generated: [],
@@ -132,16 +135,23 @@ export function parseMarkdown(file, text) {
     }
 
     const indent = line.match(/^\s*/)[0].replace(/\t/g, '    ').length;
-    const task = line.match(TASK);
+    let task = line.match(TASK);
     let scanLine = line;
+    if (task && !(task[2] in MARK_STATES)) {
+      result.unknownMarks.push({ line: i, mark: task[2] });
+      task = null;
+    }
     if (task) {
       while (taskStack.length && taskStack.at(-1).indent >= indent) taskStack.pop();
       const parent = taskStack.at(-1);
+      const markState = MARK_STATES[task[2]];
+      const blocked = (markState === 'todo' || markState === 'doing') && BLOCKED_TAG.test(task[3]);
       const entry = {
         line: i,
         indent,
         mark: task[2],
-        state: MARK_STATES[task[2]],
+        markState,
+        state: blocked ? 'blocked' : markState,
         text: task[3].trim(),
         parent: parent ? parent.index : null,
         children: [],
