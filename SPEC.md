@@ -2,25 +2,18 @@
 
 **Version:** 0.1.0-draft · **Status:** draft, expect breaking changes
 
-idk-plans is a convention for keeping a project's architecture and progress
-in plain Markdown files that live next to the code. A tool reads those files,
-checks them, keeps generated parts current, and can build a website from them.
+idk-plans is a convention for keeping a project's architecture and progress in plain Markdown files that live next to the code. A tool reads those files, checks them, keeps generated parts current, and can build a website from them.
 
-The files stay useful without the tool. Any Markdown viewer (Codeberg, GitHub,
-Obsidian, an editor) shows readable text, working links, and current progress.
+The files stay useful without the tool. Any Markdown viewer (Codeberg, GitHub, Obsidian, an editor) shows readable text, working links, and current progress.
 
 ## 1. Goals
 
-1. A reader can understand the whole system from the top page alone, and can
-   open more detail when they need it.
+1. A reader can understand the whole system from the top page alone, and can open more detail when they need it.
 2. Each concept has exactly one home page. Other pages link to it.
 3. Every page can be reached from the root page.
-4. Progress is recorded only on tasks. Pages show progress that the tool
-   calculates from the tasks below them.
-5. One page can appear in more than one tree (for example, "parts of the
-   system" and "security concerns").
-6. The source files are Markdown, YAML frontmatter, and Mermaid. People can
-   read and edit them without the tool.
+4. Progress is recorded only on tasks. Pages show progress that the tool calculates from the tasks below them.
+5. One page can appear in more than one tree (for example, "parts of the system" and "security concerns").
+6. The source files are Markdown, YAML frontmatter, and Mermaid. People can read and edit them without the tool.
 7. The tool can find stale or broken content before it is pushed.
 
 ## 2. Terms
@@ -40,17 +33,14 @@ Obsidian, an editor) shows readable text, working links, and current progress.
 
 ## 3. Nodes
 
-A Markdown file is a node when its frontmatter has an `id`. The tool ignores
-Markdown files without frontmatter `id`, except the root (see 3.4).
+A Markdown file is a node when its frontmatter has an `id`. The tool ignores Markdown files without frontmatter `id`, except the root (see 3.4).
 
 ### 3.1 Where nodes live
 
 Put a node next to what it describes:
 
-- For a module or directory, use that directory's `README.md`. Codeberg and
-  GitHub show this file when you open the directory.
-- For a concern that has no single directory, put the file in a docs folder
-  (for example `docs/concerns/security.md`).
+- For a module or directory, use that directory's `README.md`. Codeberg and GitHub show this file when you open the directory.
+- For a concern that has no single directory, put the file in a docs folder (for example `docs/concerns/security.md`).
 
 The configuration (section 9) sets which files the tool scans.
 
@@ -78,34 +68,25 @@ order: 2                        # optional, position among siblings
 
 - Lowercase letters, digits, and single hyphens: `^[a-z0-9]+(-[a-z0-9]+)*$`.
 - Unique in the project, across all trees.
-- Do not change an id after other pages link to it. If you must change it, the
-  `fix` command updates the links (see 7.2).
+- Do not change an id after other pages link to it. If you must change it, the `fix` command updates the links (see 7.2).
 
 **title**: short name for headings, links, and diagrams.
 
 **summary**: the plain-language description of the node. See section 6.
 
-**parent**: the id of the parent in the primary tree. Every node except the
-root must have one. Short for `parents.<primary tree>`.
+**parent**: the id of the parent in the primary tree. Every node except the root must have one. Short for `parents.<primary tree>`.
 
-**parents**: a map from tree name to a parent reference in that tree. See
-section 4.
+**parents**: a map from tree name to a parent reference in that tree. See section 4.
 
-**order**: a number that sets the position of the node among its siblings.
-Siblings with an order come first, from low to high. The other siblings follow,
-sorted by title.
+**order**: a number that sets the position of the node among its siblings. Siblings with an order come first, from low to high. The other siblings follow, sorted by title.
 
-**aliases**: other names for the node. `fix` adds the `title` to `aliases`
-when it is not there, so that tools which show file names (for example
-Obsidian, where many pages are `README.md`) can find the page by its title.
+**aliases**: other names for the node. `fix` adds the `title` to `aliases` when it is not there, so that tools which show file names (for example Obsidian, where many pages are `README.md`) can find the page by its title.
 
-**code**: files or directories that this node describes. Paths start at the
-project root. The tool reports paths that do not exist.
+**code**: files or directories that this node describes. Paths start at the project root. The tool reports paths that do not exist.
 
 ### 3.3 Kinds
 
-`kind` is optional. It changes how the site shows a node and which checks
-apply. It does not change rollups.
+`kind` is optional. It changes how the site shows a node and which checks apply. It does not change rollups.
 
 | Kind | Use for |
 |---|---|
@@ -117,30 +98,21 @@ apply. It does not change rollups.
 | `reference` | Facts to look up, such as a protocol format. |
 | `plan` | Work that is not finished yet. See section 8. |
 
-If you do not give a kind, the node is a `module` when it has a `code` field,
-and a `reference` when it does not.
+If you do not give a kind, the node is a `module` when it has a `code` field, and a `reference` when it does not.
 
 ### 3.4 The root
 
-The project has one root node: the top of the primary tree. The root is
-usually the project `README.md`.
+The project has one root node: the top of the primary tree. The root is usually the project `README.md`.
 
-The root can have frontmatter like any other node. If you do not want
-frontmatter in the README, set `root` in the configuration. The tool then
-treats that file as a node with the id from the configuration and the title
-from its first heading.
+The root can have frontmatter like any other node. If you do not want frontmatter in the README, set `root` in the configuration. The tool then treats that file as a node with the id from the configuration and the title from its first heading.
 
 ## 4. Trees
 
 ### 4.1 Tree names
 
-The configuration lists the trees. One of them is the primary tree. If the
-configuration lists no trees, there is one tree, named `system`, and it is
-primary.
+The configuration lists the trees. One of them is the primary tree. If the configuration lists no trees, there is one tree, named `system`, and it is primary.
 
-A tree name follows the same rules as an id. In the primary tree, the top is
-the root. In each other tree, the top is a virtual node whose id is the tree
-name, unless a real node has that id.
+A tree name follows the same rules as an id. In the primary tree, the top is the root. In each other tree, the top is a virtual node whose id is the tree name, unless a real node has that id.
 
 ### 4.2 The primary tree
 
@@ -148,8 +120,7 @@ name, unless a real node has that id.
 - The primary tree must have no cycles.
 - Each node must reach the root through its primary parents.
 
-Together these rules mean that every node can be reached from the root, and
-every node has one home.
+Together these rules mean that every node can be reached from the root, and every node has one home.
 
 ### 4.3 Other trees
 
@@ -163,59 +134,37 @@ parents:
     - recovery
 ```
 
-In trees other than the primary tree, a node can have more than one parent.
-The first parent is the one that the site uses for breadcrumbs.
+In trees other than the primary tree, a node can have more than one parent. The first parent is the one that the site uses for breadcrumbs.
 
 A node that is not in a tree is not shown in that tree. That is valid.
 
 ### 4.4 Paths
 
-A parent reference is a path: ids separated by dots. The last id is the
-parent. The ids before it are that parent's parents, from the top down.
+A parent reference is a path: ids separated by dots. The last id is the parent. The ids before it are that parent's parents, from the top down.
 
 - `peer-auth` means: the parent is `peer-auth`.
-- `security.peer-auth` means: the parent is `peer-auth`, and the parent of
-  `peer-auth` is `security`.
+- `security.peer-auth` means: the parent is `peer-auth`, and the parent of `peer-auth` is `security`.
 
-A path does not have to start at the top of the tree. The first id in a path
-keeps the position that other nodes or paths give it.
+A path does not have to start at the top of the tree. The first id in a path keeps the position that other nodes or paths give it.
 
 The tool checks each path:
 
-- If a node with an id in the path exists and gives its own parent in that
-  tree, the path must agree with it. If it does not, that is an error
-  (`path-mismatch`).
-- If a node with an id in the path exists but does not give its own parent in
-  that tree, the path gives it its parent. All paths that name the node must
-  agree, or that is an error (`path-mismatch`).
-- If a node is a parent in a tree but nothing gives its own parent there, it is
-  at the top level of that tree.
-- If no node has that id, and some path in the project has more than one id
-  and includes it, the tool makes a **virtual node** with that id. Its title
-  comes from the id (`peer-auth` becomes "Peer auth"). Its page lists its
-  children.
-- If no node has that id, and the configuration declares it as a group of
-  that tree (section 9), the tool makes a virtual node for it too.
-- If no node has that id, no longer path includes it, and no group declares
-  it, that is an error (`missing-parent`). This finds spelling mistakes such
-  as `parent: gatway`.
-- In the primary tree, a virtual node that nothing else positions is a child of
-  the root.
+- If a node with an id in the path exists and gives its own parent in that tree, the path must agree with it. If it does not, that is an error (`path-mismatch`).
+- If a node with an id in the path exists but does not give its own parent in that tree, the path gives it its parent. All paths that name the node must agree, or that is an error (`path-mismatch`).
+- If a node is a parent in a tree but nothing gives its own parent there, it is at the top level of that tree.
+- If no node has that id, and some path in the project has more than one id and includes it, the tool makes a **virtual node** with that id. Its title comes from the id (`peer-auth` becomes "Peer auth"). Its page lists its children.
+- If no node has that id, and the configuration declares it as a group of that tree (section 9), the tool makes a virtual node for it too.
+- If no node has that id, no longer path includes it, and no group declares it, that is an error (`missing-parent`). This finds spelling mistakes such as `parent: gatway`.
+- In the primary tree, a virtual node that nothing else positions is a child of the root.
 - The ids in a path follow the same rules as node ids.
 
-Use a short path (one id) when the parent is a real node with its own
-position. Use a full path to make a tree quickly without writing a file for
-each group.
+Use a short path (one id) when the parent is a real node with its own position. Use a full path to make a tree quickly without writing a file for each group.
 
-Virtual nodes and real nodes share one id namespace. If you later write a file
-for a virtual node, give it the same id. The links stay the same.
+Virtual nodes and real nodes share one id namespace. If you later write a file for a virtual node, give it the same id. The links stay the same.
 
 ### 4.5 Tree tops
 
-Each tree other than the primary tree has a top that the tool makes. The top
-has the id of the tree name, and its page lists the top-level nodes in that
-tree. The root page shows each other tree (in a `trees` generated block, see
-7.2).
+Each tree other than the primary tree has a top that the tool makes. The top has the id of the tree name, and its page lists the top-level nodes in that tree. The root page shows each other tree (in a `trees` generated block, see 7.2).
 
 ## 5. Tasks and progress
 
@@ -241,19 +190,13 @@ A task is a list item that starts with a status mark in square brackets:
 | `[>]` | deferred | not in scope |
 | `[-]` | dropped | not in scope |
 
-These marks follow common Obsidian conventions (the Tasks plugin and themes
-such as Minimal). Codeberg and GitHub show `[ ]` and `[x]` as checkboxes. They
-show the other marks as text, which is still easy to read.
+These marks follow common Obsidian conventions (the Tasks plugin and themes such as Minimal). Codeberg and GitHub show `[ ]` and `[x]` as checkboxes. They show the other marks as text, which is still easy to read.
 
-**Blocked** is not a mark, because no checkbox convention for it is common.
-Add the tag `#blocked` to an open task, and say what blocks it after the tag.
-Obsidian lists every blocked task under that tag.
+**Blocked** is not a mark, because no checkbox convention for it is common. Add the tag `#blocked` to an open task, and say what blocks it after the tag. Obsidian lists every blocked task under that tag.
 
-The tool reports a list item with any other mark (`unknown-mark`), so that a
-typo does not silently remove a task.
+The tool reports a list item with any other mark (`unknown-mark`), so that a typo does not silently remove a task.
 
-Write a task as a result that someone can check, not as an activity.
-"Show the key fingerprint" is good. "Work on fingerprints" is not.
+Write a task as a result that someone can check, not as an activity. "Show the key fingerprint" is good. "Work on fingerprints" is not.
 
 The tool ignores tasks inside code blocks and inside generated blocks.
 
@@ -262,16 +205,11 @@ The tool ignores tasks inside code blocks and inside generated blocks.
 A task can have subtasks: list items with marks, indented under it.
 
 - Only tasks without subtasks are counted.
-- The mark on a task with subtasks is calculated from its subtasks. A
-  `#blocked` tag on a subtask does not change the calculation. The tool
-  reports a mark that does not agree (`task-parent-mismatch`), and `fix`
-  corrects it.
+- The mark on a task with subtasks is calculated from its subtasks. A `#blocked` tag on a subtask does not change the calculation. The tool reports a mark that does not agree (`task-parent-mismatch`), and `fix` corrects it.
 
 ### 5.3 Which nodes own tasks
 
-Any node can own tasks. A leaf node (a node with no children) usually owns
-most of them. A parent node can own tasks that belong to the whole parent,
-such as "write end-to-end tests for the gateway".
+Any node can own tasks. A leaf node (a node with no children) usually owns most of them. A parent node can own tasks that belong to the whole parent, such as "write end-to-end tests for the gateway".
 
 Each task belongs to its node in every tree that the node is in.
 
@@ -279,20 +217,14 @@ Each task belongs to its node in every tree that the node is in.
 
 A node can have a `status` in its frontmatter. Use it in two cases:
 
-1. **A leaf node without tasks.** The status counts as one task with that
-   state. Values: `todo`, `doing`, `blocked`, `done`, `deferred`, `dropped`.
-2. **To take a whole branch out of scope.** On a node that has tasks or
-   children, the only allowed values are `deferred` and `dropped`. All tasks in
-   that node and the nodes below it in the primary tree count as out of scope.
+1. **A leaf node without tasks.** The status counts as one task with that state. Values: `todo`, `doing`, `blocked`, `done`, `deferred`, `dropped`.
+2. **To take a whole branch out of scope.** On a node that has tasks or children, the only allowed values are `deferred` and `dropped`. All tasks in that node and the nodes below it in the primary tree count as out of scope.
 
-A leaf node with no tasks and no status has unknown progress. The tool reports
-it as information (`no-progress`). It does not count in rollups.
+A leaf node with no tasks and no status has unknown progress. The tool reports it as information (`no-progress`). It does not count in rollups.
 
 ### 5.5 Rollups
 
-The rollup of a node in a tree is the **set** of tasks that the node owns and
-that every node below it owns. Because it is a set, a task counts one time even
-when there are two routes to it.
+The rollup of a node in a tree is the **set** of tasks that the node owns and that every node below it owns. Because it is a set, a task counts one time even when there are two routes to it.
 
 ```
 done     = tasks in the set that are done
@@ -301,11 +233,9 @@ scope    = done + open
 percent  = floor(100 * done / scope)     # no percent when scope is 0
 ```
 
-Deferred and dropped tasks are not in `scope`. The tool still shows how many
-there are.
+Deferred and dropped tasks are not in `scope`. The tool still shows how many there are.
 
-A rollup also records the count of each state, so a reader can see
-"2 blocked".
+A rollup also records the count of each state, so a reader can see "2 blocked".
 
 ### 5.6 How progress is written
 
@@ -322,9 +252,7 @@ The tool and the site show a rollup like this:
 
 ### 5.7 Branches
 
-Progress describes the branch that the files are on. Do not write about
-progress on another branch in a node. When the work merges, the progress
-merges with it.
+Progress describes the branch that the files are on. Do not write about progress on another branch in a node. When the work merges, the progress merges with it.
 
 ## 6. Writing
 
@@ -332,12 +260,8 @@ merges with it.
 
 Each page has two levels:
 
-1. **The summary level.** The `summary` field and the first paragraphs of the
-   body. Write for a person who uses the system, not for a person who changes
-   the code. Say what the part does and why it matters.
-2. **The detail level.** Mechanics, code links, edge cases, and reasons for
-   decisions. Put these in `<details>` elements, so that they are closed by
-   default.
+1. **The summary level.** The `summary` field and the first paragraphs of the body. Write for a person who uses the system, not for a person who changes the code. Say what the part does and why it matters.
+2. **The detail level.** Mechanics, code links, edge cases, and reasons for decisions. Put these in `<details>` elements, so that they are closed by default.
 
 ```markdown
 Your node keeps a list of the peers that you trust.
@@ -358,13 +282,11 @@ The list is in the `peers` table. Each row has the peer's Ed25519 public key …
 </details>
 ```
 
-Leave an empty line after `<summary>…</summary>` and before `</details>`, so
-that Markdown inside the element is shown correctly.
+Leave an empty line after `<summary>…</summary>` and before `</details>`, so that Markdown inside the element is shown correctly.
 
 ### 6.2 Plain language
 
-Write the summary level in a style like ASD-STE100 Simplified Technical
-English:
+Write the summary level in a style like ASD-STE100 Simplified Technical English:
 
 - One idea in each sentence.
 - At most 25 words in each sentence.
@@ -372,17 +294,15 @@ English:
 - Use one word for one concept. Use the same word on every page.
 - Explain a term at its home, and link to the home from other pages.
 
-**Exception: cause and effect.** A sentence can join two clauses with a
-cause-and-effect word, such as "because", "so", "so that", "if", or "unless",
-when the link between the two ideas is the point. "The gateway refuses the
-request, because the peer is not trusted" says more than two separate
-sentences. Without this exception, text in STE style can read as a list of
-unrelated facts. The 25-word limit still applies.
+**Exception: cause and effect.** A sentence can join two clauses with a cause-and-effect word, such as "because", "so", "so that", "if", or "unless", when the link between the two ideas is the point. "The gateway refuses the request, because the peer is not trusted" says more than two separate sentences. Without this exception, text in STE style can read as a list of unrelated facts. The 25-word limit still applies.
 
-The tool checks only some of these rules (section 10). The others are for
-reviewers.
+The tool checks only some of these rules (section 10). The others are for reviewers.
 
-### 6.3 Links between nodes
+### 6.3 Line breaks
+
+Write each paragraph, list item, and table row on one line. Do not wrap prose by hand. Codeberg and GitHub join wrapped lines, but Obsidian shows each line break by default, so hand-wrapped text breaks in the middle of sentences. Let the viewer wrap the text.
+
+### 6.4 Links between nodes
 
 A link to a node is a normal inline Markdown link. Its title is the node's id:
 
@@ -390,16 +310,11 @@ A link to a node is a normal inline Markdown link. Its title is the node's id:
 The [trust store](../trust-store/README.md "trust-store") checks the signature.
 ```
 
-The id in the title makes the link **managed**: `fix` writes its path. When a
-file moves, `fix` corrects every link to it. A path in a managed link is
-never reported as broken, because `fix` corrects it.
+The id in the title makes the link **managed**: `fix` writes its path. When a file moves, `fix` corrects every link to it. A path in a managed link is never reported as broken, because `fix` corrects it.
 
-Inline links work in every viewer: Codeberg, GitHub, and Obsidian, which also
-counts them as backlinks and in its graph. Most viewers show the title (the
-id) as a tooltip.
+Inline links work in every viewer: Codeberg, GitHub, and Obsidian, which also counts them as backlinks and in its graph. Most viewers show the title (the id) as a tooltip.
 
-You do not have to write paths. Write one of these short forms, and `fix`
-changes it to a managed link:
+You do not have to write paths. Write one of these short forms, and `fix` changes it to a managed link:
 
 | You write | `fix` writes |
 |---|---|
@@ -407,15 +322,11 @@ changes it to a managed link:
 | `[the list][trust-store]` | `[the list](<path> "trust-store")` |
 | `[trusted peers]` (an alias) | `[trusted peers](<path> "trust-store")` |
 
-A label that is not an id or alias is not changed. The tool reports a full
-reference (`[text][label]`) with an unknown label (`broken-ref`), unless the
-file defines that label itself.
+A label that is not an id or alias is not changed. The tool reports a full reference (`[text][label]`) with an unknown label (`broken-ref`), unless the file defines that label itself.
 
-A link to a virtual node goes to the page of its nearest real ancestor in the
-primary tree, if there is one. Otherwise it goes to the root.
+A link to a virtual node goes to the page of its nearest real ancestor in the primary tree, if there is one. Otherwise it goes to the root.
 
-Normal relative links without an id title are also allowed. The tool checks
-that their targets exist.
+Normal relative links without an id title are also allowed. The tool checks that their targets exist.
 
 ## 7. Generated blocks
 
@@ -429,8 +340,7 @@ A generated block starts and ends with an HTML comment:
 <!-- idk-plans:<name>:end -->
 ```
 
-Do not edit text between the markers. `fix` replaces it. `check` reports a
-block that is not current (`stale-generated`).
+Do not edit text between the markers. `fix` replaces it. `check` reports a block that is not current (`stale-generated`).
 
 ### 7.2 Block names
 
@@ -441,13 +351,9 @@ block that is not current (`stale-generated`).
 | `trees` | the root | Each other tree as a nested list, with rollups. |
 | `zoom` | directly after a Mermaid block | Links to the nodes that the diagram shows (7.4). |
 
-`fix` adds a `progress` block
-under the first heading of a node that owns or is above tasks, unless the file
-has the comment `<!-- idk-plans:progress:off -->`. Authors place the other
-blocks where they want them. `fix` fills each block that it finds.
+`fix` adds a `progress` block under the first heading of a node that owns or is above tasks, unless the file has the comment `<!-- idk-plans:progress:off -->`. Authors place the other blocks where they want them. `fix` fills each block that it finds.
 
-When an id changes, give the old id in the node's `aliases`, then run `fix`.
-`fix` changes every link that uses the old id to the new id.
+When an id changes, give the old id in the node's `aliases`, then run `fix`. `fix` changes every link that uses the old id to the new id.
 
 Earlier drafts wrote a `refs` block of link definitions. `fix` removes it.
 
@@ -474,9 +380,7 @@ The gateway is the front door of your node. …
 
 Draw diagrams in Mermaid, in fenced code blocks marked `mermaid`.
 
-If a Mermaid node id is equal to a node id, the diagram shows that node, and
-the site makes the shape a link to its page. Mermaid ids can not always
-contain hyphens, so `trust_store` also matches `trust-store`.
+If a Mermaid node id is equal to a node id, the diagram shows that node, and the site makes the shape a link to its page. Mermaid ids can not always contain hyphens, so `trust_store` also matches `trust-store`.
 
 ```mermaid
 flowchart LR
@@ -484,9 +388,7 @@ flowchart LR
   gateway --> guestbook[Guestbook]
 ```
 
-Codeberg and GitHub do not allow clicks in Mermaid diagrams. So that readers
-can go to each node without the site, `fix` writes a `zoom` block after each
-Mermaid block that shows nodes:
+Codeberg and GitHub do not allow clicks in Mermaid diagrams. So that readers can go to each node without the site, `fix` writes a `zoom` block after each Mermaid block that shows nodes:
 
 ```markdown
 <!-- idk-plans:zoom:start (generated) -->
@@ -494,31 +396,22 @@ Zoom in: [Gateway](./README.md "gateway") · [Trust store](./trust/README.md "tr
 <!-- idk-plans:zoom:end -->
 ```
 
-The site does not show the `zoom` block, because the diagram itself has the
-links.
+The site does not show the `zoom` block, because the diagram itself has the links.
 
-A diagram should show one level: a node and its children, and the links
-between them. To show more detail, draw a diagram on the child's page.
+A diagram should show one level: a node and its children, and the links between them. To show more detail, draw a diagram on the child's page.
 
 ### 7.5 Tree tags
 
-`fix` writes each node's place in each tree into the frontmatter `tags`, as
-nested tags. A tag is the tree name, then the ids from the top of that tree
-down to the node:
+`fix` writes each node's place in each tree into the frontmatter `tags`, as nested tags. A tag is the tree name, then the ids from the top of that tree down to the node:
 
 ```yaml
 tags: [system/gateway/trust-store, concern/security/peer-auth/trust-store, feature/connect/add-a-friend/trust-store]
 ```
 
-- Tags for the primary tree come first, then the other trees in the order of
-  the configuration. Tree tops are not in the path.
+- Tags for the primary tree come first, then the other trees in the order of the configuration. Tree tops are not in the path.
 - A node with two parents in a tree has two tags for that tree.
-- The tool owns only the tags whose first part is a tree name. It keeps all
-  other tags, after its own.
-- Do not rely on tag order. `parent` and `parents` are the source; tags are a
-  copy that tools such as Obsidian can use without idk-plans. In Obsidian, the
-  tag pane shows each tree, and `tag:#system/gateway` finds the whole gateway
-  branch.
+- The tool owns only the tags whose first part is a tree name. It keeps all other tags, after its own.
+- Do not rely on tag order. `parent` and `parents` are the source; tags are a copy that tools such as Obsidian can use without idk-plans. In Obsidian, the tag pane shows each tree, and `tag:#system/gateway` finds the whole gateway branch.
 
 Set `"tags": false` in the configuration to turn this off.
 
@@ -526,19 +419,13 @@ Set `"tags": false` in the configuration to turn this off.
 
 A plan describes work that is not finished. Plans go out of date quickly, so:
 
-1. A plan is a node with `kind: plan`. Its `parent` is the node that it
-   changes most.
-2. When the design is settled, move the design facts into the home pages of
-   the concepts. Move the tasks to the nodes that they change.
-3. When a plan has no more open tasks and its facts are moved, delete the
-   plan file. Git history keeps it.
+1. A plan is a node with `kind: plan`. Its `parent` is the node that it changes most.
+2. When the design is settled, move the design facts into the home pages of the concepts. Move the tasks to the nodes that they change.
+3. When a plan has no more open tasks and its facts are moved, delete the plan file. Git history keeps it.
 
-The tool reports a plan whose tasks are all done or out of scope
-(`plan-finished`).
+The tool reports a plan whose tasks are all done or out of scope (`plan-finished`).
 
-Reasons for decisions belong on the home page of the concept, in a
-`<details>` element named "Why it works this way". They do not belong in a
-separate decisions file.
+Reasons for decisions belong on the home page of the concept, in a `<details>` element named "Why it works this way". They do not belong in a separate decisions file.
 
 ## 9. Configuration
 
@@ -573,8 +460,7 @@ The configuration is `idk-plans.config.json` in the project root.
 
 ## 10. Checks
 
-`check` reports problems. It does not change files. It exits with a code that
-is not zero if it finds an error.
+`check` reports problems. It does not change files. It exits with a code that is not zero if it finds an error.
 
 | Rule | Default | Problem |
 |---|---|---|
@@ -617,8 +503,7 @@ Recommended setup:
 
 ## 12. Model
 
-`model` writes one JSON object. A site builder or another tool uses it. It
-does not need to read the Markdown files again.
+`model` writes one JSON object. A site builder or another tool uses it. It does not need to read the Markdown files again.
 
 ```jsonc
 {

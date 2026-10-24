@@ -22,7 +22,7 @@ export function rollupText(r) {
   return text;
 }
 
-/** An inline link to a node, with the node id as the link title (SPEC.md 6.3). */
+/** An inline link to a node, with the node id as the link title (SPEC.md 6.4). */
 export function nodeLink(model, fromFile, id, text, anchor = '') {
   const target = linkTarget(model, id);
   if (!target) return text;

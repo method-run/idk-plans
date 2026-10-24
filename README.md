@@ -1,8 +1,6 @@
 # idk-plans
 
-Keep your project's architecture and progress in Markdown files next to the
-code. idk-plans checks them, keeps the generated parts current, and shows
-progress that rolls up from tasks to the top of the project.
+Keep your project's architecture and progress in Markdown files next to the code. idk-plans checks them, keeps the generated parts current, and shows progress that rolls up from tasks to the top of the project.
 
 - **[SPEC.md](SPEC.md)**: the format. Start here.
 - **Status:** 0.1.0 draft. The format can change.
@@ -10,17 +8,11 @@ progress that rolls up from tasks to the top of the project.
 ## What it does
 
 - Each doc page has an `id` and a `parent`, so the pages make a tree.
-- A page can also be in other trees, such as a "concerns" tree, with
-  dot-separated paths: `parents: { concern: security.peer-auth }`.
-- Tasks are checkboxes: `[ ]` todo, `[/]` doing, `[x]` done,
-  `[>]` deferred, `[-]` dropped, and `#blocked` on an open task. Progress rolls
-  up through every tree.
-- Links carry ids (`[Trust store](../trust/README.md "trust-store")`). You can type `[trust-store]`; the tool writes the path, and fixes it when files move, so the
-  links work on Codeberg, GitHub, and Obsidian without a site build.
-- Generated blocks show progress, child pages, and diagram links. The Markdown
-  stays readable without the tool.
-- For Obsidian: `fix` writes each page's place in every tree as nested tags
-  (`concern/security/peer-auth/trust-store`) and adds page titles to `aliases`.
+- A page can also be in other trees, such as a "concerns" tree, with dot-separated paths: `parents: { concern: security.peer-auth }`.
+- Tasks are checkboxes: `[ ]` todo, `[/]` doing, `[x]` done, `[>]` deferred, `[-]` dropped, and `#blocked` on an open task. Progress rolls up through every tree.
+- Links carry ids (`[Trust store](../trust/README.md "trust-store")`). You can type `[trust-store]`; the tool writes the path, and fixes it when files move, so the links work on Codeberg, GitHub, and Obsidian without a site build.
+- Generated blocks show progress, child pages, and diagram links. The Markdown stays readable without the tool.
+- For Obsidian: `fix` writes each page's place in every tree as nested tags (`concern/security/peer-auth/trust-store`) and adds page titles to `aliases`.
 
 ## Use
 
@@ -34,8 +26,7 @@ npx idk-plans tree --tree concern
 npx idk-plans model    # the whole model as JSON, for a site builder
 ```
 
-Configuration: `idk-plans.config.json` in the project root. See SPEC.md
-section 9.
+Configuration: `idk-plans.config.json` in the project root. See SPEC.md section 9.
 
 ## Git hooks
 
