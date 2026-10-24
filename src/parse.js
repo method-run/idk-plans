@@ -176,23 +176,36 @@ export function parseMarkdown(file, text) {
 function scanInline(line, lineNo, result) {
   let rest = line;
 
-  // Inline links and images: [text](target)
-  rest = rest.replace(/!?\[([^\]]*)\]\(\s*(<[^>]*>|[^)\s]+)(?:\s+"[^"]*")?\s*\)/g, (m, _text, target) => {
-    result.links.push({ line: lineNo, target: target.replace(/^<|>$/g, '') });
-    return ' '.repeat(m.length);
-  });
+  // Positions (start, end) are columns in the line. Blanking keeps lengths, so
+  // they are valid in the original line too.
+
+  // Inline links and images: [text](target "title")
+  rest = rest.replace(/(!?)\[([^\]]*)\]\(\s*(<[^>]*>|[^)\s]+)(?:\s+(?:"([^"]*)"|'([^']*)'))?\s*\)/g,
+    (m, bang, text, target, dq, sq, start) => {
+      result.links.push({
+        line: lineNo, start, end: start + m.length, image: !!bang, text,
+        target: target.replace(/^<|>$/g, ''), title: dq ?? sq ?? null,
+      });
+      return ' '.repeat(m.length);
+    });
 
   // Full and collapsed references: [text][label], [label][]
-  rest = rest.replace(/\[([^\]]*)\]\[([^\]]*)\]/g, (m, text, label) => {
+  rest = rest.replace(/\[([^\]]*)\]\[([^\]]*)\]/g, (m, text, label, start) => {
     const kind = label ? 'full' : 'collapsed';
-    result.refsUsed.push({ line: lineNo, label: normalizeLabel(label || text), raw: label || text, text, kind });
+    result.refsUsed.push({
+      line: lineNo, start, end: start + m.length,
+      label: normalizeLabel(label || text), raw: label || text, text, kind,
+    });
     return ' '.repeat(m.length);
   });
 
   // Shortcut references: [label] not followed by ( [ or :
-  rest.replace(/(?<!\\)\[([^\][]+)\](?![[(:])/g, (m, label) => {
+  rest.replace(/(?<!\\)\[([^\][]+)\](?![[(:])/g, (m, label, start) => {
     if (label.startsWith('^')) return m; // footnote
-    result.refsUsed.push({ line: lineNo, label: normalizeLabel(label), raw: label, text: label, kind: 'shortcut' });
+    result.refsUsed.push({
+      line: lineNo, start, end: start + m.length,
+      label: normalizeLabel(label), raw: label, text: label, kind: 'shortcut',
+    });
     return m;
   });
 }

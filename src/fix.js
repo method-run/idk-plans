@@ -22,8 +22,15 @@ export function rollupText(r) {
   return text;
 }
 
-function linkFor(node) {
-  return node.virtual ? node.title : `[${node.title}][${node.id}]`;
+/** An inline link to a node, with the node id as the link title (SPEC.md 6.3). */
+export function nodeLink(model, fromFile, id, text, anchor = '') {
+  const target = linkTarget(model, id);
+  if (!target) return text;
+  return `[${text}](${relLink(fromFile, target, anchor)} "${id}")`;
+}
+
+function linkFor(model, fromFile, node) {
+  return node.virtual ? node.title : nodeLink(model, fromFile, node.id, node.title);
 }
 
 function withBadge(text, r) {
@@ -31,7 +38,7 @@ function withBadge(text, r) {
   return badge ? `${text} ${badge}` : text;
 }
 
-function renderChildren(model, id) {
+function renderChildren(model, id, fromFile) {
   const { nodes, trees, primary } = model;
   const out = [];
   const walk = (parentId, depth, seen) => {
@@ -40,7 +47,7 @@ function renderChildren(model, id) {
       const node = nodes.get(kid);
       const pad = '  '.repeat(depth);
       const summary = node.summary ? `: ${node.summary}` : '';
-      out.push(`${pad}- ${linkFor(node)}${summary}${rollupText(node.rollup?.[primary]) ? ` ${rollupText(node.rollup[primary])}` : ''}`);
+      out.push(`${pad}- ${linkFor(model, fromFile, node)}${summary}${rollupText(node.rollup?.[primary]) ? ` ${rollupText(node.rollup[primary])}` : ''}`);
       if (node.virtual) walk(kid, depth + 1, new Set([...seen, kid]));
     }
   };
@@ -48,7 +55,7 @@ function renderChildren(model, id) {
   return out.length ? out : ['_No children yet._'];
 }
 
-function renderTrees(model) {
+function renderTrees(model, fromFile) {
   const { nodes, trees, primary } = model;
   const out = [];
   for (const [name, tree] of Object.entries(trees)) {
@@ -61,7 +68,7 @@ function renderTrees(model) {
       for (const kid of tree.children.get(id) ?? []) {
         if (seen.has(kid)) continue;
         const node = nodes.get(kid);
-        out.push(`${'  '.repeat(depth)}- ${withBadge(linkFor(node), node.rollup?.[name])}`);
+        out.push(`${'  '.repeat(depth)}- ${withBadge(linkFor(model, fromFile, node), node.rollup?.[name])}`);
         walk(kid, depth + 1, new Set([...seen, kid]));
       }
     };
@@ -71,14 +78,15 @@ function renderTrees(model) {
   return out.length ? out : ['_There are no other trees._'];
 }
 
-function renderZoom(model, selfId, ids) {
-  const items = ids.filter((id) => id !== selfId).map((id) => linkFor(model.nodes.get(id)));
+function renderZoom(model, selfId, ids, fromFile) {
+  const items = ids.filter((id) => id !== selfId).map((id) => linkFor(model, fromFile, model.nodes.get(id)));
   return items.length ? [`Zoom in: ${items.join(' · ')}`] : null;
 }
 
-function relLink(fromFile, toFile) {
+function relLink(fromFile, toFile, anchor = '') {
   let rel = path.posix.relative(path.posix.dirname(fromFile), toFile) || path.posix.basename(toFile);
   if (!rel.startsWith('.')) rel = `./${rel}`;
+  rel += anchor;
   return /[\s()<>]/.test(rel) ? `<${rel}>` : rel;
 }
 
@@ -88,25 +96,13 @@ function block(name, content) {
 
 /**
  * Compute the corrected text of one node file.
- * options.blocks: regenerate generated blocks
+ * options.blocks: regenerate generated content (blocks, links, aliases, tags)
  * options.marks: correct task marks from their subtasks
- * options.aliases: rewrite alias labels to ids
  */
-export function fixDocument(model, node, options = { blocks: true, marks: true, aliases: true }) {
+export function fixDocument(model, node, options = { blocks: true, marks: true }) {
   const doc = node.doc;
   const lines = [...doc.lines];
   const { primary, labels, nodes } = model;
-
-  if (options.aliases) {
-    for (const ref of doc.refsUsed) {
-      const id = labels.get(ref.label);
-      if (!id || id === ref.label || doc.refDefs.has(ref.label)) continue;
-      const line = lines[ref.line];
-      if (ref.kind === 'full') lines[ref.line] = line.replace(`][${ref.raw}]`, `][${id}]`);
-      else if (ref.kind === 'collapsed') lines[ref.line] = line.replace(`[${ref.raw}][]`, `[${ref.raw}][${id}]`);
-      else lines[ref.line] = line.replace(`[${ref.raw}]`, `[${ref.raw}][${id}]`);
-    }
-  }
 
   if (options.marks) {
     for (const task of doc.tasks) {
@@ -123,6 +119,7 @@ export function fixDocument(model, node, options = { blocks: true, marks: true, 
 
   if (!options.blocks) return lines.join('\n');
 
+  rewriteLinks(model, node, lines);
 
   // Edits as { start, end (inclusive, or start-1 for insert), lines }.
   const edits = [];
@@ -144,8 +141,8 @@ export function fixDocument(model, node, options = { blocks: true, marks: true, 
     edits.push({ start: at + 1, end: at, lines: ['', ...block('progress', [progress])] });
   }
 
-  for (const g of existing.get('children') ?? []) replaceOrDrop(g, renderChildren(model, node.id));
-  for (const g of existing.get('trees') ?? []) replaceOrDrop(g, renderTrees(model));
+  for (const g of existing.get('children') ?? []) replaceOrDrop(g, renderChildren(model, node.id, node.file));
+  for (const g of existing.get('trees') ?? []) replaceOrDrop(g, renderTrees(model, node.file));
 
   // Zoom blocks belong to the Mermaid block directly above them.
   const zooms = [...(existing.get('zoom') ?? [])];
@@ -153,7 +150,7 @@ export function fixDocument(model, node, options = { blocks: true, marks: true, 
     let next = m.end + 1;
     while (next < lines.length && !lines[next].trim()) next++;
     const zi = zooms.findIndex((z) => z.start === next);
-    const content = renderZoom(model, node.id, m.ids ?? []);
+    const content = renderZoom(model, node.id, m.ids ?? [], node.file);
     if (zi !== -1) {
       replaceOrDrop(zooms[zi], content);
       zooms.splice(zi, 1);
@@ -170,26 +167,42 @@ export function fixDocument(model, node, options = { blocks: true, marks: true, 
   ensureTitleAlias(node, lines);
   if (model.config?.tags !== false) ensureTreeTags(model, node, lines);
 
-  // Reference definitions, computed from the final text.
-  const refsBlocks = existing.get('refs') ?? [];
-  let text = lines.join('\n');
-  text = stripBlock(text, 'refs');
-  const used = new Set();
-  const scan = text.replace(/```[\s\S]*?```|~~~[\s\S]*?~~~/g, '').replace(/`[^`\n]*`/g, '');
-  for (const m of scan.matchAll(/\[([^\]]*)\]\[([^\]]*)\]|\[([^\][]+)\](?![[(:])/g)) {
-    const label = (m[2] || m[1] || m[3] || '').trim().toLowerCase();
-    if (nodes.has(label) && !doc.refDefs.has(label)) used.add(label);
-  }
-  const defs = [...used].sort().map((id) => {
-    const target = linkTarget(model, id);
-    return target ? `[${id}]: ${relLink(node.file, target)}` : null;
-  }).filter(Boolean);
-
-  text = text.replace(/\s*$/, '');
-  if (defs.length || refsBlocks.length) {
-    if (defs.length) text += `\n\n${block('refs', defs).join('\n')}`;
-  }
+  // Links are inline now; remove reference blocks from older versions.
+  const text = stripBlock(lines.join('\n'), 'refs').replace(/\s*$/, '');
   return `${text}\n`;
+}
+
+/**
+ * Turn id references into inline links, and correct the path of every link
+ * whose title is an id or alias. Does not change the number of lines.
+ */
+function rewriteLinks(model, node, lines) {
+  const doc = node.doc;
+  const byLine = new Map();
+  const add = (line, start, end, text) => {
+    if (!byLine.has(line)) byLine.set(line, []);
+    byLine.get(line).push({ start, end, text });
+  };
+  for (const ref of doc.refsUsed) {
+    const id = model.labels.get(ref.label);
+    if (!id || doc.refDefs.has(ref.label)) continue;
+    let text = ref.text;
+    if (ref.kind !== 'full' && ref.label === id) text = model.nodes.get(id).title;
+    add(ref.line, ref.start, ref.end, nodeLink(model, node.file, id, text));
+  }
+  for (const link of doc.links) {
+    if (link.image || link.title == null) continue;
+    const id = model.labels.get(normalizeLabel(link.title));
+    if (!id) continue;
+    const hash = link.target.indexOf('#');
+    const anchor = hash === -1 ? '' : link.target.slice(hash);
+    const fixed = nodeLink(model, node.file, id, link.text, anchor);
+    if (lines[link.line].slice(link.start, link.end) !== fixed) add(link.line, link.start, link.end, fixed);
+  }
+  for (const [line, edits] of byLine) {
+    edits.sort((a, b) => b.start - a.start);
+    for (const e of edits) lines[line] = lines[line].slice(0, e.start) + e.text + lines[line].slice(e.end);
+  }
 }
 
 /**

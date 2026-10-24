@@ -15,6 +15,7 @@
     "bin",
     "src",
     "schema",
+    "obsidian",
     "SPEC.md"
   ],
   "engines": {

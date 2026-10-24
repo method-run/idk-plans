@@ -350,6 +350,12 @@ export function buildModel({ config, parsed, exists }) {
     const targets = [...doc.links.map((l) => ({ ...l })), ...[...doc.refDefs.values()]];
     for (const link of targets) {
       if (!link.target || isExternal(link.target)) continue;
+      // A link whose title is an id is managed: `fix` writes its path.
+      const managed = link.title != null && labels.get(normalizeLabel(link.title));
+      if (managed) {
+        if (owner && managed !== owner.id && !owner.links.includes(managed)) owner.links.push(managed);
+        continue;
+      }
       let target = link.target.split('#')[0].split('?')[0];
       try { target = decodeURIComponent(target); } catch { /* keep as is */ }
       const rel = target.startsWith('/')

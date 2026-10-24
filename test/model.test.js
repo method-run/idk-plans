@@ -138,28 +138,34 @@ test('rollupText', () => {
   void r;
 });
 
-test('fix writes blocks, rewrites aliases, corrects marks, and is idempotent', () => {
+test('fix writes blocks, turns id references into inline links, corrects marks, and is idempotent', () => {
   const files = [
     node('root', {}, '<!-- idk-plans:children:start (generated) -->\n<!-- idk-plans:children:end -->'),
-    node('a', { parent: 'root', aliases: ['old-a'] }, 'See [b][old-b].\n\n```mermaid\nflowchart LR\n  a --> b\n```\n\n- [ ] parent\n  - [x] sub'),
-    node('b', { parent: 'root', aliases: ['old-b'] }, 'Back to [a].'),
+    node('a', { parent: 'root', aliases: ['old-a'] }, 'See [the b page][old-b], [b], `[b]`, and [moved](./gone.md#part "b").\n\n```mermaid\nflowchart LR\n  a --> b\n```\n\n- [ ] parent\n  - [x] sub'),
+    node('b', { parent: 'root', title: 'Bee', aliases: ['old-b'] }, 'Back to [a].'),
   ];
   const m1 = model(files);
-  const a = m1.nodes.get('a');
-  const fixed = fixDocument(m1, a);
-  assert.match(fixed, /See \[b\]\[b\]\./);
+  const fixed = fixDocument(m1, m1.nodes.get('a'));
+  assert.match(fixed, /See \[the b page\]\(\.\/b\.md "b"\), \[Bee\]\(\.\/b\.md "b"\), `\[b\]`, and \[moved\]\(\.\/b\.md#part "b"\)\./);
   assert.match(fixed, /- \[x\] parent/);
-  assert.match(fixed, /Zoom in: \[b\]\[b\]/);
-  assert.match(fixed, /\[b\]: \.\/b\.md/);
+  assert.match(fixed, /Zoom in: \[Bee\]\(\.\/b\.md "b"\)/);
   assert.match(fixed, /idk-plans:progress:start/);
+  assert.doesNotMatch(fixed, /idk-plans:refs/);
+  // A link whose title is an id is managed: a stale path is fixed, not reported as broken.
+  assert.ok(!m1.problems.some((p) => p.rule === 'broken-link'));
 
   const rootFixed = fixDocument(m1, m1.nodes.get('root'));
-  assert.match(rootFixed, /- \[a\]\[a\]: About a\./);
+  assert.match(rootFixed, /- \[a\]\(\.\/a\.md "a"\): About a\./);
 
   // Fixing the fixed files changes nothing.
   const fixedFiles = files.map(([f]) => [f, fixDocument(m1, m1.byFile.get(f))]);
   const m2 = model(fixedFiles);
   for (const [f, text] of fixedFiles) assert.equal(fixDocument(m2, m2.byFile.get(f)), text, f);
+});
+
+test('old refs blocks are removed', () => {
+  const m = model([node('root'), node('a', { parent: 'root' }, 'x\n\n<!-- idk-plans:refs:start (generated) -->\n[root]: ./root.md\n<!-- idk-plans:refs:end -->')]);
+  assert.doesNotMatch(fixDocument(m, m.nodes.get('a')), /refs|\[root\]:/);
 });
 
 test('configured groups make virtual nodes that single-id parents can use', () => {

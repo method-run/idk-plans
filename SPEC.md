@@ -384,31 +384,38 @@ reviewers.
 
 ### 6.3 Links between nodes
 
-Use Markdown reference links, with the id as the label:
+A link to a node is a normal inline Markdown link. Its title is the node's id:
 
 ```markdown
-Peers sign each request. The [trust store][trust-store] checks the signature.
-See [trust-store] for details.
+The [trust store](../trust-store/README.md "trust-store") checks the signature.
 ```
 
-The tool writes the definitions for these labels at the end of the file, in a
-generated block:
+The id in the title makes the link **managed**: `fix` writes its path. When a
+file moves, `fix` corrects every link to it. A path in a managed link is
+never reported as broken, because `fix` corrects it.
 
-```markdown
-<!-- idk-plans:refs:start (generated) -->
-[trust-store]: ../gateway/server/src/trust/README.md
-<!-- idk-plans:refs:end -->
-```
+Inline links work in every viewer: Codeberg, GitHub, and Obsidian, which also
+counts them as backlinks and in its graph. Most viewers show the title (the
+id) as a tooltip.
 
-Because the definitions are normal Markdown, the links work in any viewer. When
-a file moves, `fix` writes the new paths. You do not edit the definitions by
-hand.
+You do not have to write paths. Write one of these short forms, and `fix`
+changes it to a managed link:
+
+| You write | `fix` writes |
+|---|---|
+| `[trust-store]` | `[Trust store](<path> "trust-store")` (the node's title) |
+| `[the list][trust-store]` | `[the list](<path> "trust-store")` |
+| `[trusted peers]` (an alias) | `[trusted peers](<path> "trust-store")` |
+
+A label that is not an id or alias is not changed. The tool reports a full
+reference (`[text][label]`) with an unknown label (`broken-ref`), unless the
+file defines that label itself.
 
 A link to a virtual node goes to the page of its nearest real ancestor in the
 primary tree, if there is one. Otherwise it goes to the root.
 
-Normal relative links (`[text](../path/file.md)`) are also allowed. The tool
-checks that their targets exist.
+Normal relative links without an id title are also allowed. The tool checks
+that their targets exist.
 
 ## 7. Generated blocks
 
@@ -429,19 +436,20 @@ block that is not current (`stale-generated`).
 
 | Name | Where | Contents |
 |---|---|---|
-| `refs` | end of every node file that uses reference links | Link definitions (6.3). |
 | `progress` | where the author puts it, usually under the title | The node's rollup in the primary tree. |
 | `children` | where the author puts it | A list of children in the primary tree, with summaries and rollups. |
 | `trees` | the root | Each other tree as a nested list, with rollups. |
 | `zoom` | directly after a Mermaid block | Links to the nodes that the diagram shows (7.4). |
 
-`fix` adds a `refs` block when a file needs one. `fix` adds a `progress` block
+`fix` adds a `progress` block
 under the first heading of a node that owns or is above tasks, unless the file
 has the comment `<!-- idk-plans:progress:off -->`. Authors place the other
 blocks where they want them. `fix` fills each block that it finds.
 
 When an id changes, give the old id in the node's `aliases`, then run `fix`.
-`fix` changes every `[old-id]` label to the new id.
+`fix` changes every link that uses the old id to the new id.
+
+Earlier drafts wrote a `refs` block of link definitions. `fix` removes it.
 
 ### 7.3 Example
 
@@ -457,8 +465,8 @@ The gateway is the front door of your node. …
 ## Parts
 
 <!-- idk-plans:children:start (generated) -->
-- [Trust store][trust-store]: Keeps the list of peers that you trust. ● 100% (9/9)
-- [Request signing][request-signing]: Proves that a request is from you. ◐ 50% (3/6)
+- [Trust store](./trust/README.md "trust-store"): Keeps the list of peers that you trust. ● 100% (9/9)
+- [Request signing](./signing/README.md "request-signing"): Proves that a request is from you. ◐ 50% (3/6)
 <!-- idk-plans:children:end -->
 ```
 
@@ -482,7 +490,7 @@ Mermaid block that shows nodes:
 
 ```markdown
 <!-- idk-plans:zoom:start (generated) -->
-Zoom in: [Gateway][gateway] · [Trust store][trust-store] · [Guestbook][guestbook]
+Zoom in: [Gateway](./README.md "gateway") · [Trust store](./trust/README.md "trust-store") · [Guestbook](../services/guestbook/README.md "guestbook")
 <!-- idk-plans:zoom:end -->
 ```
 
