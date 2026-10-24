@@ -131,8 +131,8 @@ test('broken refs, broken links, missing code, unlinked children', () => {
 test('rollupText', () => {
   const r = (states) => ({ ...states, scope: states.done + states.open });
   assert.equal(rollupText(null), '');
-  assert.equal(rollupText({ scope: 4, done: 4, percent: 100, states: { blocked: 0, deferred: 0, dropped: 1 } }), '✅ done · 1 dropped');
-  assert.equal(rollupText({ scope: 15, done: 8, percent: 53, states: { blocked: 2, deferred: 0, dropped: 0 } }), '◐ 53% (8/15) · ⛔ 2 blocked');
+  assert.equal(rollupText({ scope: 4, done: 4, percent: 100, states: { blocked: 0, deferred: 0, dropped: 1 } }), '● 100% (4/4) · 1 dropped');
+  assert.equal(rollupText({ scope: 15, done: 8, percent: 53, states: { blocked: 2, deferred: 0, dropped: 0 } }), '◐ 53% (8/15) · 2 blocked');
   assert.equal(rollupText({ scope: 0, done: 0, percent: null, states: { blocked: 0, deferred: 1, dropped: 0 } }), '· no tasks · 1 deferred');
   void r;
 });

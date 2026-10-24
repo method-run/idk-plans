@@ -12,10 +12,10 @@ export function rollupText(r) {
   if (scope + states.deferred + states.dropped === 0) return '';
   let text;
   if (scope === 0) text = '· no tasks';
-  else if (done === scope) text = '✅ done';
+  else if (done === scope) text = `● 100% (${done}/${scope})`;
   else if (done === 0) text = `○ 0% (0/${scope})`;
   else text = `◐ ${percent}% (${done}/${scope})`;
-  if (states.blocked) text += ` · ⛔ ${states.blocked} blocked`;
+  if (states.blocked) text += ` · ${states.blocked} blocked`;
   if (states.deferred) text += ` · ${states.deferred} deferred`;
   if (states.dropped) text += ` · ${states.dropped} dropped`;
   return text;

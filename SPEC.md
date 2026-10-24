@@ -300,10 +300,10 @@ The tool and the site show a rollup like this:
 
 | Case | Text |
 |---|---|
-| All tasks done | `✅ done` |
+| All tasks done | `● 100% (12/12)` |
 | Some tasks done | `◐ 53% (8/15)` |
 | Nothing done | `○ 0% (0/7)` |
-| Something blocked | the text above, then `· ⛔ 2 blocked` |
+| Something blocked | the text above, then `· 2 blocked` |
 | Some tasks deferred or dropped | the text above, then `· 1 deferred · 3 dropped` |
 | No tasks in scope | `· no tasks` |
 
@@ -436,7 +436,7 @@ When an id changes, give the old id in the node's `aliases`, then run `fix`.
 # Gateway
 
 <!-- idk-plans:progress:start (generated) -->
-◐ 64% (16/25) · ⛔ 1 blocked
+◐ 64% (16/25) · 1 blocked
 <!-- idk-plans:progress:end -->
 
 The gateway is the front door of your node. …
@@ -444,7 +444,7 @@ The gateway is the front door of your node. …
 ## Parts
 
 <!-- idk-plans:children:start (generated) -->
-- [Trust store][trust-store]: Keeps the list of peers that you trust. ✅ done
+- [Trust store][trust-store]: Keeps the list of peers that you trust. ● 100% (9/9)
 - [Request signing][request-signing]: Proves that a request is from you. ◐ 50% (3/6)
 <!-- idk-plans:children:end -->
 ```
