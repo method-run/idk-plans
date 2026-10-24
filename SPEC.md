@@ -359,6 +359,13 @@ English:
 - Use one word for one concept. Use the same word on every page.
 - Explain a term at its home, and link to the home from other pages.
 
+**Exception: cause and effect.** A sentence can join two clauses with a
+cause-and-effect word, such as "because", "so", "so that", "if", or "unless",
+when the link between the two ideas is the point. "The gateway refuses the
+request, because the peer is not trusted" says more than two separate
+sentences. Without this exception, text in STE style can read as a list of
+unrelated facts. The 25-word limit still applies.
+
 The tool checks only some of these rules (section 10). The others are for
 reviewers.
 
