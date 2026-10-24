@@ -17,7 +17,7 @@
       "propertyNames": { "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
       "additionalProperties": {
         "type": "object",
-        "properties": { "title": { "type": "string" }, "primary": { "type": "boolean" } }
+        "properties": { "title": { "type": "string" }, "primary": { "type": "boolean" }, "groups": { "type": "array", "items": { "type": "string" } } }
       }
     },
     "rules": {

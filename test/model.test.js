@@ -160,3 +160,23 @@ test('fix writes blocks, rewrites aliases, corrects marks, and is idempotent', (
   const m2 = model(fixedFiles);
   for (const [f, text] of fixedFiles) assert.equal(fixDocument(m2, m2.byFile.get(f)), text, f);
 });
+
+test('configured groups make virtual nodes that single-id parents can use', () => {
+  const m = model([
+    node('root'),
+    node('a', { parent: 'root', parents: { concern: 'reachability' } }),
+    node('b', { parent: 'root', parents: { concern: 'privacy' } }),
+  ], { trees: { system: { primary: true }, concern: { groups: ['reachability', 'safety.backup'] } } });
+  assert.deepEqual(m.trees.concern.parents.get('a'), ['reachability']);
+  assert.deepEqual(m.trees.concern.parents.get('reachability'), ['concern']);
+  assert.deepEqual(m.trees.concern.parents.get('backup'), ['safety']);
+  assert.equal(m.problems.filter((p) => p.rule === 'missing-parent').length, 1);
+});
+
+test('mermaid edge labels and virtual nodes do not become zoom links', () => {
+  const m = model([
+    node('root', {}, '```mermaid\nflowchart LR\n  a -- talks to b --> c\n  a -. b .-> c\n```'),
+    node('a', { parent: 'root' }), node('b', { parent: 'root' }), node('c', { parent: 'root', parents: { concern: 'grp.c' } }),
+  ], TWO_TREES);
+  assert.deepEqual(m.nodes.get('root').doc.mermaid[0].ids, ['a', 'c']);
+});

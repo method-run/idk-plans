@@ -190,8 +190,11 @@ The tool checks each path:
   and includes it, the tool makes a **virtual node** with that id. Its title
   comes from the id (`peer-auth` becomes "Peer auth"). Its page lists its
   children.
-- If no node has that id, and no longer path includes it, that is an error
-  (`missing-parent`). This finds spelling mistakes such as `parent: gatway`.
+- If no node has that id, and the configuration declares it as a group of
+  that tree (section 9), the tool makes a virtual node for it too.
+- If no node has that id, no longer path includes it, and no group declares
+  it, that is an error (`missing-parent`). This finds spelling mistakes such
+  as `parent: gatway`.
 - In the primary tree, a virtual node that nothing else positions is a child of
   the root.
 - The ids in a path follow the same rules as node ids.
@@ -499,7 +502,7 @@ The configuration is `idk-plans.config.json` in the project root.
   "root": { "file": "README.md", "id": "idk-net" },
   "trees": {
     "system":  { "title": "System",   "primary": true },
-    "concern": { "title": "Concerns" }
+    "concern": { "title": "Concerns", "groups": ["reachability", "security.peer-auth"] }
   },
   "rules": {
     "summary-max-words": ["warn", 25],
@@ -514,6 +517,7 @@ The configuration is `idk-plans.config.json` in the project root.
 | `exclude` | node_modules, dist, build, coverage, .git | Files not to scan. |
 | `root` | the node without a primary parent | The root file and id, if the root has no frontmatter. |
 | `trees` | `{ "system": { "primary": true } }` | The trees. Exactly one must be primary. |
+| `trees.<name>.groups` | `[]` | Paths of virtual nodes that this tree may use without a page (4.4). A one-id group sits at the top level of the tree. |
 | `rules` | see section 10 | Severity (`error`, `warn`, `info`, `off`) and options for each rule. |
 
 ## 10. Checks

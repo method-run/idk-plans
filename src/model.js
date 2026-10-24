@@ -112,8 +112,18 @@ export function buildModel({ config, parsed, exists }) {
     trees[tree] = { title: config.trees[tree].title ?? titleFromId(tree), top, parents: new Map(), children: new Map() };
   }
 
-  // Ids that some multi-id path names. Only these can be virtual.
+  // Ids that some multi-id path or a configured group names. Only these can be virtual.
   const virtualAllowed = new Set(treeNames.filter((t) => t !== primary));
+  const groupPaths = {};
+  for (const tree of treeNames) {
+    groupPaths[tree] = [];
+    for (const raw of config.trees[tree].groups ?? []) {
+      const p = parsePath(raw);
+      if (!p) { report('frontmatter', 'idk-plans.config.json', null, `group "${raw}" (${tree}) is not a valid id or dot-separated path`); continue; }
+      groupPaths[tree].push({ raw, path: p });
+      p.forEach((id) => virtualAllowed.add(id));
+    }
+  }
   for (const node of nodes.values()) {
     for (const tree of treeNames) {
       for (const ref of node.declared[tree] ?? []) {
@@ -152,6 +162,15 @@ export function buildModel({ config, parsed, exists }) {
           if (!asserted.has(ids[i])) asserted.set(ids[i], []);
           asserted.get(ids[i]).push({ parent: ids[i - 1], file: node.file, line: node.line, path: ref.raw });
         }
+      }
+    }
+
+    for (const { raw, path: ids } of groupPaths[tree]) {
+      ids.forEach((id) => ensureVirtual(id));
+      if (!declaredParents.has(ids[0]) && !asserted.has(ids[0])) declaredParents.set(ids[0], []);
+      for (let i = 1; i < ids.length; i++) {
+        if (!asserted.has(ids[i])) asserted.set(ids[i], []);
+        asserted.get(ids[i]).push({ parent: ids[i - 1], file: 'idk-plans.config.json', line: null, path: raw });
       }
     }
 
@@ -293,12 +312,13 @@ export function buildModel({ config, parsed, exists }) {
     const stripped = body
       .replace(/%%.*$/gm, '')
       .replace(/"[^"]*"/g, ' ')
+      .replace(/(--|==|-\.)\s[^\n]*?\s(-->|---|==>|\.->)/g, ' --> ')
       .replace(/\|[^|]*\|/g, ' ')
       .replace(/\[[^\]]*\]|\([^)]*\)|\{[^}]*\}/g, ' ');
     const found = [];
     for (const word of stripped.match(/[A-Za-z0-9][A-Za-z0-9_-]*/g) ?? []) {
       const id = word.toLowerCase().replace(/_/g, '-');
-      if (nodes.has(id) && !found.includes(id)) found.push(id);
+      if (nodes.has(id) && !nodes.get(id).virtual && !found.includes(id)) found.push(id);
     }
     return found;
   };
