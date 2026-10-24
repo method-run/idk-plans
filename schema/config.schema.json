@@ -8,6 +8,11 @@
     "include": { "type": "array", "items": { "type": "string" } },
     "exclude": { "type": "array", "items": { "type": "string" } },
     "tags": { "type": "boolean" },
+    "site": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": { "title": { "type": "string" }, "sourceUrl": { "type": "string" } }
+    },
     "root": {
       "type": "object",
       "required": ["file", "id"],

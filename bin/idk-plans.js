@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 import { parseArgs } from 'node:util';
+import path from 'node:path';
 import { loadProject, check, fix, renderTree, toJSON } from '../src/index.js';
+import { buildSite } from '../src/site.js';
 
 const USAGE = `Usage: idk-plans <command> [options]
 
@@ -9,12 +11,15 @@ Commands:
   fix                Write generated blocks and correct what can be corrected.
   tree               Show a tree with progress.
   model              Print the model as JSON.
+  site               Build the static site.
 
 Options:
   --cwd <dir>        Project root (default: current directory)
   --tree <name>      Tree to show (tree command; default: the primary tree)
   --depth <n>        Depth to show (tree command)
   --quiet            Show only errors (check command)
+  --out <dir>        Output folder (site command; default: _site)
+  --source-url <url> Base URL for links to files in the repository (site command)
   --help             Show this message
 `;
 
@@ -25,6 +30,8 @@ const { values, positionals } = parseArgs({
     tree: { type: 'string' },
     depth: { type: 'string' },
     quiet: { type: 'boolean' },
+    out: { type: 'string' },
+    'source-url': { type: 'string' },
     help: { type: 'boolean' },
   },
 });
@@ -68,6 +75,12 @@ try {
     case 'tree': {
       const depth = values.depth ? Number(values.depth) : Infinity;
       console.log(renderTree(project.model, values.tree, depth).join('\n'));
+      break;
+    }
+    case 'site': {
+      const out = path.resolve(cwd, values.out ?? '_site');
+      const pages = await buildSite(project, out, values['source-url'] ? { sourceUrl: values['source-url'] } : {});
+      console.log(`wrote ${pages.length} pages to ${path.relative(process.cwd(), out) || '.'}`);
       break;
     }
     case 'model':

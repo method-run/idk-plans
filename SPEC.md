@@ -455,6 +455,8 @@ The configuration is `idk-plans.config.json` in the project root.
 | `root` | the node without a primary parent | The root file and id, if the root has no frontmatter. |
 | `trees` | `{ "system": { "primary": true } }` | The trees. Exactly one must be primary. |
 | `tags` | `true` | Write tree tags into frontmatter (7.5). |
+| `site.title` | the root title | The site name. |
+| `site.sourceUrl` | none | Base URL for links to repository files, for example `https://codeberg.org/<owner>/<repo>/src/branch/main`. `--source-url` overrides it. |
 | `trees.<name>.groups` | `[]` | Paths of virtual nodes that this tree may use without a page (4.4). A one-id group sits at the top level of the tree. |
 | `rules` | see section 10 | Severity (`error`, `warn`, `info`, `off`) and options for each rule. |
 
@@ -492,6 +494,7 @@ The configuration is `idk-plans.config.json` in the project root.
 | `idk-plans fix` | yes | Before you commit. Writes generated blocks and corrects what it can. |
 | `idk-plans tree [--tree <name>] [--depth <n>]` | no | Shows a tree with rollups in the terminal. |
 | `idk-plans model` | no | Writes the model (section 12) as JSON to standard output. |
+| `idk-plans site [--out <dir>] [--source-url <url>]` | no | Builds the static site (section 13). |
 
 ### 11.1 Hooks
 
@@ -536,9 +539,19 @@ Recommended setup:
 }
 ```
 
-## 13. Not in this version
+## 13. Site
+
+`idk-plans site` builds a static website from the model. It needs no server: every link is relative, so the site works from any path, and from `file://`.
+
+- One page for each node, virtual node, and tree top. A page shows its breadcrumbs, progress, summary, body, children, its place in the other trees, and the pages that link to it.
+- The sidebar shows every tree. Search finds pages by title, alias, summary, and id.
+- In Mermaid diagrams, each box whose id is a node id links to that node's page.
+- `children` and `trees` blocks are drawn by the site in the same place. `progress` and `zoom` blocks are not shown, because the page header and the diagram links replace them.
+- A Tasks page lists every open task by state, and a Glossary page lists every title and alias.
+- Links to files that are not nodes go to `site.sourceUrl`, if it is set.
+
+## 14. Not in this version
 
 - Weights for tasks.
 - Ids for single tasks, and links to them.
 - Putting a single task in a different tree from its node.
-- The site builder. The model (section 12) is its input.

@@ -16,6 +16,7 @@
     "src",
     "schema",
     "obsidian",
+    "site-assets",
     "SPEC.md"
   ],
   "engines": {
@@ -26,6 +27,7 @@
     "check:self": "node bin/idk-plans.js check"
   },
   "dependencies": {
+    "marked": "^15.0.12",
     "picomatch": "^4.0.7",
     "yaml": "^2.9.1"
   }

@@ -483,7 +483,7 @@ function nodeFromFrontmatter(doc, data, rootConfig, report, treeNames, primary) 
     id,
     title: typeof title === 'string' ? title : id,
     summary: typeof data.summary === 'string' ? data.summary.trim() : null,
-    kind: KINDS.includes(data.kind) ? data.kind : (code.length ? 'module' : 'reference'),
+    kind: KINDS.includes(data.kind) ? data.kind : rootConfig ? 'system' : (code.length ? 'module' : 'reference'),
     file: doc.file,
     virtual: false,
     status: STATES.includes(data.status) ? data.status : null,
