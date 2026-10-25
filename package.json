@@ -36,7 +36,7 @@
     "docs:site": "node bin/idk-plans.js site --out _site"
   },
   "dependencies": {
-    "marked": "^15.0.12",
+    "marked": "^18.1.1",
     "picomatch": "^4.0.7",
     "yaml": "^2.9.1"
   },
