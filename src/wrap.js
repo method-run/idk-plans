@@ -9,6 +9,7 @@ const LIST = /^\s*([-*+]|\d{1,9}[.)])(\s|$)/;
 const STARTER = /^\s*(#{1,6}(\s|$)|\||<|\[[^\]]+\]:\s|(\*\s*){3,}$|(-\s*){3,}$|(_\s*){3,}$|=+\s*$|>)/;
 const TABLE_DELIMITER = /^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$/;
 const INDENTED = /^( {4}|\t)/;
+const CALLOUT = /^\[![\w-]+\]/;
 
 const hardBreak = (line) => line.endsWith('  ') || line.endsWith('\\');
 
@@ -64,7 +65,8 @@ export function unwrapProse(text) {
       const plain = body && !STARTER.test(body) && !LIST.test(body) && !FENCE.test(body);
       if (last === 'quote' && !hard && plain && prev.trim() !== '>') join(body);
       else keep(line);
-      last = body ? 'quote' : null;
+      // A callout title is a line of its own: do not join the body to it.
+      last = CALLOUT.test(body) ? 'callout' : body ? 'quote' : null;
       continue;
     }
     if (LIST.test(line)) { keep(line); last = 'item'; continue; }

@@ -134,6 +134,11 @@ h3 { font-size: 1.05rem; margin: 1.4em 0 0.4em; }
 }
 .body details[open] { padding-bottom: 12px; }
 .body summary { cursor: pointer; font-weight: 600; padding: 6px 0; }
+.body div.callout {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 4px 14px 12px; margin: 14px 0; background: var(--bg-raised);
+}
+.body .callout-title { font-weight: 600; margin: 6px 0; }
 .body .source { font-family: var(--mono); font-size: 0.9em; }
 pre.mermaid { background: var(--bg-raised); border: 1px solid var(--border); text-align: center; }
 pre.mermaid g.linked { cursor: pointer; }

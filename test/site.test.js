@@ -47,3 +47,20 @@ test('site: links, task states, diagram links, and placed children', async () =>
   assert.match(tasks, /Blocked <span class="count">1<\/span>/);
   await rm(out, { recursive: true });
 });
+
+test('site: callouts render as collapsible sections, with their tasks', async () => {
+  files['docs/callouts.md'] = '---\nid: callouts\ntitle: Callouts\nsummary: Uses callouts.\nparent: demo\n---\n# Callouts\n\n> [!note]- How it works\n> Folded **body**.\n> - [x] Task in a callout\n\n> [!tip]+ Open\n> Shown.\n\n> [!warning]\n> Not foldable.\n\n> A plain quote.\n';
+  try {
+    const { out, read, pages } = await build();
+    const page = await read('callouts/index.html');
+    assert.match(page, /<details class="callout" data-callout="note"><summary>How it works<\/summary>\s*<p>Folded <strong>body<\/strong>\.<\/p>/);
+    assert.match(page, /<details class="callout" data-callout="tip" open><summary>Open<\/summary>/);
+    assert.match(page, /<div class="callout" data-callout="warning"><p class="callout-title">Warning<\/p>/);
+    assert.match(page, /<blockquote>\s*<p>A plain quote\.<\/p>/);
+    assert.match(page, /data-state="done"/);
+    assert.ok(pages.includes('callouts/index.html'));
+    await rm(out, { recursive: true });
+  } finally {
+    delete files['docs/callouts.md'];
+  }
+});

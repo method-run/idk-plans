@@ -111,3 +111,10 @@ test('fix unwraps and check reports, unless proseWrap is "preserve"', () => {
 
   assert.throws(() => resolveConfig({ proseWrap: 'always' }), /proseWrap/);
 });
+
+test('keeps a callout title on its own line, and counts tasks in callouts', () => {
+  const text = '> [!note]- How it works\n> The body\n> continues.\n> - [ ] A task\n';
+  assert.equal(unwrapProse(text).text, '> [!note]- How it works\n> The body continues.\n> - [ ] A task\n');
+  const doc = parseMarkdown('a.md', text);
+  assert.deepEqual(doc.tasks.map((t) => [t.state, t.text]), [['todo', 'A task']]);
+});

@@ -13,7 +13,7 @@ tags: [system/compatibility/obsidian, viewer/markdown/compatibility/obsidian]
 # Obsidian setup
 
 <!-- idk-plans:progress:start (generated) -->
-◐ 66% (2/3)
+● 100% (3/3)
 <!-- idk-plans:progress:end -->
 
 You can open a project as an Obsidian vault. Links, backlinks, search by title, and the tag pane work without plugins, because `fix` writes inline links, aliases, and tree tags.
@@ -24,7 +24,7 @@ You can open a project as an Obsidian vault. Links, backlinks, search by title, 
 2. Add `.obsidian/` to `.gitignore`.
 3. Exclude `node_modules`, `dist`, and other build folders in *Files and links → Excluded files*.
 4. Copy `node_modules/@method-run/idk-plans/obsidian/idk-plans-tasks.css` to `<vault>/.obsidian/snippets/`. Turn it on in *Appearance → CSS snippets*. Without it, Obsidian shows `[/]`, `[>]`, and `[-]` as done.
-5. To collapse `<details>` elements that have Markdown inside, install the *Details Markdown* community plugin. It works in Reading view only.
+5. For collapsible sections, either write them as callouts (`> [!note]- How it works`), which Obsidian collapses without plugins, or install the *Details Markdown* community plugin for `<details>`. The plugin works in Reading view only.
 
 ## What works
 
@@ -32,17 +32,13 @@ You can open a project as an Obsidian vault. Links, backlinks, search by title, 
 - Search by title finds `README.md` pages, because `fix` adds titles to `aliases`.
 - Mermaid diagrams show without plugins.
 
-<details>
-<summary>Why it works this way</summary>
-
-Obsidian does not follow reference-style links (`[text][id]`). So `fix` writes inline links, with the id in the link title.
-
-The *Details Markdown* plugin has no network or file access, and uses Obsidian's own renderer. Plugin updates can change that, so do not turn on automatic updates for it.
-
-</details>
+> [!note]- Why it works this way
+> Obsidian does not follow reference-style links (`[text][id]`). So `fix` writes inline links, with the id in the link title.
+>
+> The *Details Markdown* plugin has no network or file access, and uses Obsidian's own renderer. Plugin updates can change that, so do not turn on automatic updates for it.
 
 ## Tasks
 
 - [x] Ship a CSS snippet for the task marks
 - [x] Write tree tags and title aliases
-- [ ] Decide whether to support Obsidian callouts as a second form of `<details>`
+- [x] Accept callouts as a second form of collapsible section

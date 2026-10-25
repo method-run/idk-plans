@@ -271,7 +271,7 @@ Progress describes the branch that the files are on. Do not write about progress
 Each page has two levels:
 
 1. **The summary level.** The `summary` field and the first paragraphs of the body. Write for a person who uses the system, not for a person who changes the code. Say what the part does and why it matters.
-2. **The detail level.** Mechanics, code links, edge cases, and reasons for decisions. Put these in `<details>` elements, so that they are closed by default.
+2. **The detail level.** Mechanics, code links, edge cases, and reasons for decisions. Put these in collapsible sections, so that they are closed by default.
 
 ```markdown
 Your node keeps a list of the peers that you trust.
@@ -293,6 +293,26 @@ The list is in the `peers` table. Each row has the peer's Ed25519 public key …
 ```
 
 Leave an empty line after `<summary>…</summary>` and before `</details>`, so that Markdown inside the element is shown correctly.
+
+A collapsible section has two allowed forms. Use the form that suits the viewers your readers use ([Tested viewers](./docs/compatibility.md "compatibility")):
+
+| Form | Example | Strong in | Weak in |
+|---|---|---|---|
+| HTML `<details>` | above | Code hosts, the site | Viewers that show Markdown inside HTML as raw text |
+| Callout | `> [!note]- How it works` | Notes apps, the site | Code hosts, which show it as a plain quote |
+
+A callout is a quote whose first line is `[!type]`, then an optional fold mark, then the title. Each line of the body starts with `>`:
+
+```markdown
+> [!note]- How it works
+> The list is in the `peers` table. …
+```
+
+- `-` after the type: closed by default. Use this for the detail level.
+- `+` after the type: open by default.
+- No fold mark: not collapsible.
+
+The tool treats both forms the same. It counts tasks in both, and the site shows both as collapsible sections.
 
 ### 6.2 Plain language
 

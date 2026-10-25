@@ -1,7 +1,7 @@
 # idk-plans
 
 <!-- idk-plans:progress:start (generated) -->
-◐ 70% (26/37) · 4 deferred
+◐ 72% (27/37) · 4 deferred
 <!-- idk-plans:progress:end -->
 
 Keep your project's architecture and progress in Markdown files next to the code. idk-plans checks the files, keeps their generated parts current, and builds a website from them. Progress rolls up from tasks to the top of the project.
@@ -39,19 +39,19 @@ Zoom in: [Specification](./SPEC.md "spec") · [Command line](./bin/README.md "cl
 - [Specification](./SPEC.md "spec"): The format of idk-plans files. It defines nodes, trees, tasks, rollups, links, generated blocks, and the checks. · no tasks · 3 deferred
 - [Command line](./bin/README.md "cli"): Runs the commands check, fix, tree, model, and site. It is the only part that reads arguments and writes to the terminal. ◐ 66% (2/3)
 - [Engine](./src/README.md "engine"): Reads the Markdown files, builds one model of all nodes, trees, and tasks, and checks and fixes the files from that model. ◐ 84% (21/25) · 1 deferred
-- [Tested viewers](./docs/compatibility.md "compatibility"): The viewers that we test the Markdown files and the site with, and what each one shows differently. ◐ 50% (3/6)
+- [Tested viewers](./docs/compatibility.md "compatibility"): The viewers that we test the Markdown files and the site with, and what each one shows differently. ◐ 66% (4/6)
 <!-- idk-plans:children:end -->
 
 ## Other views
 
 <!-- idk-plans:trees:start (generated) -->
-**Viewers** ◐ 63% (14/22) · 1 deferred
+**Viewers** ◐ 68% (15/22) · 1 deferred
 
 - [Site builder](./src/site.md "site") ◐ 42% (3/7)
   - [Publish the site](./docs/publish-site.md "publish-site") ○ 0% (0/2)
-- Markdown ◐ 75% (9/12) · 1 deferred
-  - [Tested viewers](./docs/compatibility.md "compatibility") ◐ 50% (3/6)
-    - [Obsidian setup](./obsidian/README.md "obsidian") ◐ 66% (2/3)
+- Markdown ◐ 83% (10/12) · 1 deferred
+  - [Tested viewers](./docs/compatibility.md "compatibility") ◐ 66% (4/6)
+    - [Obsidian setup](./obsidian/README.md "obsidian") ● 100% (3/3)
   - [Fix](./src/fix.md "fix") ● 100% (4/4)
   - [Prose unwrap](./src/wrap.md "wrap") ● 100% (2/2) · 1 deferred
 - Terminal ◐ 66% (2/3)

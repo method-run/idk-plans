@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { Marked } from 'marked';
 import { normalizeLabel } from './parse.js';
 import { rollupText } from './fix.js';
+import { titleFromId } from './model.js';
 
 const ASSETS = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'site-assets');
 const MERMAID_URL = 'https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs';
@@ -122,6 +123,17 @@ export async function buildSite(project, outDir, options = {}) {
     const md = new Marked({ gfm: true });
     md.use({
       renderer: {
+        // Callouts (`> [!note]- Title`) are the second form of a collapsible section.
+        blockquote(token) {
+          const m = token.text.match(/^\[!([\w-]+)\]([+-]?)[ \t]*(.*)(?:\n|$)/);
+          if (!m) return false;
+          const [head, type, fold, title] = m;
+          const label = title ? md.parseInline(title) : esc(titleFromId(type.toLowerCase()));
+          const body = md.parse(token.text.slice(head.length));
+          const attrs = `class="callout" data-callout="${esc(type.toLowerCase())}"`;
+          if (!fold) return `<div ${attrs}><p class="callout-title">${label}</p>\n${body}</div>\n`;
+          return `<details ${attrs}${fold === '+' ? ' open' : ''}><summary>${label}</summary>\n${body}</details>\n`;
+        },
         link(token) {
           const text = this.parser.parseInline(token.tokens);
           const t = token.title != null ? model.labels.get(normalizeLabel(token.title)) : null;

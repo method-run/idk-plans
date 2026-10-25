@@ -19,6 +19,7 @@ export const BLOCKED_TAG = /(^|\s)#blocked\b/;
 const FENCE = /^\s*(`{3,}|~{3,})(.*)$/;
 const TASK = /^(\s*)(?:[-*+]|\d+[.)])\s+\[([^\]])\]\s+(.*)$/;
 const LIST_ITEM = /^(\s*)(?:[-*+]|\d+[.)])\s+/;
+const QUOTE_PREFIX = /^(\s*>\s?)+/;
 const HEADING = /^(#{1,6})\s+(.*?)\s*#*\s*$/;
 const REF_DEF = /^\s{0,3}\[([^\]]+)\]:\s*(\S+)/;
 const GEN_START = /<!--\s*idk-plans:([a-z-]+):start\b.*?-->/;
@@ -134,8 +135,10 @@ export function parseMarkdown(file, text) {
       continue;
     }
 
-    const indent = line.match(/^\s*/)[0].replace(/\t/g, '    ').length;
-    let task = line.match(TASK);
+    // Tasks can be inside quotes and callouts: read the line without its `>` prefix.
+    const item = line.replace(QUOTE_PREFIX, '');
+    const indent = item.match(/^\s*/)[0].replace(/\t/g, '    ').length;
+    let task = item.match(TASK);
     let scanLine = line;
     if (task && !(task[2] in MARK_STATES)) {
       result.unknownMarks.push({ line: i, mark: task[2] });
@@ -163,7 +166,7 @@ export function parseMarkdown(file, text) {
       // Blank the mark so that `[x]` is not read as a reference.
       const markAt = line.indexOf(`[${task[2]}]`);
       scanLine = line.slice(0, markAt) + '   ' + line.slice(markAt + 3);
-    } else if (LIST_ITEM.test(line) || indent <= (taskStack.at(-1)?.indent ?? -1)) {
+    } else if (LIST_ITEM.test(item) || indent <= (taskStack.at(-1)?.indent ?? -1)) {
       while (taskStack.length && taskStack.at(-1).indent >= indent) taskStack.pop();
     }
 
