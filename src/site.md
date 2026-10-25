@@ -11,7 +11,7 @@ tags: [system/engine/site, viewer/site]
 # Site builder
 
 <!-- idk-plans:progress:start (generated) -->
-◐ 57% (4/7)
+◐ 50% (4/8)
 <!-- idk-plans:progress:end -->
 
 The site shows the same pages as the Markdown files, with more ways to move around. It needs no server, so you can open it from a folder or put it on any static host.

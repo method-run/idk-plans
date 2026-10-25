@@ -12,7 +12,7 @@ tags: [system/engine/site/publish-site, viewer/site/publish-site]
 # Publish the site
 
 <!-- idk-plans:progress:start (generated) -->
-○ 0% (0/2)
+○ 0% (0/3)
 <!-- idk-plans:progress:end -->
 
 `idk-plans site --out _site` writes a folder of HTML, CSS, and JavaScript. Every link in it is relative. So you can put the folder on any static host, under any path, and you do not need a server or a build step on the host.
@@ -24,7 +24,7 @@ A good setup builds the site in CI on each push to the main branch:
 3. Run `idk-plans site`. Give `--source-url`, so links to code files go to the exact commit that the site describes.
 4. Give the folder to the host.
 
-The two sections below do this on Codeberg and on GitHub. This repository has both workflows, in [.forgejo/workflows/pages.yml](../.forgejo/workflows/pages.yml) and [.github/workflows/pages.yml](../.github/workflows/pages.yml). They run `npm run docs:check` and `npm run docs:site`. In your project, use `npx idk-plans check --quiet` and `npx idk-plans site --out _site` instead.
+The sections below do this on Codeberg, GitHub, and GitLab. This repository has all three workflows, in [.forgejo/workflows/pages.yml](../.forgejo/workflows/pages.yml), [.github/workflows/pages.yml](../.github/workflows/pages.yml), and [.gitlab-ci.yml](../.gitlab-ci.yml). They run `npm run docs:check` and `npm run docs:site`. In your project, use `npx idk-plans check --quiet` and `npx idk-plans site --out _site` instead.
 
 ## Codeberg
 
@@ -143,7 +143,39 @@ jobs:
         uses: actions/deploy-pages@v5
 ```
 
+## GitLab
+
+GitLab Pages serves the `public` folder from a CI job named `pages`. You do not need a branch or a token.
+
+1. Add this file as `.gitlab-ci.yml` at the root of the repository:
+
+```yaml
+image: node:22
+
+pages:
+  script:
+    - npm ci
+    - npx idk-plans check --quiet
+    - npx idk-plans site --out public --source-url "$CI_PROJECT_URL/-/blob/$CI_COMMIT_SHA"
+  artifacts:
+    paths: [public]
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+```
+
+2. Push to the default branch. When the job is done, the address of the site is in *Deploy → Pages*.
+
+<details>
+<summary>Notes</summary>
+
+New projects get a unique domain, such as `https://<repo>-<random>.gitlab.io/`. To use `https://<owner>.gitlab.io/<repo>/` instead, turn off *Use unique domain* in *Deploy → Pages*.
+
+On gitlab.com, a new account must verify its identity before the shared runners run its jobs.
+
+</details>
+
 ## Tasks
 
 - [ ] Publish this repository's site on Codeberg Pages
 - [ ] Publish this repository's site on GitHub Pages
+- [ ] Publish this repository's site on GitLab Pages

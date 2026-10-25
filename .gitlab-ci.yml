@@ -1,0 +1,17 @@
+image: node:22
+
+test:
+  script:
+    - npm ci
+    - npm test
+    - npm run docs:check
+
+pages:
+  needs: [test]
+  script:
+    - npm ci
+    - node bin/idk-plans.js site --out public --source-url "$CI_PROJECT_URL/-/blob/$CI_COMMIT_SHA"
+  artifacts:
+    paths: [public]
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
