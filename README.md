@@ -7,8 +7,9 @@
 Keep your project's architecture and progress in Markdown files next to the code. idk-plans checks the files, keeps their generated parts current, and builds a website from them. Progress rolls up from tasks to the top of the project.
 
 - **[Specification](./SPEC.md "spec")**: the format. Start here.
+- **[How it works](./docs/how-it-works.md "how-it-works")**: what the tool does when you run a command, step by step.
 - **Status:** 0.1.0 draft. The format can change.
-- **AI use:** this project was made with the help of an AI coding assistant (Claude). AI wrote much of the code and the docs.
+- **AI use:** this project was made with the help of an AI coding assistant (Claude). AI wrote much of the code and the docs. The tool itself does not use AI.
 - **Demo:** these docs use idk-plans. See them as a site at [method-run.github.io/idk-plans](https://method-run.github.io/idk-plans/), or run `npm run docs:site` to build it yourself.
 
 ```mermaid
@@ -37,6 +38,7 @@ Zoom in: [Specification](./SPEC.md "spec") · [Command line](./bin/README.md "cl
 
 <!-- idk-plans:children:start (generated) -->
 - [Specification](./SPEC.md "spec"): The format of idk-plans files. It defines nodes, trees, tasks, rollups, links, generated blocks, and the checks. · no tasks · 3 deferred
+- [How it works](./docs/how-it-works.md "how-it-works"): What idk-plans does when you run a command, step by step. The tool is deterministic, and it does not use AI or the network.
 - [Command line](./bin/README.md "cli"): Runs the commands check, fix, tree, model, and site. It is the only part that reads arguments and writes to the terminal. ◐ 66% (2/3)
 - [Engine](./src/README.md "engine"): Reads the Markdown files, builds one model of all nodes, trees, and tasks, and checks and fixes the files from that model. ◐ 88% (23/26) · 1 deferred
 - [Tested viewers](./docs/compatibility.md "compatibility"): The viewers that we test the Markdown files and the site with, and what each one shows differently. ◐ 66% (4/6)
