@@ -1,5 +1,6 @@
 {
   "enabledCssSnippets": [
-    "idk-plans-tasks"
+    "idk-plans-tasks",
+    "hide-build-folders"
   ]
 }
