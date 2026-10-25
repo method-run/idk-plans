@@ -13,18 +13,18 @@ tags: [system/compatibility, viewer/markdown/compatibility]
 # Tested viewers
 
 <!-- idk-plans:progress:start (generated) -->
-◐ 66% (4/6) · 1 deferred
+◐ 66% (4/6)
 <!-- idk-plans:progress:end -->
 
-The Markdown files must be useful and easy to move through without the tool. We test them in three viewers: GitHub, Codeberg, and Obsidian. We also list GitLab, from its documentation, but we do not test it. Other Markdown viewers probably work too.
+The Markdown files must be useful and easy to move through without the tool. We test them in three viewers: GitHub, GitLab, and Obsidian. Other Markdown viewers probably work too.
 
-The three code hosts use different Markdown engines, but all of them follow CommonMark and the main GitHub extensions. So they show the files in almost the same way. The differences are under Known problems.
+The two code hosts use different Markdown engines, but both follow CommonMark and the main GitHub extensions. So they show the files in almost the same way. The differences are under Known problems.
 
-We publish the site on GitHub Pages and on Codeberg Pages. See [Publish the site](./publish-site.md "publish-site").
+We publish the site on GitHub Pages and on GitLab Pages. See [Publish the site](./publish-site.md "publish-site").
 
 ## What each viewer does
 
-| | Code hosts: GitHub, Codeberg, GitLab | Obsidian |
+| | Code hosts: GitHub, GitLab | Obsidian |
 |---|---|---|
 | Wrapped lines | Joined into one paragraph | Shown as line breaks, so `fix` joins them ([Prose unwrap](../src/wrap.md "wrap")) |
 | `[ ]` and `[x]` | Checkboxes | Checkboxes |
@@ -41,11 +41,11 @@ We publish the site on GitHub Pages and on Codeberg Pages. See [Publish the site
 
 ## Known problems
 
-We have not finished checking GitHub and Codeberg, and we have not checked GitLab, so these lists can grow.
+We have not finished checking GitHub and GitLab, so these lists can grow.
 
 ### Code hosts
 
-- **Callouts do not collapse.** GitHub and Codeberg show a callout as a plain quote, with `[!note]-` as text. GitLab shows it as a note box, but its documentation does not say that it can fold. If most readers use a code host, use `<details>` for collapsible sections.
+- **Callouts do not collapse.** GitHub shows a callout as a plain quote, with `[!note]-` as text. GitLab shows it as a note box, but its documentation does not say that it can fold. If most readers use a code host, use `<details>` for collapsible sections.
 - **Other task marks are text.** `[/]`, `[>]`, and `[-]` show as text, not as checkboxes. They are still easy to read, so no workaround is needed.
 - **GitLab has its own dropped mark.** GitLab shows `[~]` ("does not apply") as a struck-through task, and shows `[-]` as text. idk-plans accepts both as dropped.
 - **Diagram boxes are not links.** `fix` writes a `zoom` block of links under each diagram ([Fix](../src/fix.md "fix")).
@@ -68,5 +68,4 @@ We have not finished checking GitHub and Codeberg, and we have not checked GitLa
 
 - [x] Check the docs in Obsidian
 - [ ] Check the docs on GitHub
-- [ ] Check the docs on Codeberg
-- [>] Check the docs on GitLab
+- [ ] Check the docs on GitLab
