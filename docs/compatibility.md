@@ -28,7 +28,7 @@ We publish the site on GitHub Pages and on Codeberg Pages. See [Publish the site
 |---|---|---|
 | Wrapped lines | Joined into one paragraph | Shown as line breaks, so `fix` joins them ([Prose unwrap](../src/wrap.md "wrap")) |
 | `[ ]` and `[x]` | Checkboxes | Checkboxes |
-| `[/]`, `[>]`, `[-]` | Shown as text | Shown as done (see below) |
+| `[/]`, `[>]`, `[-]` | Shown as text (GitLab: `[~]` as a dropped task) | Shown as done (see below) |
 | `#blocked` | Text | A tag, so the tag pane lists every blocked task |
 | Inline links with an id title | Work; the id is a tooltip | Work, and count as backlinks |
 | Reference links (`[text][id]`) | Work | Do not work, so `fix` writes inline links |
@@ -47,13 +47,13 @@ We have not finished checking GitHub and Codeberg, and we have not checked GitLa
 
 - **Callouts do not collapse.** GitHub and Codeberg show a callout as a plain quote, with `[!note]-` as text. GitLab shows it as a note box, but its documentation does not say that it can fold. If most readers use a code host, use `<details>` for collapsible sections.
 - **Other task marks are text.** `[/]`, `[>]`, and `[-]` show as text, not as checkboxes. They are still easy to read, so no workaround is needed.
-- **GitLab has one more task mark.** `[~]` means "does not apply" on GitLab. idk-plans does not use it, and reports it as an unknown mark. Use `[-]` (dropped) instead.
+- **GitLab has its own dropped mark.** GitLab shows `[~]` ("does not apply") as a struck-through task, and shows `[-]` as text. idk-plans accepts both as dropped.
 - **Diagram boxes are not links.** `fix` writes a `zoom` block of links under each diagram ([Fix](../src/fix.md "fix")).
 - **Frontmatter shows at the top of the page.** GitHub shows it as a table. GitLab shows it as raw YAML in a box. This is expected. Keep frontmatter short, and put the content in the body.
 
 ### Obsidian
 
-- **Other task marks show as done.** Obsidian draws `[/]`, `[>]`, and `[-]` as checked boxes, so a dropped task looks finished. Workaround: a CSS snippet that ships with idk-plans.
+- **Other task marks show as done.** Obsidian draws `[/]`, `[>]`, `[-]`, and `[~]` as checked boxes, so a dropped task looks finished. Workaround: a CSS snippet that ships with idk-plans.
 - **`<details>` is not reliable.** In Reading view, part of a closed section can still show. In Live Preview, the Markdown inside shows as raw text. Workaround: write collapsible sections as callouts, or install a plugin that works in Reading view only.
 - **Wrapped lines show as line breaks.** `fix` joins them ([Prose unwrap](../src/wrap.md "wrap")).
 - **Reference links do not work.** `fix` writes inline links.

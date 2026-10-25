@@ -28,7 +28,7 @@ Obsidian shows two things wrongly: some task marks, and `<details>`. This page g
 
 ## Task marks
 
-**Problem:** Obsidian draws every mark that is not a space as a checked box. So `[/]` doing, `[>]` deferred, and `[-]` dropped all look done.
+**Problem:** Obsidian draws every mark that is not a space as a checked box. So `[/]` doing, `[>]` deferred, and `[-]` or `[~]` dropped all look done.
 
 **Workaround:** turn on the CSS snippet that ships with idk-plans. It gives each mark its own look.
 

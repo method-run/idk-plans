@@ -7,6 +7,7 @@ export const MARK_STATES = {
   'X': 'done',
   '>': 'deferred',
   '-': 'dropped',
+  '~': 'dropped', // GitLab's mark for a task that does not apply
 };
 
 export const STATE_MARKS = {

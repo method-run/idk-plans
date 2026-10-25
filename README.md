@@ -28,7 +28,7 @@ Zoom in: [Specification](./SPEC.md "spec") · [Command line](./bin/README.md "cl
 
 - Each doc page has an `id` and a `parent`, so the pages make a tree.
 - A page can also be in other trees, such as a "concerns" tree. It uses dot-separated paths: `parents: { concern: security.peer-auth }`.
-- Tasks are checkboxes: `[ ]` todo, `[/]` doing, `[x]` done, `[>]` deferred, `[-]` dropped. `#blocked` on an open task makes it blocked. Progress rolls up through every tree.
+- Tasks are checkboxes: `[ ]` todo, `[/]` doing, `[x]` done, `[>]` deferred, `[-]` or `[~]` dropped. `#blocked` on an open task makes it blocked. Progress rolls up through every tree.
 - Links carry ids: `[Trust store](../trust/README.md "trust-store")`. You type `[trust-store]`, and the tool writes the path. It corrects the path when files move, so links work in any Markdown viewer without a site.
 - Generated blocks show progress, child pages, and diagram links. The Markdown stays readable without the tool.
 - `fix` writes each page's place in every tree as nested tags, and adds page titles to `aliases`, for viewers that use them.

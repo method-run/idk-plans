@@ -198,9 +198,9 @@ A task is a list item that starts with a status mark in square brackets:
 | `[ ]` or `[/]` with `#blocked` | blocked | open |
 | `[x]` or `[X]` | done | done |
 | `[>]` | deferred | not in scope |
-| `[-]` | dropped | not in scope |
+| `[-]` or `[~]` | dropped | not in scope |
 
-These marks follow common conventions in Markdown task tools. Most viewers show `[ ]` and `[x]` as checkboxes. Many show the other marks as text, which is still easy to read.
+`[ ]` and `[x]` are standard task list marks. `[/]`, `[>]`, and `[-]` come from the Obsidian Tasks plugin and themes such as Minimal. `[~]` is GitLab's mark for a task that does not apply. Use `[-]` unless your readers use GitLab. Most viewers show `[ ]` and `[x]` as checkboxes. Many show the other marks as text, which is still easy to read.
 
 **Blocked** is not a mark, because no checkbox convention for it is common. Add the tag `#blocked` to an open task, and say what blocks it after the tag. Viewers that read tags list every blocked task under that tag.
 

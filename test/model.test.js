@@ -34,11 +34,12 @@ test('parses task marks, nesting, and skips code blocks', () => {
     '```',
     'Paragraph',
     '- [-] three',
+    '- [~] three b',
     '- [?] not a known mark',
   ].join('\n'));
   assert.deepEqual(doc.unknownMarks.map((u) => u.mark), ['?']);
   assert.deepEqual(doc.tasks.map((t) => [t.state, t.parent]), [
-    ['done', null], ['doing', null], ['blocked', 1], ['deferred', 1], ['dropped', null],
+    ['done', null], ['doing', null], ['blocked', 1], ['deferred', 1], ['dropped', null], ['dropped', null],
   ]);
 });
 
