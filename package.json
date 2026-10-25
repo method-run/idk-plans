@@ -1,7 +1,7 @@
 {
   "name": "@method-run/idk-plans",
   "version": "0.1.0",
-  "description": "Architecture docs and progress rollups kept in Markdown next to your code.",
+  "description": "Architecture docs and progress rollups kept in Markdown next to your code. Made with the help of AI.",
   "type": "module",
   "license": "MIT",
   "author": "Pixelbandito",

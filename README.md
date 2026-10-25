@@ -8,6 +8,7 @@ Keep your project's architecture and progress in Markdown files next to the code
 
 - **[Specification](./SPEC.md "spec")**: the format. Start here.
 - **Status:** 0.1.0 draft. The format can change.
+- **AI use:** this project was made with the help of an AI coding assistant (Claude). AI wrote much of the code and the docs.
 - **Demo:** these docs use idk-plans. Run `npm run docs:site` in this repository, then open `_site/index.html`.
 
 ```mermaid
