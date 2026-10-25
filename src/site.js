@@ -12,6 +12,13 @@ const TASK_SENTINEL = /([a-z]+)/g;
 const esc = (s) => String(s ?? '')
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
+/** Show #blocked as a tag, except inside code. */
+function tagBlocked(html) {
+  return html.split(/(<pre[\s\S]*?<\/pre>|<code>[\s\S]*?<\/code>)/).map((part, i) => (
+    i % 2 ? part : part.replace(/(^|[\s>(])#blocked\b/g, '$1<span class="tag blocked">#blocked</span>')
+  )).join('');
+}
+
 /** Site path of a node page, relative to the site root. The root is index.html. */
 function pagePath(model, id) {
   return id === model.rootId ? 'index.html' : `${id}/index.html`;
@@ -151,8 +158,7 @@ export async function buildSite(project, outDir, options = {}) {
     let html = md.parse(lines.filter((_, i) => !drop.has(i)).join('\n'));
     html = html.replace(/(?:<p>)?\uE002([a-z-]+)\uE003(?:<\/p>)?/g, (_, name) => blocks[name]());
     html = html.replace(TASK_SENTINEL, (_, state) => `<span class="task-mark" data-state="${state}" title="${state}"></span>`);
-    html = html.replace(/(^|[\s>(])#blocked\b/g, '$1<span class="tag blocked">#blocked</span>');
-    return html;
+    return tagBlocked(html);
   };
 
   // ── Page parts ────────────────────────────────────────────────────
@@ -337,8 +343,7 @@ ${main}
           current = id;
         }
         const md = new Marked();
-        const text = md.parseInline(task.text.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1'))
-          .replace(/(^|[\s>(])#blocked\b/g, '$1<span class="tag blocked">#blocked</span>');
+        const text = tagBlocked(md.parseInline(task.text.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')));
         main += `<li><span class="task-mark" data-state="${state}"></span>${text}</li>`;
       }
       main += '</ul></section>';

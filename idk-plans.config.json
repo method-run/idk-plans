@@ -1,0 +1,10 @@
+{
+  "$schema": "./schema/config.schema.json",
+  "exclude": ["test/fixtures/**"],
+  "root": { "file": "README.md", "id": "idk-plans" },
+  "trees": {
+    "system": { "title": "System", "primary": true },
+    "viewer": { "title": "Viewers", "groups": ["forges", "terminal"] }
+  },
+  "site": { "title": "idk-plans" }
+}

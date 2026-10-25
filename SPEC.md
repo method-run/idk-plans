@@ -1,3 +1,13 @@
+---
+id: spec
+title: Specification
+summary: The format of idk-plans files. It defines nodes, trees, tasks, rollups, links, generated blocks, and the checks.
+parent: idk-plans
+kind: reference
+order: 1
+aliases: [Specification]
+tags: [system/spec]
+---
 # idk-plans specification
 
 **Version:** 0.1.0-draft · **Status:** draft, expect breaking changes
@@ -440,7 +450,7 @@ The configuration is `idk-plans.config.json` in the project root.
   "$schema": "./node_modules/idk-plans/schema/config.schema.json",
   "include": ["**/*.md"],
   "exclude": ["**/node_modules/**", "**/dist/**", "**/CHANGELOG.md"],
-  "root": { "file": "README.md", "id": "idk-net" },
+  "root": { "file": "README.md", "id": "my-app" },
   "trees": {
     "system":  { "title": "System",   "primary": true },
     "concern": { "title": "Concerns", "groups": ["reachability", "security.peer-auth"] }
@@ -517,9 +527,9 @@ Recommended setup:
 ```jsonc
 {
   "version": "0.1",
-  "root": "idk-net",
+  "root": "my-app",
   "primaryTree": "system",
-  "trees": { "system": { "title": "System", "top": "idk-net" }, "concern": { "title": "Concerns", "top": "concern" } },
+  "trees": { "system": { "title": "System", "top": "my-app" }, "concern": { "title": "Concerns", "top": "concern" } },
   "nodes": {
     "trust-store": {
       "id": "trust-store",
@@ -558,6 +568,6 @@ Recommended setup:
 
 ## 14. Not in this version
 
-- Weights for tasks.
-- Ids for single tasks, and links to them.
-- Putting a single task in a different tree from its node.
+- [>] Weights for tasks
+- [>] Ids for single tasks, and links to them
+- [>] A single task in a different tree from its node

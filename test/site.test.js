@@ -10,7 +10,7 @@ import { buildSite } from '../src/site.js';
 
 const files = {
   'README.md': '# Demo\n\nIntro.\n\n```mermaid\nflowchart LR\n  gateway --> other_thing\n```\n\n<!-- idk-plans:children:start (generated) -->\n<!-- idk-plans:children:end -->\n',
-  'gateway/README.md': '---\nid: gateway\ntitle: Gateway\nsummary: The front door.\nparent: demo\nparents:\n  concern: security.auth\ncode: [gateway/src]\n---\n# Gateway\n\nSee [the docs](../README.md "demo") and [code](src/app.ts).\n\n- [x] Done thing\n- [/] Doing thing\n- [ ] Waiting thing #blocked on the router\n- [-] Dropped thing\n',
+  'gateway/README.md': '---\nid: gateway\ntitle: Gateway\nsummary: The front door.\nparent: demo\nparents:\n  concern: security.auth\ncode: [gateway/src]\n---\n# Gateway\n\nSee [the docs](../README.md "demo") and [code](src/app.ts). Tag with `#blocked`.\n\n- [x] Done thing\n- [/] Doing thing\n- [ ] Waiting thing #blocked on the router\n- [-] Dropped thing\n',
 };
 
 async function build(options) {
@@ -38,6 +38,7 @@ test('site: links, task states, diagram links, and placed children', async () =>
   assert.match(gw, /href="https:\/\/example\.org\/repo\/src\/commit\/abc\/gateway\/src\/app\.ts"/);
   for (const s of ['done', 'doing', 'blocked', 'dropped']) assert.match(gw, new RegExp(`data-state="${s}"`));
   assert.match(gw, /class="tag blocked">#blocked/);
+  assert.match(gw, /<code>#blocked<\/code>/);
   const root = await read('index.html');
   assert.match(root, /data-links="\{&quot;gateway&quot;:&quot;gateway\/&quot;\}"/);
   assert.match(root, /<ul class="cards">/);
