@@ -13,7 +13,7 @@ tags: [system/compatibility, viewer/markdown/compatibility]
 # Tested viewers
 
 <!-- idk-plans:progress:start (generated) -->
-◐ 66% (4/6)
+● 100% (6/6)
 <!-- idk-plans:progress:end -->
 
 The Markdown files must be useful and easy to move through without the tool. We test them in three viewers: GitHub, GitLab, and Obsidian. Other Markdown viewers probably work too.
@@ -41,7 +41,7 @@ We publish the site on GitHub Pages and on GitLab Pages. See [Publish the site](
 
 ## Known problems
 
-We have not finished checking GitHub and GitLab, so these lists can grow.
+We checked GitHub, GitLab, and Obsidian in October 2026. Tell us if you find a problem that is not in these lists.
 
 ### Code hosts
 
@@ -67,5 +67,5 @@ We have not finished checking GitHub and GitLab, so these lists can grow.
 ## Tasks
 
 - [x] Check the docs in Obsidian
-- [ ] Check the docs on GitHub
-- [ ] Check the docs on GitLab
+- [x] Check the docs on GitHub
+- [x] Check the docs on GitLab

@@ -1,7 +1,7 @@
 # idk-plans
 
 <!-- idk-plans:progress:start (generated) -->
-◐ 78% (30/38) · 4 deferred
+◐ 92% (39/42) · 4 deferred
 <!-- idk-plans:progress:end -->
 
 Keep your project's architecture and progress in Markdown files next to the code. idk-plans checks the files, keeps their generated parts current, and builds a website from them. Progress rolls up from tasks to the top of the project.
@@ -39,25 +39,25 @@ Zoom in: [Specification](./SPEC.md "spec") · [Command line](./bin/README.md "cl
 <!-- idk-plans:children:start (generated) -->
 - [Specification](./SPEC.md "spec"): The format of idk-plans files. It defines nodes, trees, tasks, rollups, links, generated blocks, and the checks. · no tasks · 3 deferred
 - [How it works](./docs/how-it-works.md "how-it-works"): What idk-plans does when you run a command, step by step. The tool is deterministic, and it does not use AI or the network.
-- [Command line](./bin/README.md "cli"): Runs the commands check, fix, tree, model, and site. It is the only part that reads arguments and writes to the terminal. ◐ 66% (2/3)
-- [Engine](./src/README.md "engine"): Reads the Markdown files, builds one model of all nodes, trees, and tasks, and checks and fixes the files from that model. ◐ 88% (23/26) · 1 deferred
-- [Tested viewers](./docs/compatibility.md "compatibility"): The viewers that we test the Markdown files and the site with, and what each one shows differently. ◐ 66% (4/6)
+- [Command line](./bin/README.md "cli"): Runs the commands check, fix, tree, model, and site. It is the only part that reads arguments and writes to the terminal. ● 100% (4/4)
+- [Engine](./src/README.md "engine"): Reads the Markdown files, builds one model of all nodes, trees, and tasks, and checks and fixes the files from that model. ◐ 93% (27/29) · 1 deferred
+- [Tested viewers](./docs/compatibility.md "compatibility"): The viewers that we test the Markdown files and the site with, and what each one shows differently. ● 100% (6/6)
 <!-- idk-plans:children:end -->
 
 ## Other views
 
 <!-- idk-plans:trees:start (generated) -->
-**Viewers** ◐ 73% (17/23) · 1 deferred
+**Viewers** ◐ 91% (22/24) · 1 deferred
 
-- [Site builder](./src/site.md "site") ◐ 62% (5/8)
-  - [Publish the site](./docs/publish-site.md "publish-site") ◐ 50% (1/2)
-- Markdown ◐ 83% (10/12) · 1 deferred
-  - [Tested viewers](./docs/compatibility.md "compatibility") ◐ 66% (4/6)
+- [Site builder](./src/site.md "site") ◐ 75% (6/8)
+  - [Publish the site](./docs/publish-site.md "publish-site") ● 100% (2/2)
+- Markdown ● 100% (12/12) · 1 deferred
+  - [Tested viewers](./docs/compatibility.md "compatibility") ● 100% (6/6)
     - [Working in Obsidian](./obsidian/README.md "obsidian") ● 100% (3/3)
   - [Fix](./src/fix.md "fix") ● 100% (4/4)
   - [Prose unwrap](./src/wrap.md "wrap") ● 100% (2/2) · 1 deferred
-- Terminal ◐ 66% (2/3)
-  - [Command line](./bin/README.md "cli") ◐ 66% (2/3)
+- Terminal ● 100% (4/4)
+  - [Command line](./bin/README.md "cli") ● 100% (4/4)
 <!-- idk-plans:trees:end -->
 
 ## Use
@@ -65,8 +65,11 @@ Zoom in: [Specification](./SPEC.md "spec") · [Command line](./bin/README.md "cl
 ```sh
 npm install --save-dev @method-run/idk-plans
 
+npx idk-plans init     # write a starter config and README
+npx idk-plans init --ci github --hooks
 npx idk-plans check    # report problems (CI, pre-push)
 npx idk-plans fix      # update generated blocks (pre-commit)
+npx idk-plans fix --dry-run
 npx idk-plans tree     # show progress in the terminal
 npx idk-plans tree --tree concern
 npx idk-plans model    # the whole model as JSON
@@ -87,11 +90,22 @@ The configuration is `idk-plans.config.json` in the project root. See section 9 
 
 ## Git hooks
 
-```sh
-# .githooks/pre-commit
-npx idk-plans fix && git add -u
+`idk-plans init --hooks` writes these two hooks.
 
-# .githooks/pre-push
+`.githooks/pre-commit`:
+
+```sh
+#!/bin/sh
+# Update the generated parts, then add the files that fix changed.
+out=$(npx idk-plans fix) || { echo "$out"; exit 1; }
+echo "$out"
+echo "$out" | sed -n 's/^fixed //p' | while read -r file; do git add -- "$file"; done
+```
+
+`.githooks/pre-push`:
+
+```sh
+#!/bin/sh
 npx idk-plans check --quiet
 ```
 
@@ -103,7 +117,7 @@ Turn them on with `git config core.hooksPath .githooks`.
 
 ## Tasks
 
-- [ ] Publish the repository
+- [x] Publish the repository
 - [x] Publish the package on npm
 - [ ] Publish version 1.0 of the format
 

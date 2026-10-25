@@ -30,10 +30,12 @@ Every command starts with the same four steps:
 Then the command does its job:
 
 5. **`check`** finds problems, such as broken links, missing parents, and generated blocks that are out of date. It exits with an error if it finds one, so CI can stop a broken change.
-6. **`fix`** writes the parts of the files that the tool owns: generated blocks, link paths, task marks, aliases, and tags. It also joins prose that is wrapped by hand ([Fix](../src/fix.md "fix")).
+6. **`fix`** writes the parts of the files that the tool owns: generated blocks, link paths, task marks, aliases, and tags. It also joins prose that is wrapped by hand ([Fix](../src/fix.md "fix")). With `--dry-run`, it shows the changes and writes nothing.
 7. **`tree`** shows each tree and its progress in the terminal.
 8. **`site`** builds a static website, with search, a sidebar for each tree, and diagrams that link to pages ([Site builder](../src/site.md "site")).
 9. **`model`** writes the model as JSON, so that other tools can use it.
+
+`init` is different. It writes starter files for a new project: a configuration, a README, and, if you ask, git hooks and a CI workflow. It does not change a file that exists ([Init](../src/init.md "init")).
 
 <details>
 <summary>How it works</summary>

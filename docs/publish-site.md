@@ -12,7 +12,7 @@ tags: [system/engine/site/publish-site, viewer/site/publish-site]
 # Publish the site
 
 <!-- idk-plans:progress:start (generated) -->
-◐ 50% (1/2)
+● 100% (2/2)
 <!-- idk-plans:progress:end -->
 
 `idk-plans site --out _site` writes a folder of HTML, CSS, and JavaScript. Every link in it is relative. So you can put the folder on any static host, under any path, and you do not need a server or a build step on the host.
@@ -25,6 +25,8 @@ A good setup builds the site in CI on each push to the main branch:
 4. Give the folder to the host.
 
 The two sections below do this on GitHub and on GitLab. This repository has both workflows, in [.github/workflows/pages.yml](../.github/workflows/pages.yml) and [.gitlab-ci.yml](../.gitlab-ci.yml). They run `npm run docs:check` and `npm run docs:site`. In your project, use `npx idk-plans check --quiet` and `npx idk-plans site --out _site` instead.
+
+`idk-plans init --ci github` or `idk-plans init --ci gitlab` writes the workflow for that host, as shown below.
 
 ## GitHub
 
@@ -116,5 +118,5 @@ On gitlab.com, a new account must verify its identity before the shared runners 
 
 ## Tasks
 
-- [ ] Publish this repository's site on GitHub Pages
+- [x] Publish this repository's site on GitHub Pages
 - [x] Publish this repository's site on GitLab Pages

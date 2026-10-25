@@ -1,12 +1,15 @@
 #!/usr/bin/env node
 import { parseArgs } from 'node:util';
 import path from 'node:path';
-import { loadProject, check, fix, renderTree, toJSON } from '../src/index.js';
+import { loadProject, check, fix, planFixes, renderTree, toJSON } from '../src/index.js';
 import { buildSite } from '../src/site.js';
+import { initProject } from '../src/init.js';
+import { diffLines } from '../src/diff.js';
 
 const USAGE = `Usage: idk-plans <command> [options]
 
 Commands:
+  init               Write starter files that do not exist yet.
   check              Report problems. Exits 1 if there is an error.
   fix                Write generated blocks and correct what can be corrected.
   tree               Show a tree with progress.
@@ -15,6 +18,9 @@ Commands:
 
 Options:
   --cwd <dir>        Project root (default: current directory)
+  --ci <host>        Add a workflow that publishes the site: github or gitlab (init command)
+  --hooks            Add git hooks in .githooks/ (init command)
+  --dry-run          Show what would change, and write nothing (fix command)
   --tree <name>      Tree to show (tree command; default: the primary tree)
   --depth <n>        Depth to show (tree command)
   --quiet            Show only errors (check command)
@@ -27,6 +33,9 @@ const { values, positionals } = parseArgs({
   allowPositionals: true,
   options: {
     cwd: { type: 'string' },
+    ci: { type: 'string' },
+    hooks: { type: 'boolean' },
+    'dry-run': { type: 'boolean' },
     tree: { type: 'string' },
     depth: { type: 'string' },
     quiet: { type: 'boolean' },
@@ -54,7 +63,21 @@ function printProblems(problems) {
   console.log(`\n${count('error')} errors, ${count('warn')} warnings, ${count('info')} info`);
 }
 
+async function init() {
+  const results = await initProject(cwd, { ci: values.ci, hooks: values.hooks });
+  for (const { file, action } of results) console.log(`${action.padEnd(8)} ${file}`);
+  // Fill the generated blocks of the new files.
+  const changed = await fix(await loadProject(cwd));
+  for (const file of changed) console.log(`fixed    ${file}`);
+  if (values.hooks) console.log('\nTurn on the hooks with: git config core.hooksPath .githooks');
+  if (values.ci === 'github') console.log('\nIn the repository settings, open Pages, and set Source to GitHub Actions.');
+}
+
 try {
+  if (command === 'init') {
+    await init();
+    process.exit(0);
+  }
   const project = await loadProject(cwd);
   switch (command) {
     case 'check': {
@@ -65,6 +88,15 @@ try {
       break;
     }
     case 'fix': {
+      if (values['dry-run']) {
+        const plans = planFixes(project);
+        for (const { file, before, after } of plans) {
+          console.log(`would fix ${file}`);
+          for (const line of diffLines(before, after)) console.log(`  ${line}`);
+        }
+        console.log(`\n${plans.length} files would change`);
+        break;
+      }
       const changed = await fix(project);
       for (const file of changed) console.log(`fixed ${file}`);
       const after = check(await loadProject(cwd));

@@ -11,6 +11,7 @@ import { unwrapProse } from './wrap.js';
 
 export { buildModel, toJSON, parseMarkdown, fixDocument, rollupText, unwrapProse };
 export { buildSite } from './site.js';
+export { initProject } from './init.js';
 
 /** Read, parse, and model a project. */
 export async function loadProject(cwd) {
@@ -67,18 +68,22 @@ export function check(project) {
   ));
 }
 
-/** Write fixes to disk. Returns the files that changed. */
-export async function fix(project) {
-  const changed = [];
+/** The fixes, without writing them: { file, before, after } for each file that would change. */
+export function planFixes(project) {
+  const plans = [];
   for (const node of project.model.nodes.values()) {
     if (!node.doc) continue;
-    const fixed = fixDocument(project.model, node);
-    if (fixed !== node.doc.text) {
-      await writeFile(path.join(project.cwd, node.file), fixed);
-      changed.push(node.file);
-    }
+    const after = fixDocument(project.model, node);
+    if (after !== node.doc.text) plans.push({ file: node.file, before: node.doc.text, after });
   }
-  return changed;
+  return plans;
+}
+
+/** Write fixes to disk. Returns the files that changed. */
+export async function fix(project) {
+  const plans = planFixes(project);
+  for (const { file, after } of plans) await writeFile(path.join(project.cwd, file), after);
+  return plans.map((p) => p.file);
 }
 
 /** A tree as text lines, for the terminal. */
