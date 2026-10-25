@@ -11,7 +11,7 @@ tags: [system/engine/site, viewer/site]
 # Site builder
 
 <!-- idk-plans:progress:start (generated) -->
-◐ 62% (5/8)
+◐ 55% (5/9)
 <!-- idk-plans:progress:end -->
 
 The site shows the same pages as the Markdown files, with more ways to move around. It needs no server, so you can open it from a folder or put it on any static host.
@@ -38,3 +38,4 @@ Mermaid runs in the browser, with `securityLevel: 'strict'`. By default, pages l
 - [x] List open tasks, and a glossary
 - [x] Use the project's own Mermaid, so diagrams work offline
 - [ ] Check the layout on a phone
+- [ ] Give the site a theme with more character: type, color, and spacing. The current style is plain.

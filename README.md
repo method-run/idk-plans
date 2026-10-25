@@ -1,7 +1,7 @@
 # idk-plans
 
 <!-- idk-plans:progress:start (generated) -->
-◐ 76% (29/38) · 5 deferred
+◐ 74% (29/39) · 5 deferred
 <!-- idk-plans:progress:end -->
 
 Keep your project's architecture and progress in Markdown files next to the code. idk-plans checks the files, keeps their generated parts current, and builds a website from them. Progress rolls up from tasks to the top of the project.
@@ -38,16 +38,16 @@ Zoom in: [Specification](./SPEC.md "spec") · [Command line](./bin/README.md "cl
 <!-- idk-plans:children:start (generated) -->
 - [Specification](./SPEC.md "spec"): The format of idk-plans files. It defines nodes, trees, tasks, rollups, links, generated blocks, and the checks. · no tasks · 3 deferred
 - [Command line](./bin/README.md "cli"): Runs the commands check, fix, tree, model, and site. It is the only part that reads arguments and writes to the terminal. ◐ 66% (2/3)
-- [Engine](./src/README.md "engine"): Reads the Markdown files, builds one model of all nodes, trees, and tasks, and checks and fixes the files from that model. ◐ 88% (23/26) · 1 deferred
+- [Engine](./src/README.md "engine"): Reads the Markdown files, builds one model of all nodes, trees, and tasks, and checks and fixes the files from that model. ◐ 85% (23/27) · 1 deferred
 - [Tested viewers](./docs/compatibility.md "compatibility"): The viewers that we test the Markdown files and the site with, and what each one shows differently. ◐ 66% (4/6) · 1 deferred
 <!-- idk-plans:children:end -->
 
 ## Other views
 
 <!-- idk-plans:trees:start (generated) -->
-**Viewers** ◐ 73% (17/23) · 2 deferred
+**Viewers** ◐ 70% (17/24) · 2 deferred
 
-- [Site builder](./src/site.md "site") ◐ 62% (5/8)
+- [Site builder](./src/site.md "site") ◐ 55% (5/9)
   - [Publish the site](./docs/publish-site.md "publish-site") ◐ 33% (1/3)
 - Markdown ◐ 83% (10/12) · 2 deferred
   - [Tested viewers](./docs/compatibility.md "compatibility") ◐ 66% (4/6) · 1 deferred
