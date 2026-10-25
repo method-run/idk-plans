@@ -8,7 +8,7 @@ Keep your project's architecture and progress in Markdown files next to the code
 
 - **[Specification](./SPEC.md "spec")**: the format. Start here.
 - **Status:** 0.1.0 draft. The format can change.
-- **Demo:** these docs use idk-plans. Run `npx idk-plans site` in this repository, then open `_site/index.html`.
+- **Demo:** these docs use idk-plans. Run `npm run docs:site` in this repository, then open `_site/index.html`.
 
 ```mermaid
 flowchart LR
@@ -60,7 +60,7 @@ Zoom in: [Specification](./SPEC.md "spec") · [Command line](./bin/README.md "cl
 ## Use
 
 ```sh
-npm install --save-dev idk-plans
+npm install --save-dev @method-run/idk-plans
 
 npx idk-plans check    # report problems (CI, pre-push)
 npx idk-plans fix      # update generated blocks (pre-commit)

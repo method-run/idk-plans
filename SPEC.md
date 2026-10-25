@@ -447,7 +447,7 @@ The configuration is `idk-plans.config.json` in the project root.
 
 ```json
 {
-  "$schema": "./node_modules/idk-plans/schema/config.schema.json",
+  "$schema": "./node_modules/@method-run/idk-plans/schema/config.schema.json",
   "include": ["**/*.md"],
   "exclude": ["**/node_modules/**", "**/dist/**", "**/CHANGELOG.md"],
   "root": { "file": "README.md", "id": "my-app" },

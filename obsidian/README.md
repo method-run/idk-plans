@@ -23,7 +23,7 @@ You can open a project as an Obsidian vault. Links, backlinks, search by title, 
 1. Open the project folder as a vault (*Open folder as vault*). Do not use *Create new vault*, because it makes a new folder.
 2. Add `.obsidian/` to `.gitignore`.
 3. Exclude `node_modules`, `dist`, and other build folders in *Files and links → Excluded files*.
-4. Copy `node_modules/idk-plans/obsidian/idk-plans-tasks.css` to `<vault>/.obsidian/snippets/`. Turn it on in *Appearance → CSS snippets*. Without it, Obsidian shows `[/]`, `[>]`, and `[-]` as done.
+4. Copy `node_modules/@method-run/idk-plans/obsidian/idk-plans-tasks.css` to `<vault>/.obsidian/snippets/`. Turn it on in *Appearance → CSS snippets*. Without it, Obsidian shows `[/]`, `[>]`, and `[-]` as done.
 5. To collapse `<details>` elements that have Markdown inside, install the *Details Markdown* community plugin. It works in Reading view only.
 
 ## What works
