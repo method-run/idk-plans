@@ -42,6 +42,7 @@ Zoom in: [Specification](./SPEC.md "spec") · [Command line](./bin/README.md "cl
 - [Command line](./bin/README.md "cli"): Runs the commands check, fix, tree, model, and site. It is the only part that reads arguments and writes to the terminal. ● 100% (4/4)
 - [Engine](./src/README.md "engine"): Reads the Markdown files, builds one model of all nodes, trees, and tasks, and checks and fixes the files from that model. ◐ 93% (27/29) · 1 deferred
 - [Tested viewers](./docs/compatibility.md "compatibility"): The viewers that we test the Markdown files and the site with, and what each one shows differently. ● 100% (6/6)
+- [Release a version](./docs/release.md "release"): How a maintainer releases a new version of idk-plans. A version tag starts a workflow that publishes to npm and makes a GitHub release.
 <!-- idk-plans:children:end -->
 
 ## Other views
