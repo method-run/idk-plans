@@ -27,6 +27,7 @@ export const DEFAULT_RULES = {
   'bad-status': 'error',
   'task-parent-mismatch': 'warn',
   'unknown-mark': 'warn',
+  'hard-wrap': 'warn',
   'summary-max-words': ['warn', 25],
   'plan-finished': 'warn',
   'unlinked-child': 'warn',
@@ -63,6 +64,10 @@ export function resolveConfig(raw = {}) {
     throw new Error(`${CONFIG_FILE}: exactly one tree must have "primary": true (found ${primaries.length})`);
   }
   const rules = { ...DEFAULT_RULES, ...(raw.rules ?? {}) };
+  const proseWrap = raw.proseWrap ?? 'never';
+  if (!['never', 'preserve'].includes(proseWrap)) {
+    throw new Error(`${CONFIG_FILE}: "proseWrap" must be "never" or "preserve"`);
+  }
   return {
     include: raw.include ?? ['**/*.md'],
     exclude: [...DEFAULT_EXCLUDE, ...(raw.exclude ?? [])],
@@ -70,6 +75,7 @@ export function resolveConfig(raw = {}) {
     trees,
     primaryTree: primaries[0],
     tags: raw.tags ?? true,
+    proseWrap,
     site: raw.site ?? {},
     rules,
   };

@@ -7,8 +7,9 @@ import { parseMarkdown } from './parse.js';
 import { buildModel, toJSON } from './model.js';
 import { fixDocument, firstDifference, rollupText } from './fix.js';
 import { ruleSetting } from './config.js';
+import { unwrapProse } from './wrap.js';
 
-export { buildModel, toJSON, parseMarkdown, fixDocument, rollupText };
+export { buildModel, toJSON, parseMarkdown, fixDocument, rollupText, unwrapProse };
 
 /** Read, parse, and model a project. */
 export async function loadProject(cwd) {
@@ -38,6 +39,21 @@ export function check(project) {
           file: node.file,
           line: firstDifference(node.doc.text, fixed),
           message: 'generated content is not current; run `idk-plans fix`',
+        });
+      }
+    }
+  }
+  const wrap = ruleSetting(config.rules['hard-wrap']);
+  if (wrap.severity !== 'off' && config.proseWrap !== 'preserve') {
+    for (const node of model.nodes.values()) {
+      if (!node.doc) continue;
+      for (const line of unwrapProse(node.doc.text).wrapped) {
+        problems.push({
+          rule: 'hard-wrap',
+          severity: wrap.severity,
+          file: node.file,
+          line: line + 1,
+          message: 'text is wrapped across lines; run `idk-plans fix` (6.3)',
         });
       }
     }

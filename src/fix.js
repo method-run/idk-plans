@@ -2,6 +2,7 @@ import path from 'node:path';
 import { normalizeLabel } from './parse.js';
 import { STATE_MARKS } from './parse.js';
 import { aggregateState, linkTarget } from './model.js';
+import { unwrapProse } from './wrap.js';
 
 const startMarker = (name) => `<!-- idk-plans:${name}:start (generated) -->`;
 const endMarker = (name) => `<!-- idk-plans:${name}:end -->`;
@@ -99,7 +100,7 @@ function block(name, content) {
  * options.blocks: regenerate generated content (blocks, links, aliases, tags)
  * options.marks: correct task marks from their subtasks
  */
-export function fixDocument(model, node, options = { blocks: true, marks: true }) {
+export function fixDocument(model, node, options = { blocks: true, marks: true, unwrap: true }) {
   const doc = node.doc;
   const lines = [...doc.lines];
   const { primary, labels, nodes } = model;
@@ -168,7 +169,8 @@ export function fixDocument(model, node, options = { blocks: true, marks: true }
   if (model.config?.tags !== false) ensureTreeTags(model, node, lines);
 
   // Links are inline now; remove reference blocks from older versions.
-  const text = stripBlock(lines.join('\n'), 'refs').replace(/\s*$/, '');
+  let text = stripBlock(lines.join('\n'), 'refs').replace(/\s*$/, '');
+  if (options.unwrap && model.config?.proseWrap !== 'preserve') text = unwrapProse(text).text;
   return `${text}\n`;
 }
 

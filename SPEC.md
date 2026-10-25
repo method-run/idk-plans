@@ -302,6 +302,10 @@ The tool checks only some of these rules (section 10). The others are for review
 
 Write each paragraph, list item, and table row on one line. Do not wrap prose by hand. Codeberg and GitHub join wrapped lines, but Obsidian shows each line break by default, so hand-wrapped text breaks in the middle of sentences. Let the viewer wrap the text.
 
+By default, `check` reports text that is wrapped across lines (`hard-wrap`), and `fix` joins the lines. It joins only lines that Markdown already joins, so the rendered page does not change. It does not touch frontmatter, code, tables, HTML, headings, or lines that end in a hard break.
+
+Some teams read Markdown mostly as raw text, in a terminal or a code editor. They can keep their own line breaks: set `"proseWrap": "preserve"` in the configuration (section 9). Then `check` and `fix` ignore line breaks in prose.
+
 ### 6.4 Links between nodes
 
 A link to a node is a normal inline Markdown link. Its title is the node's id:
@@ -455,6 +459,7 @@ The configuration is `idk-plans.config.json` in the project root.
 | `root` | the node without a primary parent | The root file and id, if the root has no frontmatter. |
 | `trees` | `{ "system": { "primary": true } }` | The trees. Exactly one must be primary. |
 | `tags` | `true` | Write tree tags into frontmatter (7.5). |
+| `proseWrap` | `"never"` | `"never"`: one line per paragraph; `check` reports wrapped text and `fix` joins it. `"preserve"`: keep line breaks as they are (6.3). |
 | `site.title` | the root title | The site name. |
 | `site.sourceUrl` | none | Base URL for links to repository files, for example `https://codeberg.org/<owner>/<repo>/src/branch/main`. `--source-url` overrides it. |
 | `trees.<name>.groups` | `[]` | Paths of virtual nodes that this tree may use without a page (4.4). A one-id group sits at the top level of the tree. |
@@ -480,6 +485,7 @@ The configuration is `idk-plans.config.json` in the project root.
 | `bad-status` | error | A node status is not allowed for that node (5.4). |
 | `task-parent-mismatch` | warn | A task mark does not agree with its subtasks. |
 | `unknown-mark` | warn | A list item has a mark in brackets that is not a task mark (5.1). |
+| `hard-wrap` | warn | A paragraph, list item, or quote is wrapped across lines (6.3). `fix` joins it. Off when `proseWrap` is `"preserve"`. |
 | `summary-max-words` | warn (25) | A sentence in `summary` has too many words. |
 | `plan-finished` | warn | A plan has no open tasks. |
 | `unlinked-child` | warn | A node's page has no link to one of its children in the primary tree. A `children` block counts as a link. |
