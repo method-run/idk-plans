@@ -1,15 +1,16 @@
 ---
 id: obsidian
-title: Obsidian support
+title: Obsidian setup
 summary: Lets you read and edit the docs in Obsidian, with working links, backlinks, tags for each tree, and distinct task marks.
-parent: idk-plans
+parent: compatibility
+parents:
+  viewer: compatibility
 kind: guide
 code: [obsidian/]
-order: 4
-aliases: [Obsidian support]
-tags: [system/obsidian, viewer/obsidian]
+aliases: [Obsidian support, Obsidian setup]
+tags: [system/compatibility/obsidian, viewer/markdown/compatibility/obsidian]
 ---
-# Obsidian support
+# Obsidian setup
 
 <!-- idk-plans:progress:start (generated) -->
 ◐ 66% (2/3)

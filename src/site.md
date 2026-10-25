@@ -11,12 +11,12 @@ tags: [system/engine/site, viewer/site]
 # Site builder
 
 <!-- idk-plans:progress:start (generated) -->
-◐ 50% (3/6)
+◐ 42% (3/7)
 <!-- idk-plans:progress:end -->
 
 The site shows the same pages as the Markdown files, with more ways to move around. It needs no server, so you can open it from a folder or put it on any static host.
 
-To put the site on Codeberg Pages, see [Publish the site](../docs/publish-site.md "publish-site").
+The site is static files, so any static host can serve it. See [Publish the site](../docs/publish-site.md "publish-site").
 
 <details>
 <summary>How it works</summary>

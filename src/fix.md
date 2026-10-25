@@ -5,10 +5,10 @@ summary: >-
   Writes the parts of each file that the tool owns: generated blocks, link paths, task marks, aliases, and tree tags.
 parent: engine
 parents:
-  viewer: [forges, obsidian]
+  viewer: markdown
 code: [src/fix.js]
 order: 5
-tags: [system/engine/fix, viewer/forges/fix, viewer/obsidian/fix]
+tags: [system/engine/fix, viewer/markdown/fix]
 ---
 # Fix
 
@@ -37,5 +37,5 @@ Frontmatter edits change only the `aliases` and `tags` lines, so the rest of the
 
 - [x] Fill generated blocks
 - [x] Write link paths, and correct them when files move
-- [x] Write aliases and tree tags for Obsidian
+- [x] Write aliases and tree tags
 - [x] Remove `refs` blocks from earlier drafts

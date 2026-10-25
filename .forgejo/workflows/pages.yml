@@ -1,0 +1,39 @@
+name: Docs site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  pages:
+    runs-on: codeberg-small
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - run: npm ci
+
+      - run: npm run docs:check
+
+      - run: >-
+          npm run docs:site --
+          --source-url "${{ github.server_url }}/${{ github.repository }}/src/commit/${{ github.sha }}"
+
+      - name: Push to the pages branch
+        env:
+          PAGES_TOKEN: ${{ secrets.PAGES_TOKEN }}
+          SERVER: ${{ github.server_url }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+        run: |
+          cd _site
+          git init -q -b pages
+          git config user.name "idk-plans"
+          git config user.email "noreply@codeberg.org"
+          git add -A
+          git commit -q -m "Docs site for ${SHA}"
+          git push -q --force "https://oauth2:${PAGES_TOKEN}@${SERVER#https://}/${REPO}.git" pages

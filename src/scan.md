@@ -13,7 +13,7 @@ tags: [system/engine/scan]
 ● 100% (2/2)
 <!-- idk-plans:progress:end -->
 
-Scan finds the files to read. It always skips folders that start with a dot, such as `.git` and `.obsidian`.
+Scan finds the files to read. It always skips folders that start with a dot, such as `.git` and editor settings.
 
 <details>
 <summary>How it works</summary>

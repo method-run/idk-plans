@@ -14,7 +14,7 @@ tags: [system/spec]
 
 idk-plans is a convention for keeping a project's architecture and progress in plain Markdown files that live next to the code. A tool reads those files, checks them, keeps generated parts current, and can build a website from them.
 
-The files stay useful without the tool. Any Markdown viewer (Codeberg, GitHub, Obsidian, an editor) shows readable text, working links, and current progress.
+The files stay useful without the tool. Any Markdown viewer (a code host, a notes app, an editor) shows readable text, working links, and current progress. The [Tested viewers](./docs/compatibility.md "compatibility") page lists the viewers that we test.
 
 ## 1. Goals
 
@@ -49,7 +49,7 @@ A Markdown file is a node when its frontmatter has an `id`. The tool ignores Mar
 
 Put a node next to what it describes:
 
-- For a module or directory, use that directory's `README.md`. Codeberg and GitHub show this file when you open the directory.
+- For a module or directory, use that directory's `README.md`. Code hosts show this file when you open the directory.
 - For a concern that has no single directory, put the file in a docs folder (for example `docs/concerns/security.md`).
 
 The configuration (section 9) sets which files the tool scans.
@@ -90,7 +90,7 @@ order: 2                        # optional, position among siblings
 
 **order**: a number that sets the position of the node among its siblings. Siblings with an order come first, from low to high. The other siblings follow, sorted by title.
 
-**aliases**: other names for the node. `fix` adds the `title` to `aliases` when it is not there, so that tools which show file names (for example Obsidian, where many pages are `README.md`) can find the page by its title.
+**aliases**: other names for the node. `fix` adds the `title` to `aliases` when it is not there, so that viewers which show file names, where many pages are `README.md`, can find the page by its title.
 
 **code**: files or directories that this node describes. Paths start at the project root. The tool reports paths that do not exist.
 
@@ -200,9 +200,9 @@ A task is a list item that starts with a status mark in square brackets:
 | `[>]` | deferred | not in scope |
 | `[-]` | dropped | not in scope |
 
-These marks follow common Obsidian conventions (the Tasks plugin and themes such as Minimal). Codeberg and GitHub show `[ ]` and `[x]` as checkboxes. They show the other marks as text, which is still easy to read.
+These marks follow common conventions in Markdown task tools. Most viewers show `[ ]` and `[x]` as checkboxes. Many show the other marks as text, which is still easy to read.
 
-**Blocked** is not a mark, because no checkbox convention for it is common. Add the tag `#blocked` to an open task, and say what blocks it after the tag. Obsidian lists every blocked task under that tag.
+**Blocked** is not a mark, because no checkbox convention for it is common. Add the tag `#blocked` to an open task, and say what blocks it after the tag. Viewers that read tags list every blocked task under that tag.
 
 The tool reports a list item with any other mark (`unknown-mark`), so that a typo does not silently remove a task.
 
@@ -310,7 +310,7 @@ The tool checks only some of these rules (section 10). The others are for review
 
 ### 6.3 Line breaks
 
-Write each paragraph, list item, and table row on one line. Do not wrap prose by hand. Codeberg and GitHub join wrapped lines, but Obsidian shows each line break by default, so hand-wrapped text breaks in the middle of sentences. Let the viewer wrap the text.
+Write each paragraph, list item, and table row on one line. Do not wrap prose by hand. Some viewers join wrapped lines, but others show each line break, so hand-wrapped text breaks in the middle of sentences. Let the viewer wrap the text.
 
 By default, `check` reports text that is wrapped across lines (`hard-wrap`), and `fix` joins the lines. It joins only lines that Markdown already joins, so the rendered page does not change. It does not touch frontmatter, code, tables, HTML, headings, or lines that end in a hard break.
 
@@ -326,7 +326,7 @@ The [trust store](../trust-store/README.md "trust-store") checks the signature.
 
 The id in the title makes the link **managed**: `fix` writes its path. When a file moves, `fix` corrects every link to it. A path in a managed link is never reported as broken, because `fix` corrects it.
 
-Inline links work in every viewer: Codeberg, GitHub, and Obsidian, which also counts them as backlinks and in its graph. Most viewers show the title (the id) as a tooltip.
+Inline links work in every viewer, and some viewers count them as backlinks. Reference-style links do not work in every viewer. Most viewers show the title (the id) as a tooltip.
 
 You do not have to write paths. Write one of these short forms, and `fix` changes it to a managed link:
 
@@ -402,7 +402,7 @@ flowchart LR
   gateway --> guestbook[Guestbook]
 ```
 
-Codeberg and GitHub do not allow clicks in Mermaid diagrams. So that readers can go to each node without the site, `fix` writes a `zoom` block after each Mermaid block that shows nodes:
+Most viewers do not allow clicks in Mermaid diagrams. So that readers can go to each node without the site, `fix` writes a `zoom` block after each Mermaid block that shows nodes:
 
 ```markdown
 <!-- idk-plans:zoom:start (generated) -->
@@ -425,7 +425,7 @@ tags: [system/gateway/trust-store, concern/security/peer-auth/trust-store, featu
 - Tags for the primary tree come first, then the other trees in the order of the configuration. Tree tops are not in the path.
 - A node with two parents in a tree has two tags for that tree.
 - The tool owns only the tags whose first part is a tree name. It keeps all other tags, after its own.
-- Do not rely on tag order. `parent` and `parents` are the source; tags are a copy that tools such as Obsidian can use without idk-plans. In Obsidian, the tag pane shows each tree, and `tag:#system/gateway` finds the whole gateway branch.
+- Do not rely on tag order. `parent` and `parents` are the source; tags are a copy that viewers can use without idk-plans. In a viewer with nested tags, the tag list shows each tree, and a search for the tag `system/gateway` finds the whole gateway branch.
 
 Set `"tags": false` in the configuration to turn this off.
 
@@ -471,7 +471,7 @@ The configuration is `idk-plans.config.json` in the project root.
 | `tags` | `true` | Write tree tags into frontmatter (7.5). |
 | `proseWrap` | `"never"` | `"never"`: one line per paragraph; `check` reports wrapped text and `fix` joins it. `"preserve"`: keep line breaks as they are (6.3). |
 | `site.title` | the root title | The site name. |
-| `site.sourceUrl` | none | Base URL for links to repository files, for example `https://codeberg.org/<owner>/<repo>/src/branch/main`. `--source-url` overrides it. |
+| `site.sourceUrl` | none | Base URL for links to repository files, for example `https://<host>/<owner>/<repo>/src/branch/main`. `--source-url` overrides it. |
 | `trees.<name>.groups` | `[]` | Paths of virtual nodes that this tree may use without a page (4.4). A one-id group sits at the top level of the tree. |
 | `rules` | see section 10 | Severity (`error`, `warn`, `info`, `off`) and options for each rule. |
 

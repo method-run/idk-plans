@@ -24,7 +24,8 @@
   },
   "scripts": {
     "test": "node --test test/*.test.js",
-    "check:self": "node bin/idk-plans.js check"
+    "docs:check": "node bin/idk-plans.js check --quiet",
+    "docs:site": "node bin/idk-plans.js site --out _site"
   },
   "dependencies": {
     "marked": "^15.0.12",

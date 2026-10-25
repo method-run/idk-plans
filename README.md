@@ -1,7 +1,7 @@
 # idk-plans
 
 <!-- idk-plans:progress:start (generated) -->
-◐ 75% (25/33) · 4 deferred
+◐ 70% (26/37) · 4 deferred
 <!-- idk-plans:progress:end -->
 
 Keep your project's architecture and progress in Markdown files next to the code. idk-plans checks the files, keeps their generated parts current, and builds a website from them. Progress rolls up from tasks to the top of the project.
@@ -16,11 +16,11 @@ flowchart LR
   spec[Specification] -.->|defines| files
   cli[Command line] -->|runs| engine[Engine]
   engine -->|checks and fixes| files
-  files -->|open as a vault| obsidian[Obsidian support]
+  files -->|read in any viewer| compatibility[Tested viewers]
 ```
 
 <!-- idk-plans:zoom:start (generated) -->
-Zoom in: [Specification](./SPEC.md "spec") · [Command line](./bin/README.md "cli") · [Engine](./src/README.md "engine") · [Obsidian support](./obsidian/README.md "obsidian")
+Zoom in: [Specification](./SPEC.md "spec") · [Command line](./bin/README.md "cli") · [Engine](./src/README.md "engine") · [Tested viewers](./docs/compatibility.md "compatibility")
 <!-- idk-plans:zoom:end -->
 
 ## What it does
@@ -28,31 +28,31 @@ Zoom in: [Specification](./SPEC.md "spec") · [Command line](./bin/README.md "cl
 - Each doc page has an `id` and a `parent`, so the pages make a tree.
 - A page can also be in other trees, such as a "concerns" tree. It uses dot-separated paths: `parents: { concern: security.peer-auth }`.
 - Tasks are checkboxes: `[ ]` todo, `[/]` doing, `[x]` done, `[>]` deferred, `[-]` dropped. `#blocked` on an open task makes it blocked. Progress rolls up through every tree.
-- Links carry ids: `[Trust store](../trust/README.md "trust-store")`. You type `[trust-store]`, and the tool writes the path. It corrects the path when files move, so links work on Codeberg, GitHub, and Obsidian without a site.
+- Links carry ids: `[Trust store](../trust/README.md "trust-store")`. You type `[trust-store]`, and the tool writes the path. It corrects the path when files move, so links work in any Markdown viewer without a site.
 - Generated blocks show progress, child pages, and diagram links. The Markdown stays readable without the tool.
-- For Obsidian, `fix` writes each page's place in every tree as nested tags, and adds page titles to `aliases`.
+- `fix` writes each page's place in every tree as nested tags, and adds page titles to `aliases`, for viewers that use them.
 
 ## Parts
 
 <!-- idk-plans:children:start (generated) -->
 - [Specification](./SPEC.md "spec"): The format of idk-plans files. It defines nodes, trees, tasks, rollups, links, generated blocks, and the checks. · no tasks · 3 deferred
 - [Command line](./bin/README.md "cli"): Runs the commands check, fix, tree, model, and site. It is the only part that reads arguments and writes to the terminal. ◐ 66% (2/3)
-- [Engine](./src/README.md "engine"): Reads the Markdown files, builds one model of all nodes, trees, and tasks, and checks and fixes the files from that model. ◐ 87% (21/24) · 1 deferred
-- [Obsidian support](./obsidian/README.md "obsidian"): Lets you read and edit the docs in Obsidian, with working links, backlinks, tags for each tree, and distinct task marks. ◐ 66% (2/3)
+- [Engine](./src/README.md "engine"): Reads the Markdown files, builds one model of all nodes, trees, and tasks, and checks and fixes the files from that model. ◐ 84% (21/25) · 1 deferred
+- [Tested viewers](./docs/compatibility.md "compatibility"): The viewers that we test the Markdown files and the site with, and what each one shows differently. ◐ 50% (3/6)
 <!-- idk-plans:children:end -->
 
 ## Other views
 
 <!-- idk-plans:trees:start (generated) -->
-**Viewers** ◐ 72% (13/18) · 1 deferred
+**Viewers** ◐ 63% (14/22) · 1 deferred
 
-- [Obsidian support](./obsidian/README.md "obsidian") ◐ 88% (8/9) · 1 deferred
+- [Site builder](./src/site.md "site") ◐ 42% (3/7)
+  - [Publish the site](./docs/publish-site.md "publish-site") ○ 0% (0/2)
+- Markdown ◐ 75% (9/12) · 1 deferred
+  - [Tested viewers](./docs/compatibility.md "compatibility") ◐ 50% (3/6)
+    - [Obsidian setup](./obsidian/README.md "obsidian") ◐ 66% (2/3)
   - [Fix](./src/fix.md "fix") ● 100% (4/4)
   - [Prose unwrap](./src/wrap.md "wrap") ● 100% (2/2) · 1 deferred
-- [Site builder](./src/site.md "site") ◐ 50% (3/6)
-  - [Publish the site](./docs/publish-site.md "publish-site") ○ 0% (0/1)
-- Forges ● 100% (4/4)
-  - [Fix](./src/fix.md "fix") ● 100% (4/4)
 - Terminal ◐ 66% (2/3)
   - [Command line](./bin/README.md "cli") ◐ 66% (2/3)
 <!-- idk-plans:trees:end -->
@@ -84,13 +84,16 @@ npx idk-plans check --quiet
 
 Turn them on with `git config core.hooksPath .githooks`.
 
-## Viewers
+## Site
 
-- **Obsidian:** see [Obsidian support](./obsidian/README.md "obsidian").
-- **The site:** `idk-plans site --out _site` builds a static site. To put it on Codeberg Pages, see [Publish the site](./docs/publish-site.md "publish-site").
+`idk-plans site --out _site` builds a static site that any static host can serve. See [Publish the site](./docs/publish-site.md "publish-site").
 
 ## Tasks
 
-- [ ] Publish the repository on Codeberg
+- [ ] Publish the repository
 - [ ] Publish the package on npm
 - [ ] Publish version 1.0 of the format
+
+## Tested with
+
+We test the Markdown files in GitHub, Codeberg, and Obsidian, and publish the site with GitHub Pages and Codeberg Pages. See [Tested viewers](./docs/compatibility.md "compatibility").

@@ -10,7 +10,7 @@ tags: [system/engine]
 # Engine
 
 <!-- idk-plans:progress:start (generated) -->
-◐ 87% (21/24) · 1 deferred
+◐ 84% (21/25) · 1 deferred
 <!-- idk-plans:progress:end -->
 
 The engine does the work behind every command. It reads the files once, and builds a model. Every check, fix, and page comes from that model, so they always agree.
@@ -37,8 +37,8 @@ Zoom in: [Configuration](./config.md "config") · [Scan](./scan.md "scan") · [P
 - [Parse](./parse.md "parse"): Reads one Markdown file into facts: frontmatter, tasks, links, diagrams, and generated blocks. It does not look at other files. ● 100% (3/3)
 - [Model](./model.md "model"): Joins the parsed files into nodes and trees, calculates every rollup, and finds problems that need more than one file. ● 100% (3/3)
 - [Fix](./fix.md "fix"): Writes the parts of each file that the tool owns: generated blocks, link paths, task marks, aliases, and tree tags. ● 100% (4/4)
-- [Prose unwrap](./wrap.md "wrap"): Finds prose that is wrapped by hand, and joins it into one line for each paragraph, so that Obsidian does not break sentences. ● 100% (2/2) · 1 deferred
-- [Site builder](./site.md "site"): Builds a static website from the model, with diagrams that link to pages, a sidebar for each tree, search, and a list of open tasks. ◐ 50% (3/6)
+- [Prose unwrap](./wrap.md "wrap"): Joins prose that is wrapped by hand into one line for each paragraph, so that viewers which show line breaks do not break sentences. ● 100% (2/2) · 1 deferred
+- [Site builder](./site.md "site"): Builds a static website from the model, with diagrams that link to pages, a sidebar for each tree, search, and a list of open tasks. ◐ 42% (3/7)
 <!-- idk-plans:children:end -->
 
 <details>
