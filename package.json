@@ -4,6 +4,14 @@
   "description": "Architecture docs and progress rollups kept in Markdown next to your code. Made with the help of AI.",
   "type": "module",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/method-run/idk-plans.git"
+  },
+  "homepage": "https://method-run.github.io/idk-plans/",
+  "bugs": {
+    "url": "https://github.com/method-run/idk-plans/issues"
+  },
   "author": "Pixelbandito",
   "bin": {
     "idk-plans": "bin/idk-plans.js"

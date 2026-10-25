@@ -21,6 +21,7 @@
     }
   },
   "site": {
-    "title": "idk-plans"
+    "title": "idk-plans",
+    "sourceUrl": "https://github.com/method-run/idk-plans/blob/main"
   }
 }
