@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import { mkdir, writeFile, rm, copyFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -59,6 +60,18 @@ function progressBar(r) {
 </div>`;
 }
 
+/**
+ * The project's own Mermaid browser build, or null if the project does not install `mermaid`.
+ * Looks in node_modules from cwd upward, as Node does.
+ */
+export function findLocalMermaid(cwd) {
+  for (let dir = path.resolve(cwd); ; dir = path.dirname(dir)) {
+    const file = path.join(dir, 'node_modules', 'mermaid', 'dist', 'mermaid.min.js');
+    if (existsSync(file)) return file;
+    if (path.dirname(dir) === dir) return null;
+  }
+}
+
 /** Build the whole site into outDir. Returns the list of written pages. */
 export async function buildSite(project, outDir, options = {}) {
   const { model, cwd, config } = project;
@@ -76,11 +89,21 @@ export async function buildSite(project, outDir, options = {}) {
     }
   }
 
+  // "local" copies the project's Mermaid, so diagrams work offline. It is a
+  // classic script, not a module, because browsers block modules on file:// pages.
+  const mermaidMode = siteConfig.mermaid ?? 'cdn';
+  if (!['cdn', 'local'].includes(mermaidMode)) throw new Error(`site.mermaid must be "cdn" or "local"`);
+  const localMermaid = mermaidMode === 'local' ? findLocalMermaid(cwd ?? '.') : null;
+  if (mermaidMode === 'local' && !localMermaid) {
+    throw new Error('site.mermaid is "local", but the mermaid package is not installed; run `npm install --save-dev mermaid`');
+  }
+
   await rm(outDir, { recursive: true, force: true });
   await mkdir(path.join(outDir, 'assets'), { recursive: true });
   for (const asset of ['site.css', 'site.js']) {
     await copyFile(path.join(ASSETS, asset), path.join(outDir, 'assets', asset));
   }
+  if (localMermaid) await copyFile(localMermaid, path.join(outDir, 'assets', 'mermaid.min.js'));
 
   // Search index, as a script so that the site also works from file://.
   const index = [...model.nodes.values()].map((n) => ({
@@ -231,7 +254,15 @@ ${main}
 <script type="module">
   const blocks = document.querySelectorAll('pre.mermaid');
   if (blocks.length) {
-    const { default: mermaid } = await import('${MERMAID_URL}');
+    const mermaid = ${localMermaid
+    ? `await new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = ${JSON.stringify(root('assets/mermaid.min.js'))};
+      s.onload = () => resolve(window.mermaid);
+      s.onerror = reject;
+      document.head.append(s);
+    })`
+    : `(await import('${MERMAID_URL}')).default`};
     const dark = matchMedia('(prefers-color-scheme: dark)').matches;
     mermaid.initialize({ startOnLoad: false, theme: dark ? 'dark' : 'neutral', securityLevel: 'strict' });
     await mermaid.run({ nodes: blocks });

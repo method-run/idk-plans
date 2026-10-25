@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, mkdir, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { parseMarkdown } from '../src/parse.js';
@@ -62,5 +62,33 @@ test('site: callouts render as collapsible sections, with their tasks', async ()
     await rm(out, { recursive: true });
   } finally {
     delete files['docs/callouts.md'];
+  }
+});
+
+test('site: uses the CDN by default, and the project\'s own Mermaid with site.mermaid "local"', async () => {
+  const cwd = await mkdtemp(path.join(tmpdir(), 'idk-mermaid-'));
+  const out = path.join(cwd, '_site');
+  try {
+    const config = resolveConfig({ root: { file: 'README.md', id: 'demo' } });
+    const parsed = Object.entries(files).map(([f, t]) => parseMarkdown(f, t));
+    const model = buildModel({ config, parsed, exists: () => true });
+
+    await buildSite({ model, config, cwd }, out);
+    assert.match(await readFile(path.join(out, 'index.html'), 'utf8'), /cdn\.jsdelivr\.net\/npm\/mermaid/);
+
+    await assert.rejects(buildSite({ model, config, cwd }, out, { mermaid: 'local' }), /not installed/);
+
+    await mkdir(path.join(cwd, 'node_modules/mermaid/dist'), { recursive: true });
+    await writeFile(path.join(cwd, 'node_modules/mermaid/dist/mermaid.min.js'), '/* mermaid */');
+    await buildSite({ model, config, cwd }, out);
+    assert.match(await readFile(path.join(out, 'index.html'), 'utf8'), /cdn\.jsdelivr/, 'installed is not enough');
+
+    await buildSite({ model, config, cwd }, out, { mermaid: 'local' });
+    const root = await readFile(path.join(out, 'index.html'), 'utf8');
+    assert.doesNotMatch(root, /cdn\.jsdelivr/);
+    assert.match(root, /"assets\/mermaid\.min\.js"/);
+    assert.equal(await readFile(path.join(out, 'assets/mermaid.min.js'), 'utf8'), '/* mermaid */');
+  } finally {
+    await rm(cwd, { recursive: true });
   }
 });

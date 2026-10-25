@@ -12,7 +12,7 @@
     "site": {
       "type": "object",
       "additionalProperties": false,
-      "properties": { "title": { "type": "string" }, "sourceUrl": { "type": "string" } }
+      "properties": { "title": { "type": "string" }, "sourceUrl": { "type": "string" }, "mermaid": { "enum": ["cdn", "local"] } }
     },
     "root": {
       "type": "object",

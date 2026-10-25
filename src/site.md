@@ -11,7 +11,7 @@ tags: [system/engine/site, viewer/site]
 # Site builder
 
 <!-- idk-plans:progress:start (generated) -->
-◐ 42% (3/7)
+◐ 57% (4/7)
 <!-- idk-plans:progress:end -->
 
 The site shows the same pages as the Markdown files, with more ways to move around. It needs no server, so you can open it from a folder or put it on any static host.
@@ -27,7 +27,7 @@ It renders Markdown with `marked`. Links to nodes go to their pages. Links to ot
 
 [site-assets/](../site-assets/) holds the stylesheet and the browser script. The script makes boxes in Mermaid diagrams into links, and runs the search and the sidebar tabs.
 
-Mermaid loads from a CDN in the browser, with `securityLevel: 'strict'`.
+Mermaid runs in the browser, with `securityLevel: 'strict'`. By default, pages load Mermaid from a CDN. With `"site": { "mermaid": "local" }` in the configuration, `buildSite` copies the project's own single-file build (`mermaid.min.js`, about 2.5 MB) into the site, so diagrams work offline. idk-plans does not depend on Mermaid, so the project must install it.
 
 </details>
 
@@ -36,5 +36,5 @@ Mermaid loads from a CDN in the browser, with `securityLevel: 'strict'`.
 - [x] Make diagram boxes into links
 - [x] Show a sidebar for each tree, and search
 - [x] List open tasks, and a glossary
-- [ ] Include Mermaid in the site, so diagrams work offline
+- [x] Use the project's own Mermaid, so diagrams work offline
 - [ ] Check the layout on a phone

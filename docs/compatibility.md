@@ -62,7 +62,7 @@ We have not finished checking GitHub and Codeberg, and we have not checked GitLa
 
 ### The site
 
-- **Diagrams need a network connection.** The site loads Mermaid from a CDN. See the open task on the [Site builder](../src/site.md "site") page.
+- **Diagrams need a network connection by default.** The site loads Mermaid from a CDN. For offline diagrams, install `mermaid` as a dev dependency, and set `"site": { "mermaid": "local" }` ([Site builder](../src/site.md "site")).
 
 ## Tasks
 

@@ -1,7 +1,7 @@
 # idk-plans
 
 <!-- idk-plans:progress:start (generated) -->
-◐ 72% (27/37) · 5 deferred
+◐ 75% (28/37) · 5 deferred
 <!-- idk-plans:progress:end -->
 
 Keep your project's architecture and progress in Markdown files next to the code. idk-plans checks the files, keeps their generated parts current, and builds a website from them. Progress rolls up from tasks to the top of the project.
@@ -38,16 +38,16 @@ Zoom in: [Specification](./SPEC.md "spec") · [Command line](./bin/README.md "cl
 <!-- idk-plans:children:start (generated) -->
 - [Specification](./SPEC.md "spec"): The format of idk-plans files. It defines nodes, trees, tasks, rollups, links, generated blocks, and the checks. · no tasks · 3 deferred
 - [Command line](./bin/README.md "cli"): Runs the commands check, fix, tree, model, and site. It is the only part that reads arguments and writes to the terminal. ◐ 66% (2/3)
-- [Engine](./src/README.md "engine"): Reads the Markdown files, builds one model of all nodes, trees, and tasks, and checks and fixes the files from that model. ◐ 84% (21/25) · 1 deferred
+- [Engine](./src/README.md "engine"): Reads the Markdown files, builds one model of all nodes, trees, and tasks, and checks and fixes the files from that model. ◐ 88% (22/25) · 1 deferred
 - [Tested viewers](./docs/compatibility.md "compatibility"): The viewers that we test the Markdown files and the site with, and what each one shows differently. ◐ 66% (4/6) · 1 deferred
 <!-- idk-plans:children:end -->
 
 ## Other views
 
 <!-- idk-plans:trees:start (generated) -->
-**Viewers** ◐ 68% (15/22) · 2 deferred
+**Viewers** ◐ 72% (16/22) · 2 deferred
 
-- [Site builder](./src/site.md "site") ◐ 42% (3/7)
+- [Site builder](./src/site.md "site") ◐ 57% (4/7)
   - [Publish the site](./docs/publish-site.md "publish-site") ○ 0% (0/2)
 - Markdown ◐ 83% (10/12) · 2 deferred
   - [Tested viewers](./docs/compatibility.md "compatibility") ◐ 66% (4/6) · 1 deferred
@@ -69,6 +69,16 @@ npx idk-plans tree     # show progress in the terminal
 npx idk-plans tree --tree concern
 npx idk-plans model    # the whole model as JSON
 npx idk-plans site     # build the static site into _site/
+```
+
+To use it from code:
+
+```js
+import { loadProject, check, fix, buildSite } from '@method-run/idk-plans';
+
+const project = await loadProject(process.cwd());
+const problems = check(project);
+await buildSite(project, '_site');
 ```
 
 The configuration is `idk-plans.config.json` in the project root. See section 9 of the [Specification](./SPEC.md "spec").

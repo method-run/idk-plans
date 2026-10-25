@@ -490,6 +490,7 @@ The configuration is `idk-plans.config.json` in the project root.
 | `tags` | `true` | Write tree tags into frontmatter (7.5). |
 | `proseWrap` | `"never"` | `"never"`: one line per paragraph; `check` reports wrapped text and `fix` joins it. `"preserve"`: keep line breaks as they are (6.3). |
 | `site.title` | the root title | The site name. |
+| `site.mermaid` | `"cdn"` | `"local"`: copy the project's `mermaid` package into the site, so diagrams work offline (13). The project must install `mermaid`. |
 | `site.sourceUrl` | none | Base URL for links to repository files, for example `https://<host>/<owner>/<repo>/src/branch/main`. `--source-url` overrides it. |
 | `trees.<name>.groups` | `[]` | Paths of virtual nodes that this tree may use without a page (4.4). A one-id group sits at the top level of the tree. |
 | `rules` | see section 10 | Severity (`error`, `warn`, `info`, `off`) and options for each rule. |
@@ -584,8 +585,27 @@ Recommended setup:
 - `children` and `trees` blocks are drawn by the site in the same place. `progress` and `zoom` blocks are not shown, because the page header and the diagram links replace them.
 - A Tasks page lists every open task by state, and a Glossary page lists every title and alias.
 - Links to files that are not nodes go to `site.sourceUrl`, if it is set.
+- Pages load Mermaid from a CDN. With `"site": { "mermaid": "local" }`, the site copies the project's own `mermaid` package instead, so diagrams work offline.
 
-## 14. Not in this version
+## 14. Versions
+
+The specification and the package have the same version number.
+
+**Before 1.0**, a minor version can change the format. Read the specification again before you update.
+
+**From 1.0**, versions follow semantic versioning:
+
+| Change | Version |
+|---|---|
+| A valid project becomes invalid, or a valid file changes its meaning. For example: a field, mark, or path rule changes or goes away, or a generated block marker or name changes. | major |
+| A field is removed or renamed in the model JSON (section 12). | major |
+| A new rule reports `error` by default. | major |
+| A new optional field, mark, rule with a default of `warn` or `info`, model field, command, or site feature. | minor |
+| A bug fix. If the fix changes what `fix` writes, the release notes say so. | patch |
+
+The model JSON has a `version` field with the major and minor version of the specification. A tool that reads the model should ignore fields that it does not know.
+
+## 15. Not in this version
 
 - [>] Weights for tasks
 - [>] Ids for single tasks, and links to them

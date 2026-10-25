@@ -10,6 +10,7 @@ import { ruleSetting } from './config.js';
 import { unwrapProse } from './wrap.js';
 
 export { buildModel, toJSON, parseMarkdown, fixDocument, rollupText, unwrapProse };
+export { buildSite } from './site.js';
 
 /** Read, parse, and model a project. */
 export async function loadProject(cwd) {
