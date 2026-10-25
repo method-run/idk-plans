@@ -1,0 +1,62 @@
+/*
+ * idk-plans task marks in Obsidian.
+ * Core Obsidian draws every mark except [ ] as a checked box. This snippet
+ * shows [/] doing, [>] deferred, and [-] or [~] dropped differently.
+ *
+ * Install: copy this file to <vault>/.obsidian/snippets/, then turn it on in
+ * Settings → Appearance → CSS snippets.
+ */
+
+/* Shared: these marks are not "done", so remove the check mark. */
+input.task-list-item-checkbox:is([data-task="/"], [data-task=">"], [data-task="-"], [data-task="~"]):checked::after {
+  -webkit-mask-image: none;
+  mask-image: none;
+  background: none;
+}
+
+/* [/] doing: half-filled box. */
+input.task-list-item-checkbox[data-task="/"]:checked {
+  background: linear-gradient(90deg, var(--interactive-accent) 50%, transparent 50%);
+  border-color: var(--interactive-accent);
+}
+
+/* [>] deferred: empty box with a faint arrow; text is faint. */
+input.task-list-item-checkbox[data-task=">"]:checked {
+  background: transparent;
+  border-color: var(--text-faint);
+}
+input.task-list-item-checkbox[data-task=">"]:checked::after {
+  content: "›";
+  color: var(--text-faint);
+  font-size: 0.9em;
+  line-height: 1;
+  text-align: center;
+}
+li.task-list-item[data-task=">"],
+.HyperMD-task-line[data-task=">"] {
+  color: var(--text-faint);
+}
+
+/* [-] and [~] dropped: empty box with a dash; text is faint and struck through. */
+input.task-list-item-checkbox:is([data-task="-"], [data-task="~"]):checked {
+  background: transparent;
+  border-color: var(--text-faint);
+}
+input.task-list-item-checkbox:is([data-task="-"], [data-task="~"]):checked::after {
+  content: "–";
+  color: var(--text-faint);
+  font-size: 0.9em;
+  line-height: 1;
+  text-align: center;
+}
+li.task-list-item:is([data-task="-"], [data-task="~"]) > p,
+li.task-list-item:is([data-task="-"], [data-task="~"]):not(:has(> p)),
+.HyperMD-task-line:is([data-task="-"], [data-task="~"]) {
+  color: var(--text-faint);
+  text-decoration: line-through;
+}
+
+/* Undo the struck-through text on subtasks of a dropped task, which have their own mark. */
+li.task-list-item:is([data-task="-"], [data-task="~"]) li.task-list-item:not([data-task="-"], [data-task="~"]) {
+  text-decoration: none;
+}

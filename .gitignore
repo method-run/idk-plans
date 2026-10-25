@@ -1,3 +1,7 @@
 node_modules/
-.obsidian/
+# Obsidian: share the vault settings that the docs need, not personal ones.
+.obsidian/*
+!.obsidian/app.json
+!.obsidian/appearance.json
+!.obsidian/snippets/
 _site/

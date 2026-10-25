@@ -23,7 +23,7 @@ Obsidian shows two things wrongly: some task marks, and `<details>`. This page g
 ## Set up the vault
 
 1. Open the project folder as a vault (*Open folder as vault*). Do not use *Create new vault*, because it makes a new folder.
-2. Add `.obsidian/` to `.gitignore`.
+2. Add `.obsidian/` to `.gitignore`. To share the settings below with your team, ignore everything in it except `app.json`, `appearance.json`, and `snippets/`, as this repository does.
 3. Exclude `node_modules`, `dist`, and other build folders in *Files and links → Excluded files*.
 
 ## Task marks

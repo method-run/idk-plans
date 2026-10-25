@@ -142,3 +142,9 @@ test('cli: exit codes', async () => {
     await rm(dir, { recursive: true });
   }
 });
+
+test('the vault copy of the Obsidian snippet matches the shipped one', async () => {
+  const shipped = await readFile(path.join(ROOT, 'obsidian/idk-plans-tasks.css'), 'utf8');
+  const vault = await readFile(path.join(ROOT, '.obsidian/snippets/idk-plans-tasks.css'), 'utf8');
+  assert.equal(vault, shipped, 'copy obsidian/idk-plans-tasks.css to .obsidian/snippets/');
+});
