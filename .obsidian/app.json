@@ -3,5 +3,7 @@
     "node_modules/",
     "_site/",
     "test/fixtures/"
-  ]
+  ],
+  "useMarkdownLinks": true,
+  "newLinkFormat": "relative"
 }
