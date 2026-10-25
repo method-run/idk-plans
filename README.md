@@ -51,7 +51,7 @@ Zoom in: [Specification](./SPEC.md "spec") · [Command line](./bin/README.md "cl
   - [Publish the site](./docs/publish-site.md "publish-site") ○ 0% (0/2)
 - Markdown ◐ 83% (10/12) · 1 deferred
   - [Tested viewers](./docs/compatibility.md "compatibility") ◐ 66% (4/6)
-    - [Obsidian setup](./obsidian/README.md "obsidian") ● 100% (3/3)
+    - [Working in Obsidian](./obsidian/README.md "obsidian") ● 100% (3/3)
   - [Fix](./src/fix.md "fix") ● 100% (4/4)
   - [Prose unwrap](./src/wrap.md "wrap") ● 100% (2/2) · 1 deferred
 - Terminal ◐ 66% (2/3)

@@ -274,8 +274,7 @@ Each page has two levels:
 2. **The detail level.** Mechanics, code links, edge cases, and reasons for decisions. Put these in collapsible sections, so that they are closed by default.
 
 ```markdown
-Your node keeps a list of the peers that you trust.
-Only those peers can use your services.
+Your node keeps a list of the peers that you trust. Only those peers can use your services.
 
 <details>
 <summary>How it works</summary>
@@ -294,7 +293,7 @@ The list is in the `peers` table. Each row has the peer's Ed25519 public key …
 
 Leave an empty line after `<summary>…</summary>` and before `</details>`, so that Markdown inside the element is shown correctly.
 
-A collapsible section has two allowed forms. Use the form that suits the viewers your readers use ([Tested viewers](./docs/compatibility.md "compatibility")):
+A collapsible section has two allowed forms, because viewers do not show `<details>` in the same way. Some show the Markdown inside it as raw text, or show part of it when it is closed. [Tested viewers](./docs/compatibility.md "compatibility") lists the known problems and workarounds. Use the form that suits the viewers your readers use:
 
 | Form | Example | Strong in | Weak in |
 |---|---|---|---|
