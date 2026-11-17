@@ -491,6 +491,7 @@ The configuration is `idk-plans.config.json` in the project root.
 | `proseWrap` | `"never"` | `"never"`: one line per paragraph; `check` reports wrapped text and `fix` joins it. `"preserve"`: keep line breaks as they are (6.3). |
 | `site.title` | the root title | The site name. |
 | `site.mermaid` | `"cdn"` | `"local"`: copy the project's `mermaid` package into the site, so diagrams work offline (13). The project must install `mermaid`. |
+| `site.theme` | none | The path of an [idk-themetron](https://www.npmjs.com/package/@method-run/idk-themetron) theme, from the project root: the `css` format, for token contract 0.2 (13). `--theme` overrides it. |
 | `site.sourceUrl` | none | Base URL for links to repository files, for example `https://<host>/<owner>/<repo>/src/branch/main`. `--source-url` overrides it. |
 | `trees.<name>.groups` | `[]` | Paths of virtual nodes that this tree may use without a page (4.4). A one-id group sits at the top level of the tree. |
 | `rules` | see section 10 | Severity (`warn`, `info`, `off`) and options for each warning rule. Error rules can not be changed. |
@@ -596,6 +597,7 @@ Recommended setup:
 - A Tasks page lists every open task by state, and a Glossary page lists every title and alias.
 - Links to files that are not nodes go to `site.sourceUrl`, if it is set.
 - Pages load Mermaid from a CDN. With `"site": { "mermaid": "local" }`, the site copies the project's own `mermaid` package instead, so diagrams work offline.
+- With `site.theme`, the site loads a themetron theme (the `css` format, for [token contract 0.2](https://method-run.github.io/idk-themetron/schema/0.2.0/tokens.manifest.json)) before its own stylesheet, and takes its colors, fonts, edges, and shadows from it. Task states and callouts take the colors of the theme's `success`, `warning`, `danger`, `info`, and `important` themes, when the theme has them. Without a theme, the site keeps its own look.
 
 ## 14. Versions
 

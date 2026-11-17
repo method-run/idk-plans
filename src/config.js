@@ -59,6 +59,13 @@ export async function loadConfig(cwd) {
   return resolveConfig(raw);
 }
 
+function siteConfig(site) {
+  if (site.theme != null && (typeof site.theme !== 'string' || !site.theme.trim())) {
+    throw new Error(`${CONFIG_FILE}: "site.theme" must be the path of a themetron CSS theme`);
+  }
+  return site;
+}
+
 export function resolveConfig(raw = {}) {
   const trees = raw.trees && Object.keys(raw.trees).length
     ? raw.trees
@@ -88,7 +95,7 @@ export function resolveConfig(raw = {}) {
     primaryTree: primaries[0],
     tags: raw.tags ?? true,
     proseWrap,
-    site: raw.site ?? {},
+    site: siteConfig(raw.site ?? {}),
     rules,
   };
 }

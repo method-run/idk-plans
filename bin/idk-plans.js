@@ -30,6 +30,7 @@ Options:
   --quiet            Show only the problems that make the command fail (check command)
   --out <dir>        Output folder (site command; default: _site)
   --source-url <url> Base URL for links to files in the repository (site and serve commands)
+  --theme <file>     A themetron CSS theme, in place of site.theme (site and serve commands)
   --port <n>         Port (serve command; default: 4747)
   --host <host>      Host (serve command; default: 127.0.0.1)
   --help             Show this message
@@ -48,6 +49,7 @@ const { values, positionals } = parseArgs({
     quiet: { type: 'boolean' },
     out: { type: 'string' },
     'source-url': { type: 'string' },
+    theme: { type: 'string' },
     port: { type: 'string' },
     host: { type: 'string' },
     help: { type: 'boolean' },
@@ -62,7 +64,10 @@ if (values.help || !command) {
 
 const cwd = values.cwd ?? process.cwd();
 // Options of site and serve that override "site" in the configuration.
-const siteOptions = values['source-url'] ? { sourceUrl: values['source-url'] } : {};
+const siteOptions = {
+  ...(values['source-url'] ? { sourceUrl: values['source-url'] } : {}),
+  ...(values.theme ? { theme: values.theme } : {}),
+};
 
 const color = process.stdout.isTTY && !process.env.NO_COLOR;
 const paint = (format, text) => (color ? styleText(format, text) : text);

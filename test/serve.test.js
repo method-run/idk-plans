@@ -84,3 +84,24 @@ test('serve: starts without a site when there is an error, and builds it when th
   }
 });
 
+test('serve: rebuilds when the theme changes, also from outside the project', async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'idk-serve-'));
+  const themes = await mkdtemp(path.join(tmpdir(), 'idk-theme-'));
+  const theme = path.join(themes, 'theme.css');
+  await writeFile(path.join(dir, 'idk-plans.config.json'), CONFIG);
+  await writeFile(path.join(dir, 'README.md'), README('Themed.'));
+  await writeFile(theme, ':root { --tm-bg-canvas: white; }');
+  const server = await serveSite(dir, { port: 0, siteOptions: { theme } });
+  try {
+    assert.match(await (await fetch(`${server.url}assets/theme.css`)).text(), /white/);
+    const reloaded = nextEvent(await fetch(`${server.url}__idk-plans/events`), 'reload');
+    await writeFile(theme, ':root { --tm-bg-canvas: black; }');
+    await reloaded;
+    assert.match(await (await fetch(`${server.url}assets/theme.css`)).text(), /black/);
+  } finally {
+    await server.close();
+    await rm(dir, { recursive: true });
+    await rm(themes, { recursive: true });
+  }
+});
+

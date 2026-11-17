@@ -78,6 +78,21 @@ export async function serveSite(cwd, options = {}) {
     timer = setTimeout(rebuild, 100);
   };
 
+  // The theme file (site.theme, or --theme) can be outside the project, so it has its own
+  // watcher, on its folder: editors often save a file by replacing it.
+  let theme = { file: null, watcher: null };
+  const watchTheme = (file) => {
+    if (file === theme.file) return;
+    theme.watcher?.close();
+    theme = { file, watcher: null };
+    if (!file) return;
+    try {
+      theme.watcher = watch(path.dirname(file), (_, name) => {
+        if (name && path.join(path.dirname(file), name.toString()) === file) changed();
+      });
+    } catch { /* a missing folder: the build reports the missing file */ }
+  };
+
   const send = (event, data) => {
     for (const res of clients) res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
   };
@@ -89,6 +104,8 @@ export async function serveSite(cwd, options = {}) {
     let next = null;
     try {
       const project = await loadProject(cwd);
+      const themeFile = siteOptions.theme ?? project.config.site.theme;
+      watchTheme(themeFile ? path.resolve(cwd, themeFile) : null);
       const { errors, warnings } = checkBuild(project);
       if (errors.length) return { errors, warnings };
       next = await mkdtemp(path.join(tmpdir(), 'idk-plans-serve-'));
@@ -188,6 +205,7 @@ export async function serveSite(cwd, options = {}) {
     async close() {
       clearTimeout(timer);
       watcher.close();
+      theme.watcher?.close();
       for (const res of clients) res.end();
       await new Promise((resolve) => { server.close(resolve); server.closeAllConnections(); });
       await running;

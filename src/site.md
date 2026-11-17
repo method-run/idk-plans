@@ -3,7 +3,7 @@ id: site
 title: Site builder
 summary: Builds a static website from the model, with diagrams that link to pages, a sidebar for each tree, search, and a list of open tasks.
 parent: engine
-code: [src/site.js, src/serve.js, src/problems.js, site-assets/]
+code: [src/site.js, src/serve.js, src/problems.js, src/theme.js, site-assets/]
 order: 7
 aliases: [Site builder]
 tags: [system/engine/site, viewer/site]
@@ -11,12 +11,16 @@ tags: [system/engine/site, viewer/site]
 # Site builder
 
 <!-- idk-plans:progress:start (generated) -->
-◐ 77% (7/9)
+◐ 76% (10/13)
 <!-- idk-plans:progress:end -->
 
 The site shows the same pages as the Markdown files, with more ways to move around. It needs no server, so you can open it from a folder or put it on any static host.
 
 While you work, `idk-plans serve` shows the site at `http://127.0.0.1:4747/`. When you save a Markdown file or the configuration, it builds the site again, and open pages reload. So you can read the plans next to the code, and change both at the same time.
+
+The sidebar, the top bar, and the settings menu are always dark. On a wide screen, a reader can collapse the sidebar with the chevron at its bottom, and drag its right edge to make it wider or narrower. The site remembers both, and the color mode, in the reader's browser.
+
+To skin the site with a theme from idk-themetron, see [Themes](../docs/themes.md "themes").
 
 The site is static files, so any static host can serve it. See [Publish the site](../docs/publish-site.md "publish-site").
 

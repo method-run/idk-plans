@@ -81,6 +81,104 @@
     if (!e.target.closest('.search')) results.hidden = true;
   });
 
+  // Color mode and contrast. Auto follows the system. The choice goes on <html> as
+  // data-tm-mode or data-tm-contrast, which the theme and site.css read. Diagrams are drawn
+  // once, in the page's mode, so a change of mode reloads a page that has diagrams.
+  for (const group of document.querySelectorAll('[data-look]')) {
+    const key = group.dataset.look;
+    const show = () => group.querySelectorAll('button').forEach((b) => {
+      b.setAttribute('aria-pressed', String(b.dataset.value === (document.documentElement.dataset[key] || '')));
+    });
+    show();
+    group.addEventListener('click', (e) => {
+      const value = e.target.closest('button')?.dataset.value;
+      if (value == null) return;
+      if (value) document.documentElement.dataset[key] = value;
+      else delete document.documentElement.dataset[key];
+      show();
+      try {
+        const look = JSON.parse(localStorage.getItem('idk-look') || '{}');
+        look[key] = value;
+        localStorage.setItem('idk-look', JSON.stringify(look));
+      } catch { /* storage may be blocked */ }
+      if (key === 'tmMode' && document.querySelector('pre.mermaid')) window.location.reload();
+    });
+  }
+
+  // The sidebar, on wide screens: the chevron button collapses it to a rail, and its right edge
+  // drags (or takes the arrow keys) to set its width. Double-click the edge for the default
+  // width. Both stay in the reader's browser.
+  const html = document.documentElement;
+  const remember = (key, value) => {
+    try {
+      const look = JSON.parse(localStorage.getItem('idk-look') || '{}');
+      look[key] = value;
+      localStorage.setItem('idk-look', JSON.stringify(look));
+    } catch { /* storage may be blocked */ }
+  };
+  const collapse = document.querySelector('.collapse');
+  const showCollapsed = () => {
+    const collapsed = html.dataset.sidebar === 'collapsed';
+    const label = collapsed ? 'Expand the sidebar' : 'Collapse the sidebar';
+    collapse?.setAttribute('aria-expanded', String(!collapsed));
+    collapse?.setAttribute('aria-label', label);
+    collapse?.setAttribute('title', label);
+  };
+  showCollapsed();
+  collapse?.addEventListener('click', () => {
+    if (html.dataset.sidebar === 'collapsed') delete html.dataset.sidebar;
+    else html.dataset.sidebar = 'collapsed';
+    remember('sidebar', html.dataset.sidebar || '');
+    showCollapsed();
+  });
+
+  const edge = document.querySelector('.resize');
+  const sidebar = document.querySelector('.sidebar');
+  const MIN = 200;
+  const MAX = 560;
+  const width = () => Math.round(sidebar.getBoundingClientRect().width);
+  const setWidth = (w) => {
+    const clamped = Math.round(Math.min(MAX, Math.max(MIN, w)));
+    html.style.setProperty('--sidebar', `${clamped}px`);
+    edge.setAttribute('aria-valuenow', String(clamped));
+  };
+  if (edge && sidebar) {
+    edge.setAttribute('aria-valuemin', String(MIN));
+    edge.setAttribute('aria-valuemax', String(MAX));
+    edge.setAttribute('aria-valuenow', String(width()));
+    edge.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      edge.setPointerCapture(e.pointerId);
+      const start = e.clientX;
+      const from = width();
+      html.classList.add('resizing');
+      const move = (ev) => setWidth(from + ev.clientX - start);
+      const end = () => {
+        edge.removeEventListener('pointermove', move);
+        edge.removeEventListener('pointerup', end);
+        edge.removeEventListener('pointercancel', end);
+        html.classList.remove('resizing');
+        remember('sidebarWidth', width());
+      };
+      edge.addEventListener('pointermove', move);
+      edge.addEventListener('pointerup', end);
+      edge.addEventListener('pointercancel', end);
+    });
+    edge.addEventListener('keydown', (e) => {
+      const step = e.shiftKey ? 64 : 16;
+      const to = { ArrowLeft: width() - step, ArrowRight: width() + step, Home: MIN, End: MAX }[e.key];
+      if (to == null) return;
+      e.preventDefault();
+      setWidth(to);
+      remember('sidebarWidth', width());
+    });
+    edge.addEventListener('dblclick', () => {
+      html.style.removeProperty('--sidebar');
+      edge.setAttribute('aria-valuenow', String(width()));
+      remember('sidebarWidth', 0);
+    });
+  }
+
   // Make diagram boxes that name a page into links (called after Mermaid renders).
   window.idkLinkDiagrams = () => {
     for (const pre of document.querySelectorAll('pre.mermaid')) {
