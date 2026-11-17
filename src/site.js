@@ -8,7 +8,7 @@ import { rollupText } from './fix.js';
 import { titleFromId } from './model.js';
 import { readTheme } from './theme.js';
 
-const ASSETS = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'site-assets');
+export const ASSETS = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'site-assets');
 const MERMAID_URL = 'https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs';
 const TASK_SENTINEL = /([a-z]+)/g;
 

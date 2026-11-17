@@ -35,6 +35,8 @@ It renders Markdown with `marked`. Links to nodes go to their pages. Links to ot
 
 [src/serve.js](serve.js) `serveSite` builds the site into a temporary folder, and serves it with `node:http`. It watches the project with `fs.watch`, and builds again 100 ms after a Markdown file or the configuration changes. Each build goes into a new folder, so a request never gets a half-built site. Each HTML page gets a short script that listens for server-sent events, and reloads the page after a build. When `check` finds an error, `serve` does not build: the last good site stays up, with the errors across the top of the page. Warnings show in a closed box at the bottom. Both use the same text as `check` ([src/problems.js](problems.js)). `serve` does not write to the project, and does not run `fix`.
 
+`serve` also builds again when the site's own stylesheet or script changes, in [site-assets/](../site-assets/). A change to the code of idk-plans needs a new process, because Node.js loads the code once. `npm run docs:serve` in this repository runs `serve` with `node --watch`, which starts it again when its code changes. Each process sends its id to the open pages, and a page that connects to a new process reloads. Without `--watch`, `serve` says when its code changed: in the terminal, and on the page.
+
 Mermaid runs in the browser, with `securityLevel: 'strict'`. By default, pages load Mermaid from a CDN. With `"site": { "mermaid": "local" }` in the configuration, `buildSite` copies the project's own single-file build (`mermaid.min.js`, about 2.5 MB) into the site, so diagrams work offline. idk-plans does not depend on Mermaid, so the project must install it.
 
 </details>

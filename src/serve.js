@@ -3,12 +3,17 @@ import { mkdtemp, readFile, rm, stat } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { loadProject, checkBuild } from './index.js';
-import { buildSite } from './site.js';
+import { buildSite, ASSETS } from './site.js';
 import { CONFIG_FILE } from './config.js';
 import { LABELS, problemText, countText } from './problems.js';
 
 const EVENTS = '/__idk-plans/events';
+// idk-plans' own code. A running process can not load new code, so a change to it needs a
+// restart: `node --watch` does that, and tells the process so with this variable.
+const OWN_CODE = path.dirname(fileURLToPath(import.meta.url));
+const RESTARTS_ITSELF = process.env.WATCH_REPORT_DEPENDENCIES === '1';
 const TYPES = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
@@ -39,6 +44,11 @@ const client = (problems) => `<script>
   show(${JSON.stringify(problems).replace(/</g, '\\u003c')});
   const events = new EventSource(${JSON.stringify(EVENTS)});
   events.addEventListener('reload', () => location.reload());
+  let server = null;
+  events.addEventListener('hello', (e) => {
+    if (server && server !== e.data) location.reload();
+    server = e.data;
+  });
   events.addEventListener('problems', (e) => show(JSON.parse(e.data)));
 })();
 </script>`;
@@ -66,6 +76,13 @@ function isWatched(file) {
  */
 export async function serveSite(cwd, options = {}) {
   const { port = 4747, host = '127.0.0.1', siteOptions = {}, log = () => {} } = options;
+  // The folders of idk-plans itself, which tests can replace.
+  const own = { assets: ASSETS, code: OWN_CODE, restartsItself: RESTARTS_ITSELF, ...options.own };
+  // Each server process has its own id. A page that reconnects to a new process (after a
+  // restart) reloads, so it gets the new process's pages.
+  const serverId = `${process.pid}-${Date.now()}`;
+  // Set when idk-plans' own code changed and this process can not use it.
+  let stale = null;
   const clients = new Set();
   let outDir = null;
   // Errors and warnings of the last build, shown on every page.
@@ -120,8 +137,13 @@ export async function serveSite(cwd, options = {}) {
     }
   };
 
+  const staleNote = () => ({
+    severity: 'warn',
+    text: `warning  idk-plans changed (${stale}); restart serve to use the new code, or run it with node --watch`,
+    count: 'idk-plans changed: restart serve',
+  });
   const report = ({ pages, errors, warnings }) => {
-    shown = forPage([...errors, ...warnings]);
+    shown = [...(stale ? [staleNote()] : []), ...forPage([...errors, ...warnings])];
     if (errors.length) {
       log(`not built: ${countText(errors)}`);
       for (const p of errors) log(`  ${LABELS.error}  ${problemText(p)}`);
@@ -155,7 +177,7 @@ export async function serveSite(cwd, options = {}) {
     const url = new URL(req.url, 'http://localhost');
     if (url.pathname === EVENTS) {
       res.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache', connection: 'keep-alive' });
-      res.write(': connected\n\n');
+      res.write(`event: hello\ndata: ${serverId}\n\n`);
       clients.add(res);
       req.on('close', () => clients.delete(res));
       return;
@@ -197,6 +219,16 @@ export async function serveSite(cwd, options = {}) {
   const watcher = watch(cwd, { recursive: true }, (_, filename) => {
     if (filename && isWatched(filename.toString())) changed();
   });
+  // The site's stylesheet and script are copied at each build, so a change to them only needs
+  // a build. A change to idk-plans' code needs a restart: say so, unless node --watch does it.
+  const assetWatcher = watch(own.assets, { recursive: true }, changed);
+  const codeWatcher = own.restartsItself ? null : watch(own.code, { recursive: true }, (_, filename) => {
+    if (!filename || !filename.toString().endsWith('.js')) return;
+    stale = path.relative(path.dirname(own.code), path.join(own.code, filename.toString()));
+    log(`idk-plans changed (${stale}); restart serve to use the new code, or run it with node --watch`);
+    shown = [staleNote(), ...shown.filter((p) => !p.text.includes('idk-plans changed'))];
+    send('problems', shown);
+  });
 
   const { port: actualPort } = server.address();
   return {
@@ -206,6 +238,8 @@ export async function serveSite(cwd, options = {}) {
       clearTimeout(timer);
       watcher.close();
       theme.watcher?.close();
+      assetWatcher.close();
+      codeWatcher?.close();
       for (const res of clients) res.end();
       await new Promise((resolve) => { server.close(resolve); server.closeAllConnections(); });
       await running;

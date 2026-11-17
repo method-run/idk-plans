@@ -105,3 +105,34 @@ test('serve: rebuilds when the theme changes, also from outside the project', as
   }
 });
 
+test('serve: rebuilds when the site assets change, and asks for a restart when its code changes', async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'idk-serve-'));
+  const assets = await mkdtemp(path.join(tmpdir(), 'idk-assets-'));
+  const code = await mkdtemp(path.join(tmpdir(), 'idk-code-'));
+  await writeFile(path.join(dir, 'idk-plans.config.json'), CONFIG);
+  await writeFile(path.join(dir, 'README.md'), README('Assets.'));
+  const lines = [];
+  const server = await serveSite(dir, { port: 0, log: (line) => lines.push(line), own: { assets, code, restartsItself: false } });
+  try {
+    // Each connection learns the server's id, so a page can tell when the server restarted.
+    const hello = await fetch(`${server.url}__idk-plans/events`);
+    const reader = hello.body.getReader();
+    const first = new TextDecoder().decode((await reader.read()).value);
+    reader.cancel();
+    assert.match(first, /^event: hello\ndata: \d+-\d+\n\n/);
+
+    const reloaded = nextEvent(await fetch(`${server.url}__idk-plans/events`), 'reload');
+    await writeFile(path.join(assets, 'site.css'), 'body {}');
+    await reloaded;
+
+    const warned = nextEvent(await fetch(`${server.url}__idk-plans/events`), 'problems');
+    await writeFile(path.join(code, 'site.js'), '// new code');
+    const [note] = await warned;
+    assert.equal(note.severity, 'warn');
+    assert.match(note.text, /idk-plans changed \(.*site\.js\); restart serve/);
+    assert.ok(lines.some((l) => /restart serve/.test(l)));
+  } finally {
+    await server.close();
+    for (const d of [dir, assets, code]) await rm(d, { recursive: true });
+  }
+});
