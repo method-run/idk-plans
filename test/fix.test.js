@@ -126,13 +126,28 @@ test('fix settles in one run: a project that needs every kind of fix', () => {
 test('cli: exit codes', async () => {
   const dir = await mkdtemp(path.join(tmpdir(), 'idk-cli-'));
   const cli = (...args) => run(process.execPath, [BIN, ...args, '--cwd', dir]).then(() => 0, (e) => e.code);
+  const out = (...args) => run(process.execPath, [BIN, ...args, '--cwd', dir]).then((r) => r.stdout, (e) => e.stdout);
   try {
+    // An error: no root page. Every command that builds stops, with the same text as check.
     await writeFile(path.join(dir, 'README.md'), '# Root\n');
-    assert.equal(await cli('check'), 0);
+    assert.equal(await cli('check'), 1);
+    const error = (await out('check')).split('\n').find((l) => l.includes('[no-root]'));
+    assert.match(error, /^✖ error {3}\(project\) {2}there is no root page/);
+    for (const command of ['site', 'tree']) {
+      assert.equal(await cli(command, '--out', path.join(dir, '_site')), 1, command);
+      assert.ok((await out(command, '--out', path.join(dir, '_site'))).includes(`${error}\n`), command);
+    }
 
+    // A warning: check passes, unless --strict.
+    await writeFile(path.join(dir, 'README.md'), '---\nid: root\ntitle: Root\nsummary: The root.\n---\n# Root\n');
     await mkdir(path.join(dir, 'a'));
     await writeFile(path.join(dir, 'a/README.md'), '---\nid: a\ntitle: A\nsummary: A.\nparent: nope\n---\n# A\n');
-    assert.equal(await cli('check'), 1);
+    assert.equal(await cli('check'), 0);
+    assert.equal(await cli('check', '--strict'), 1);
+    assert.match(await out('check', '--quiet'), /^\n0 errors, 0 warnings, 0 info/);
+    assert.match(await out('check', '--strict', '--quiet'), /^⚠ warning a\/README\.md:1 {2}parent "nope"/);
+    assert.equal(await cli('site', '--out', path.join(dir, '_site')), 0);
+    assert.match(await out('site', '--out', path.join(dir, '_site')), /wrote \d+ pages[^]*⚠ warning a\/README\.md:1 {2}parent "nope"/);
 
     assert.equal(await cli('nope'), 1);
 

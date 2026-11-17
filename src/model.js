@@ -53,7 +53,7 @@ function isExternal(target) {
 export function buildModel({ config, parsed, exists }) {
   const problems = [];
   const report = (rule, file, line, message) => {
-    const { severity } = ruleSetting(config.rules[rule] ?? 'error');
+    const { severity } = ruleSetting(config.rules[rule]);
     if (severity === 'off') return;
     problems.push({ rule, severity, file, line: line == null ? null : line + 1, message });
   };
@@ -68,7 +68,7 @@ export function buildModel({ config, parsed, exists }) {
   for (const doc of parsed) {
     const fm = doc.frontmatter;
     if (fm?.error) {
-      report('frontmatter', doc.file, 0, fm.error);
+      report('frontmatter', doc.file, 0, `${fm.error}; this page is not built`);
       continue;
     }
     const data = fm?.data ?? {};
@@ -80,7 +80,7 @@ export function buildModel({ config, parsed, exists }) {
     const node = nodeFromFrontmatter(doc, data, isConfigRoot ? config.root : null, report, treeNames, primary);
     if (!node) continue;
     if (nodes.has(node.id)) {
-      report('duplicate-id', doc.file, 0, `id "${node.id}" is also used by ${nodes.get(node.id).file}`);
+      report('duplicate-id', doc.file, 0, `id "${node.id}" is also used by ${nodes.get(node.id).file}; this page is not built until one of them has another id`);
       continue;
     }
     nodes.set(node.id, node);
@@ -97,6 +97,10 @@ export function buildModel({ config, parsed, exists }) {
     const candidates = [...nodes.values()].filter((n) => !n.declared[primary]?.length);
     if (candidates.length === 1) rootId = candidates[0].id;
     else rootId = candidates.find((n) => n.file === 'README.md')?.id ?? candidates[0]?.id ?? null;
+  }
+  if (!rootId) {
+    report('no-root', config.root?.file ?? null, null,
+      'there is no root page; give README.md frontmatter with an id, title, and summary, or set "root" in idk-plans.config.json (`idk-plans init` does this)');
   }
   for (const node of nodes.values()) {
     if (node.id !== rootId && !node.declared[primary]?.length) {
@@ -118,7 +122,7 @@ export function buildModel({ config, parsed, exists }) {
     groupPaths[tree] = [];
     for (const raw of config.trees[tree].groups ?? []) {
       const p = parsePath(raw);
-      if (!p) { report('frontmatter', 'idk-plans.config.json', null, `group "${raw}" (${tree}) is not a valid id or dot-separated path`); continue; }
+      if (!p) { report('bad-field', 'idk-plans.config.json', null, `group "${raw}" (${tree}) is not a valid id or dot-separated path`); continue; }
       groupPaths[tree].push({ raw, path: p });
       p.forEach((id) => virtualAllowed.add(id));
     }
@@ -428,10 +432,10 @@ function parsePath(raw) {
 
 function nodeFromFrontmatter(doc, data, rootConfig, report, treeNames, primary) {
   const fmLine = 0;
-  const bad = (msg) => report('frontmatter', doc.file, fmLine, msg);
+  const bad = (msg) => report('bad-field', doc.file, fmLine, msg);
   const id = data.id ?? rootConfig?.id;
   if (typeof id !== 'string' || !ID_PATTERN.test(id)) {
-    bad(`id ${JSON.stringify(id)} must be lowercase letters, digits, and single hyphens`);
+    report('frontmatter', doc.file, fmLine, `id ${JSON.stringify(id)} must be lowercase letters, digits, and single hyphens; this page is not built`);
     return null;
   }
   const title = data.title ?? (rootConfig ? doc.firstHeading?.text : undefined);
@@ -512,7 +516,7 @@ export function toJSON(model) {
   const { nodes, trees, rootId, primary, problems } = model;
   const treeNames = Object.keys(trees);
   const out = {
-    version: '0.1',
+    version: '0.3',
     root: rootId,
     primaryTree: primary,
     trees: Object.fromEntries(treeNames.map((t) => [t, { title: trees[t].title, top: trees[t].top }])),

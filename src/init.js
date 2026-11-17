@@ -37,7 +37,7 @@ jobs:
 
       - run: npm ci
 
-      - run: npx idk-plans check --quiet
+      - run: npx idk-plans check --strict --quiet
 
       - run: >-
           npx idk-plans site --out _site
@@ -65,7 +65,7 @@ jobs:
 pages:
   script:
     - npm ci
-    - npx idk-plans check --quiet
+    - npx idk-plans check --strict --quiet
     - npx idk-plans site --out public --source-url "$CI_PROJECT_URL/-/blob/$CI_COMMIT_SHA"
   artifacts:
     paths: [public]
@@ -84,7 +84,7 @@ echo "$out"
 echo "$out" | sed -n 's/^fixed //p' | while read -r file; do git add -- "$file"; done
 `,
   'pre-push': `#!/bin/sh
-npx idk-plans check --quiet
+npx idk-plans check --strict --quiet
 `,
 };
 

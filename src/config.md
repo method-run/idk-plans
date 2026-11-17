@@ -30,5 +30,5 @@ Section 9 of the [Specification](../SPEC.md "spec") lists every field.
 ## Tasks
 
 - [x] Default to one primary tree
-- [x] Let each rule be error, warn, info, or off
+- [x] Let each warning rule be warn, info, or off. Error rules can not be changed.
 - [x] Add `proseWrap`

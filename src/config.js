@@ -11,20 +11,24 @@ export const DEFAULT_EXCLUDE = [
   '**/.git/**',
 ];
 
-// Rule name → [severity, option?]. See SPEC.md section 10.
+// Problems that stop pages from being built. They are always errors, and every
+// command that builds from the model stops on them. See SPEC.md section 10.
+export const ERROR_RULES = ['no-root', 'frontmatter', 'duplicate-id'];
+
+// Every other rule: rule name → [severity, option?]. A project can make each one
+// warn, info, or off, but not error. `check --strict` fails on warnings.
 export const DEFAULT_RULES = {
-  'frontmatter': 'error',
-  'duplicate-id': 'error',
-  'missing-parent': 'error',
-  'no-primary-parent': 'error',
-  'cycle': 'error',
-  'path-mismatch': 'error',
-  'unknown-tree': 'error',
-  'broken-ref': 'error',
-  'broken-link': 'error',
-  'missing-code': 'error',
-  'stale-generated': 'error',
-  'bad-status': 'error',
+  'bad-field': 'warn',
+  'missing-parent': 'warn',
+  'no-primary-parent': 'warn',
+  'cycle': 'warn',
+  'path-mismatch': 'warn',
+  'unknown-tree': 'warn',
+  'broken-ref': 'warn',
+  'broken-link': 'warn',
+  'missing-code': 'warn',
+  'stale-generated': 'warn',
+  'bad-status': 'warn',
   'task-parent-mismatch': 'warn',
   'unknown-mark': 'warn',
   'hard-wrap': 'warn',
@@ -55,6 +59,13 @@ export async function loadConfig(cwd) {
   return resolveConfig(raw);
 }
 
+function siteConfig(site) {
+  if (site.theme != null && (typeof site.theme !== 'string' || !site.theme.trim())) {
+    throw new Error(`${CONFIG_FILE}: "site.theme" must be the path of a themetron CSS theme`);
+  }
+  return site;
+}
+
 export function resolveConfig(raw = {}) {
   const trees = raw.trees && Object.keys(raw.trees).length
     ? raw.trees
@@ -63,7 +74,15 @@ export function resolveConfig(raw = {}) {
   if (primaries.length !== 1) {
     throw new Error(`${CONFIG_FILE}: exactly one tree must have "primary": true (found ${primaries.length})`);
   }
-  const rules = { ...DEFAULT_RULES, ...(raw.rules ?? {}) };
+  for (const [rule, value] of Object.entries(raw.rules ?? {})) {
+    if (ERROR_RULES.includes(rule)) {
+      throw new Error(`${CONFIG_FILE}: rule "${rule}" can not be changed, because pages can not be built while it fails`);
+    }
+    if (ruleSetting(value).severity === 'error') {
+      throw new Error(`${CONFIG_FILE}: rule "${rule}" can not be "error"; only problems that stop pages from being built are errors. To fail on warnings, use \`check --strict\``);
+    }
+  }
+  const rules = { ...DEFAULT_RULES, ...(raw.rules ?? {}), ...Object.fromEntries(ERROR_RULES.map((r) => [r, 'error'])) };
   const proseWrap = raw.proseWrap ?? 'never';
   if (!['never', 'preserve'].includes(proseWrap)) {
     throw new Error(`${CONFIG_FILE}: "proseWrap" must be "never" or "preserve"`);
@@ -76,7 +95,7 @@ export function resolveConfig(raw = {}) {
     primaryTree: primaries[0],
     tags: raw.tags ?? true,
     proseWrap,
-    site: raw.site ?? {},
+    site: siteConfig(raw.site ?? {}),
     rules,
   };
 }

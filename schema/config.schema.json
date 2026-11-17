@@ -12,7 +12,12 @@
     "site": {
       "type": "object",
       "additionalProperties": false,
-      "properties": { "title": { "type": "string" }, "sourceUrl": { "type": "string" }, "mermaid": { "enum": ["cdn", "local"] } }
+      "properties": {
+        "title": { "type": "string" },
+        "sourceUrl": { "type": "string" },
+        "mermaid": { "enum": ["cdn", "local"] },
+        "theme": { "type": "string", "minLength": 1, "description": "The path of an idk-themetron theme, from the project root: the \"css\" format, for token contract 0.2 (https://method-run.github.io/idk-themetron/schema/0.2.0/tokens.manifest.json). The site loads it before its own stylesheet. --theme overrides it." }
+      }
     },
     "root": {
       "type": "object",
@@ -29,10 +34,11 @@
     },
     "rules": {
       "type": "object",
+      "propertyNames": { "not": { "enum": ["no-root", "frontmatter", "duplicate-id"] } },
       "additionalProperties": {
         "oneOf": [
-          { "enum": ["error", "warn", "info", "off"] },
-          { "type": "array", "prefixItems": [{ "enum": ["error", "warn", "info", "off"] }] }
+          { "enum": ["warn", "info", "off"] },
+          { "type": "array", "prefixItems": [{ "enum": ["warn", "info", "off"] }] }
         ]
       }
     }

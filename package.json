@@ -32,8 +32,9 @@
   },
   "scripts": {
     "test": "node --test test/*.test.js",
-    "docs:check": "node bin/idk-plans.js check --quiet",
-    "docs:site": "node bin/idk-plans.js site --out _site"
+    "docs:check": "node bin/idk-plans.js check --strict --quiet",
+    "docs:site": "node bin/idk-plans.js site --out _site",
+    "docs:serve": "node --watch --watch-preserve-output bin/idk-plans.js serve"
   },
   "dependencies": {
     "marked": "^15.0.12",

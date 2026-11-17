@@ -6,18 +6,33 @@ import { Marked } from 'marked';
 import { normalizeLabel } from './parse.js';
 import { rollupText } from './fix.js';
 import { titleFromId } from './model.js';
+import { readTheme } from './theme.js';
 
-const ASSETS = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'site-assets');
+export const ASSETS = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'site-assets');
 const MERMAID_URL = 'https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs';
 const TASK_SENTINEL = /([a-z]+)/g;
+
+// The colorway of each task state, and of each callout type, and the icon of a callout.
+// A part gets its colorway's theme class only when the theme has that colorway; without one
+// it looks as it does with no theme.
+const STATE_COLORWAYS = { done: 'success', doing: 'warning', blocked: 'danger' };
+const CALLOUT_COLORWAYS = {
+  note: 'info', info: 'info', abstract: 'info', summary: 'info', tldr: 'info', todo: 'info',
+  tip: 'success', hint: 'success', success: 'success', check: 'success', done: 'success',
+  warning: 'warning', attention: 'warning', question: 'warning', help: 'warning', faq: 'warning',
+  caution: 'danger', danger: 'danger', error: 'danger', failure: 'danger', fail: 'danger', missing: 'danger', bug: 'danger',
+  important: 'important', example: 'important',
+};
+const COLORWAY_ICONS = { info: 'info', success: 'check_circle', warning: 'warning', danger: 'error', important: 'star' };
 
 const esc = (s) => String(s ?? '')
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-/** Show #blocked as a tag, except inside code. */
-function tagBlocked(html) {
+/** Show #blocked as a tag, except inside code. `theme` is the class of the danger colorway, if any. */
+function tagBlocked(html, theme) {
+  const cls = theme ? `tag blocked ${theme}` : 'tag blocked';
   return html.split(/(<pre[\s\S]*?<\/pre>|<code>[\s\S]*?<\/code>)/).map((part, i) => (
-    i % 2 ? part : part.replace(/(^|[\s>(])#blocked\b/g, '$1<span class="tag blocked">#blocked</span>')
+    i % 2 ? part : part.replace(/(^|[\s>(])#blocked\b/g, `$1<span class="${cls}">#blocked</span>`)
   )).join('');
 }
 
@@ -50,10 +65,10 @@ function inTree(model, tree, id) {
   return id === t.top || t.parents.has(id);
 }
 
-function progressBar(r) {
+function progressBar(r, stateClass) {
   if (!r || r.scope + r.states.deferred + r.states.dropped === 0) return '';
   const pct = (n) => (r.scope ? (100 * n) / r.scope : 0);
-  const seg = (cls, n) => (n ? `<span class="seg ${cls}" style="width:${pct(n).toFixed(2)}%"></span>` : '');
+  const seg = (cls, n) => (n ? `<span class="${stateClass('seg', cls)}" style="width:${pct(n).toFixed(2)}%"></span>` : '');
   return `<div class="progress" title="${esc(rollupText(r))}">
   <div class="bar">${seg('done', r.done)}${seg('doing', r.states.doing)}${seg('blocked', r.states.blocked)}</div>
   <span class="progress-text">${esc(rollupText(r))}</span>
@@ -98,11 +113,23 @@ export async function buildSite(project, outDir, options = {}) {
     throw new Error('site.mermaid is "local", but the mermaid package is not installed; run `npm install --save-dev mermaid`');
   }
 
+  // A themetron theme (site.theme): loaded before site.css, which reads its tokens.
+  const theme = siteConfig.theme ? await readTheme(cwd ?? '.', siteConfig.theme) : null;
+  const colorway = (name) => theme?.classes[name] ?? null;
+  const classes = (...names) => names.filter(Boolean).join(' ');
+  // A part that shows a task state: its own class, the state, and the state's colorway.
+  const stateClass = (part, state) => classes(part, state, colorway(STATE_COLORWAYS[state === 'partial' ? 'doing' : state]));
+  const markClass = (state) => classes('task-mark', colorway(STATE_COLORWAYS[state]));
+  const icon = (name) => (theme?.icons && name ? `<span class="icon" aria-hidden="true">${name}</span>` : '');
+  const blockedTag = (html) => tagBlocked(html, colorway('danger'));
+  const bar = (r) => progressBar(r, stateClass);
+
   await rm(outDir, { recursive: true, force: true });
   await mkdir(path.join(outDir, 'assets'), { recursive: true });
   for (const asset of ['site.css', 'site.js']) {
     await copyFile(path.join(ASSETS, asset), path.join(outDir, 'assets', asset));
   }
+  if (theme) await writeFile(path.join(outDir, 'assets', 'theme.css'), theme.css);
   if (localMermaid) await copyFile(localMermaid, path.join(outDir, 'assets', 'mermaid.min.js'));
 
   // Search index, as a script so that the site also works from file://.
@@ -153,9 +180,11 @@ export async function buildSite(project, outDir, options = {}) {
           const [head, type, fold, title] = m;
           const label = title ? md.parseInline(title) : esc(titleFromId(type.toLowerCase()));
           const body = md.parse(token.text.slice(head.length));
-          const attrs = `class="callout" data-callout="${esc(type.toLowerCase())}"`;
-          if (!fold) return `<div ${attrs}><p class="callout-title">${label}</p>\n${body}</div>\n`;
-          return `<details ${attrs}${fold === '+' ? ' open' : ''}><summary>${label}</summary>\n${body}</details>\n`;
+          const kind = CALLOUT_COLORWAYS[type.toLowerCase()];
+          const attrs = `class="${classes('callout', colorway(kind))}" data-callout="${esc(type.toLowerCase())}"`;
+          const heading = `${icon(COLORWAY_ICONS[kind])}${label}`;
+          if (!fold) return `<div ${attrs}><p class="callout-title">${heading}</p>\n${body}</div>\n`;
+          return `<details ${attrs}${fold === '+' ? ' open' : ''}><summary>${heading}</summary>\n${body}</details>\n`;
         },
         link(token) {
           const text = this.parser.parseInline(token.tokens);
@@ -192,8 +221,8 @@ export async function buildSite(project, outDir, options = {}) {
 
     let html = md.parse(lines.filter((_, i) => !drop.has(i)).join('\n'));
     html = html.replace(/(?:<p>)?\uE002([a-z-]+)\uE003(?:<\/p>)?/g, (_, name) => blocks[name]());
-    html = html.replace(TASK_SENTINEL, (_, state) => `<span class="task-mark" data-state="${state}" title="${state}"></span>`);
-    return tagBlocked(html);
+    html = html.replace(TASK_SENTINEL, (_, state) => `<span class="${markClass(state)}" data-state="${state}" title="${state}"></span>`);
+    return blockedTag(html);
   };
 
   // ── Page parts ────────────────────────────────────────────────────
@@ -203,46 +232,67 @@ export async function buildSite(project, outDir, options = {}) {
     const item = (id, seen) => {
       const n = model.nodes.get(id);
       const kids = (t.children.get(id) ?? []).filter((k) => !seen.has(k));
-      const label = `${id === currentId ? '<strong>' : ''}${esc(n.title)}${id === currentId ? '</strong>' : ''}`;
-      const link = `<a href="${esc(href(fromPage, pagePath(model, id)))}"${id === currentId ? ' aria-current="page"' : ''}>${label}</a>${badgeDot(n.rollup?.[tree])}`;
-      if (!kids.length) return `<li>${link}</li>`;
+      // A row: a chevron (an empty space for a leaf), then the link. A branch's row is its
+      // <summary>, so the chevron opens and closes it.
+      const row = id === currentId ? 'row current' : 'row';
+      const twisty = `<span class="${kids.length ? 'twisty branch' : 'twisty'}" aria-hidden="true">${kids.length ? icon('chevron_right') : ''}</span>`;
+      const link = `<a href="${esc(href(fromPage, pagePath(model, id)))}"${id === currentId ? ' aria-current="page"' : ''}>${esc(n.title)}${badgeDot(n.rollup?.[tree])}</a>`;
+      if (!kids.length) return `<li><div class="${row}">${twisty}${link}</div></li>`;
       const inner = kids.map((k) => item(k, new Set([...seen, k]))).join('');
-      return `<li><details${open.has(id) || id === t.top ? ' open' : ''}><summary>${link}</summary><ul>${inner}</ul></details></li>`;
+      return `<li><details${open.has(id) || id === t.top ? ' open' : ''}><summary class="${row}">${twisty}${link}</summary><ul>${inner}</ul></details></li>`;
     };
     return `<ul class="tree">${item(t.top, new Set([t.top]))}</ul>`;
   };
 
+  // A switch for color mode or contrast. It sets data-tm-mode or data-tm-contrast on <html>.
+  const lookSwitch = (key, label, values) => `<span>${label}</span><div class="switch segmented" role="group" aria-label="${label}" data-look="${key}">${
+    values.map((v, i) => `<button type="button" data-value="${i ? v.toLowerCase() : ''}">${v}</button>`).join('')}</div>`;
+
   const badgeDot = (r) => {
     if (!r || !r.scope) return '';
     const cls = r.done === r.scope ? 'done' : r.done === 0 ? 'todo' : 'partial';
-    return ` <span class="dot ${cls}" title="${esc(rollupText(r))}"></span>`;
+    return ` <span class="${stateClass('dot', cls)}" title="${esc(rollupText(r))}"></span>`;
   };
 
   const layout = ({ page, title, currentId, main }) => {
     const root = (p) => href(page, p);
     const selected = treeOrder.find((t) => currentId && inTree(model, t, currentId)) ?? treeOrder[0];
-    const tabs = treeOrder.map((tree) => `<button type="button" role="tab" data-tree="${esc(tree)}" aria-selected="${tree === selected}">${esc(model.trees[tree].title)}</button>`).join('');
+    const tabs = treeOrder.map((tree) => `<button type="button" role="tab" data-tree="${esc(tree)}" aria-selected="${tree === selected}" title="${esc(model.trees[tree].title)}">${esc(model.trees[tree].title)}</button>`).join('');
     const panels = treeOrder.map((tree) => `<div class="tree-panel" data-tree="${esc(tree)}"${tree === selected ? '' : ' hidden'}>${sidebarTree(page, tree, currentId)}</div>`).join('');
     return `<!doctype html>
-<html lang="en">
+<html lang="en"${theme?.root ? ` class="${theme.root}"` : ''}>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(title)} · ${esc(siteTitle)}</title>
-<link rel="stylesheet" href="${root('assets/site.css')}">
+<script>try {
+  const look = JSON.parse(localStorage.getItem('idk-look') || '{}');
+  const html = document.documentElement;
+  for (const k of ['tmMode', 'tmContrast', 'sidebar']) if (look[k]) html.dataset[k] = look[k];
+  if (look.sidebarWidth > 0) html.style.setProperty('--sidebar', look.sidebarWidth + 'px');
+} catch { /* storage may be blocked */ }</script>
+${theme ? `<link rel="stylesheet" href="${root('assets/theme.css')}">\n` : ''}<link rel="stylesheet" href="${root('assets/site.css')}">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<header class="topbar">
-  <button type="button" class="menu" aria-label="Show navigation" aria-expanded="false">☰</button>
+<header class="topbar" data-tm-mode="dark">
+  <button type="button" class="menu" aria-label="Show navigation" aria-expanded="false">${icon('menu') || '☰'}</button>
   <a class="site-title" href="${root('index.html')}">${esc(siteTitle)}</a>
   <nav class="top-links"><a href="${root('tasks.html')}">Tasks</a><a href="${root('glossary.html')}">Glossary</a></nav>
   <div class="search"><input type="search" placeholder="Search pages" aria-label="Search pages"><ul class="results" hidden></ul></div>
 </header>
 <div class="shell">
-<nav class="sidebar" aria-label="Site map">
-  <div class="tabs" role="tablist">${tabs}</div>
+<nav class="sidebar" aria-label="Site map" data-tm-mode="dark">
+  <div class="sidebar-scroll" id="sidebar-content">
+  <div class="tabs segmented" role="tablist">${tabs}</div>
   ${panels}
+  </div>
+  <div class="sidebar-foot">
+    <button type="button" class="ghost gear" popovertarget="settings" aria-label="Settings" title="Settings">${icon('settings') || '⚙\uFE0E'}</button>
+    <div class="settings" id="settings" popover>${lookSwitch('tmMode', 'Mode', ['Auto', 'Light', 'Dark'])}${theme ? lookSwitch('tmContrast', 'Contrast', ['Auto', 'Base', 'More']) : ''}</div>
+    <button type="button" class="ghost collapse" aria-controls="sidebar-content" aria-expanded="true" aria-label="Collapse the sidebar" title="Collapse the sidebar">${icon('chevron_left') || '<span class="glyph">‹</span>'}</button>
+  </div>
+  <div class="resize" role="separator" aria-orientation="vertical" aria-label="Sidebar width" aria-controls="sidebar-content" tabindex="0"></div>
 </nav>
 <main id="main">
 ${main}
@@ -263,8 +313,9 @@ ${main}
       document.head.append(s);
     })`
     : `(await import('${MERMAID_URL}')).default`};
-    const dark = matchMedia('(prefers-color-scheme: dark)').matches;
-    mermaid.initialize({ startOnLoad: false, theme: dark ? 'dark' : 'neutral', securityLevel: 'strict' });
+    const mode = document.documentElement.dataset.tmMode;
+    const dark = mode ? mode === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    mermaid.initialize({ startOnLoad: false, theme: dark ? 'dark' : 'neutral', securityLevel: 'strict', fontFamily: getComputedStyle(document.body).fontFamily });
     await mermaid.run({ nodes: blocks });
     window.idkLinkDiagrams?.();
   }
@@ -292,13 +343,13 @@ ${main}
         return `<li>${nodeLink(page, k)}${badgeDot(n.rollup?.[tree])}${list(k, new Set([...seen, k]))}</li>`;
       }).join('')}</ul>`;
     };
-    return `<div class="view"><h3>${nodeLink(page, t.top, esc(t.title))}</h3>${progressBar(model.nodes.get(t.top)?.rollup?.[tree])}<div class="tree-overview">${list(t.top, new Set([t.top]))}</div></div>`;
+    return `<div class="view"><h3>${nodeLink(page, t.top, esc(t.title))}</h3>${bar(model.nodes.get(t.top)?.rollup?.[tree])}<div class="tree-overview">${list(t.top, new Set([t.top]))}</div></div>`;
   }).join('');
 
   const card = (page, id, tree) => {
     const n = model.nodes.get(id);
     return `<li class="card"><a href="${esc(href(page, pagePath(model, id)))}"><span class="card-title">${esc(n.title)}</span>${n.virtual ? '<span class="kind">group</span>' : n.kind ? `<span class="kind">${esc(n.kind)}</span>` : ''}</a>
-  ${n.summary ? `<p>${esc(n.summary)}</p>` : ''}${progressBar(n.rollup?.[tree])}</li>`;
+  ${n.summary ? `<p>${esc(n.summary)}</p>` : ''}${bar(n.rollup?.[tree])}</li>`;
   };
 
   const written = [];
@@ -321,7 +372,7 @@ ${main}
     main += `<h1>${esc(node.title)}</h1>`;
     const meta = [node.virtual ? 'group' : node.kind, node.status ? `status: ${node.status}` : null].filter(Boolean);
     if (meta.length) main += `<p class="meta">${meta.map(esc).join(' · ')}</p>`;
-    main += progressBar(node.rollup?.[homeTree]);
+    main += bar(node.rollup?.[homeTree]);
     if (node.summary) main += `<p class="lead">${esc(node.summary)}</p>`;
     const kids = homeTree === model.primary ? primaryKids : model.trees[homeTree].children.get(node.id) ?? [];
     const childCards = () => `<ul class="cards">${kids.map((k) => card(page, k, homeTree)).join('')}</ul>`;
@@ -342,7 +393,7 @@ ${main}
       main += '<section><h2>In other views</h2>';
       for (const t of places) {
         const tKids = model.trees[t].children.get(node.id) ?? [];
-        main += `<div class="view"><h3>${esc(model.trees[t].title)}</h3>${crumbs(page, t, node.id) || '<p class="meta">Top level</p>'}${progressBar(node.rollup?.[t])}`;
+        main += `<div class="view"><h3>${esc(model.trees[t].title)}</h3>${crumbs(page, t, node.id) || '<p class="meta">Top level</p>'}${bar(node.rollup?.[t])}`;
         if (tKids.length) main += `<ul class="cards">${tKids.map((k) => card(page, k, t)).join('')}</ul>`;
         main += '</div>';
       }
@@ -373,7 +424,7 @@ ${main}
       }
     }
     const titles = { blocked: 'Blocked', doing: 'In progress', todo: 'To do' };
-    let main = `<h1>Tasks</h1>${progressBar(model.nodes.get(model.rootId)?.rollup?.[model.primary])}<p class="lead">Every open task, grouped by state and then by page. Deferred and dropped tasks are on their pages.</p>`;
+    let main = `<h1>Tasks</h1>${bar(model.nodes.get(model.rootId)?.rollup?.[model.primary])}<p class="lead">Every open task, grouped by state and then by page. Deferred and dropped tasks are on their pages.</p>`;
     for (const state of ['blocked', 'doing', 'todo']) {
       const items = groups[state];
       main += `<section><h2>${titles[state]} <span class="count">${items.length}</span></h2>`;
@@ -386,8 +437,8 @@ ${main}
           current = id;
         }
         const md = new Marked();
-        const text = tagBlocked(md.parseInline(task.text.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')));
-        main += `<li><span class="task-mark" data-state="${state}"></span>${text}</li>`;
+        const text = blockedTag(md.parseInline(task.text.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')));
+        main += `<li><span class="${markClass(state)}" data-state="${state}"></span>${text}</li>`;
       }
       main += '</ul></section>';
     }

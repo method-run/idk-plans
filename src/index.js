@@ -11,6 +11,7 @@ import { unwrapProse } from './wrap.js';
 
 export { buildModel, toJSON, parseMarkdown, fixDocument, rollupText, unwrapProse };
 export { buildSite } from './site.js';
+export { serveSite } from './serve.js';
 export { initProject } from './init.js';
 
 /** Read, parse, and model a project. */
@@ -66,6 +67,18 @@ export function check(project) {
     || (a.file ?? '').localeCompare(b.file ?? '')
     || (a.line ?? 0) - (b.line ?? 0)
   ));
+}
+
+/**
+ * check, split by what each problem means for a build. Errors stop every command that
+ * builds from the model; warnings do not. Info is left out.
+ */
+export function checkBuild(project) {
+  const problems = check(project);
+  return {
+    errors: problems.filter((p) => p.severity === 'error'),
+    warnings: problems.filter((p) => p.severity === 'warn'),
+  };
 }
 
 /** The fixes, without writing them: { file, before, after } for each file that would change. */
