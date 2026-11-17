@@ -1,7 +1,9 @@
 name: Release
 
-# Publish to npm and make a GitHub release when a version tag is pushed.
-# npm trusts this workflow (trusted publishing), so it needs no token.
+# Stage the version on npm and make a GitHub release when a version tag is pushed.
+# npm trusts this workflow (trusted publishing), so it needs no token. The trusted publisher
+# may only stage: a maintainer approves the staged version on npmjs.com, with 2FA, and only
+# then is it public.
 on:
   push:
     tags: ['v*']
@@ -46,13 +48,20 @@ jobs:
       - run: npm test
       - run: npm run docs:check
 
-      - name: Publish to npm
+      # Staged publishing needs a recent npm, newer than some Node releases ship with.
+      - name: Use the latest npm
+        run: |
+          npm install --global npm@latest
+          npm --version
+
+      - name: Stage the version on npm
         run: |
           name="$(node -p "require('./package.json').name")"
           if npm view "$name@${TAG#v}" version >/dev/null 2>&1; then
             echo "$name@${TAG#v} is already on npm"
           else
-            npm publish
+            npm stage publish
+            echo "::notice::$name@${TAG#v} is staged. Approve it on npmjs.com to publish it."
           fi
 
       - name: Make the GitHub release
