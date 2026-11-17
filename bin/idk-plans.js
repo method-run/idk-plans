@@ -3,6 +3,7 @@ import { parseArgs } from 'node:util';
 import path from 'node:path';
 import { loadProject, check, fix, planFixes, renderTree, toJSON } from '../src/index.js';
 import { buildSite } from '../src/site.js';
+import { serveSite } from '../src/serve.js';
 import { initProject } from '../src/init.js';
 import { diffLines } from '../src/diff.js';
 
@@ -15,6 +16,7 @@ Commands:
   tree               Show a tree with progress.
   model              Print the model as JSON.
   site               Build the static site.
+  serve              Serve the site, and rebuild and reload it when a file changes.
 
 Options:
   --cwd <dir>        Project root (default: current directory)
@@ -25,7 +27,9 @@ Options:
   --depth <n>        Depth to show (tree command)
   --quiet            Show only errors (check command)
   --out <dir>        Output folder (site command; default: _site)
-  --source-url <url> Base URL for links to files in the repository (site command)
+  --source-url <url> Base URL for links to files in the repository (site and serve commands)
+  --port <n>         Port (serve command; default: 4747)
+  --host <host>      Host (serve command; default: 127.0.0.1)
   --help             Show this message
 `;
 
@@ -41,6 +45,8 @@ const { values, positionals } = parseArgs({
     quiet: { type: 'boolean' },
     out: { type: 'string' },
     'source-url': { type: 'string' },
+    port: { type: 'string' },
+    host: { type: 'string' },
     help: { type: 'boolean' },
   },
 });
@@ -77,6 +83,19 @@ try {
   if (command === 'init') {
     await init();
     process.exit(0);
+  }
+  if (command === 'serve') {
+    const server = await serveSite(cwd, {
+      port: values.port ? Number(values.port) : undefined,
+      host: values.host,
+      siteOptions: values['source-url'] ? { sourceUrl: values['source-url'] } : {},
+      log: (message) => console.log(message),
+    });
+    console.log(`serving ${server.url}\nwatching ${path.relative(process.cwd(), cwd) || '.'} for changes; press Ctrl+C to stop`);
+    const stop = async () => { await server.close(); process.exit(0); };
+    process.on('SIGINT', stop);
+    process.on('SIGTERM', stop);
+    await new Promise(() => {});
   }
   const project = await loadProject(cwd);
   switch (command) {

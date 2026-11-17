@@ -1,7 +1,7 @@
 ---
 id: cli
 title: Command line
-summary: Runs the commands check, fix, tree, model, and site. It is the only part that reads arguments and writes to the terminal.
+summary: Runs the commands check, fix, tree, model, site, and serve. It is the only part that reads arguments and writes to the terminal.
 parent: idk-plans
 parents:
   viewer: terminal
@@ -13,7 +13,7 @@ tags: [system/cli, viewer/terminal/cli]
 # Command line
 
 <!-- idk-plans:progress:start (generated) -->
-● 100% (4/4)
+● 100% (5/5)
 <!-- idk-plans:progress:end -->
 
 The `idk-plans` command is how people and CI use the tool. Each command loads the project with the [Engine](../src/README.md "engine"), then does one job.
@@ -26,6 +26,7 @@ The `idk-plans` command is how people and CI use the tool. Each command loads th
 | `tree` | no | To see progress in the terminal. |
 | `model` | no | To give the model to another tool, as JSON. |
 | `site` | no | To build the website. |
+| `serve` | no | To read the website while you work. It rebuilds and reloads the page when a file changes. |
 
 <details>
 <summary>How it works</summary>
@@ -42,6 +43,8 @@ Exit codes:
 
 `fix --dry-run` calls `planFixes`, and prints a short line diff for each file ([src/diff.js](../src/diff.js)). It writes nothing, and exits with 0.
 
+`serve` does not stop until you press Ctrl+C. Give `--port` and `--host` to change where it listens.
+
 `init` does not load the project first, because a new project has no configuration yet.
 
 </details>
@@ -52,3 +55,4 @@ Exit codes:
 - [x] Exit with 1 when check finds an error
 - [x] Show what `fix` would change without writing it (`fix --dry-run`)
 - [x] Write starter files for a new project (`init`)
+- [x] Serve the site, and reload it when a file changes (`serve`)

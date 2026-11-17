@@ -11,6 +11,7 @@ import { unwrapProse } from './wrap.js';
 
 export { buildModel, toJSON, parseMarkdown, fixDocument, rollupText, unwrapProse };
 export { buildSite } from './site.js';
+export { serveSite } from './serve.js';
 export { initProject } from './init.js';
 
 /** Read, parse, and model a project. */

@@ -1,7 +1,7 @@
 # idk-plans
 
 <!-- idk-plans:progress:start (generated) -->
-◐ 92% (39/42) · 4 deferred
+◐ 93% (41/44) · 4 deferred
 <!-- idk-plans:progress:end -->
 
 Keep your project's architecture and progress in Markdown files next to the code. idk-plans checks the files, keeps their generated parts current, and builds a website from them. Progress rolls up from tasks to the top of the project.
@@ -39,8 +39,8 @@ Zoom in: [Specification](./SPEC.md "spec") · [Command line](./bin/README.md "cl
 <!-- idk-plans:children:start (generated) -->
 - [Specification](./SPEC.md "spec"): The format of idk-plans files. It defines nodes, trees, tasks, rollups, links, generated blocks, and the checks. · no tasks · 3 deferred
 - [How it works](./docs/how-it-works.md "how-it-works"): What idk-plans does when you run a command, step by step. The tool is deterministic, and it does not use AI or the network.
-- [Command line](./bin/README.md "cli"): Runs the commands check, fix, tree, model, and site. It is the only part that reads arguments and writes to the terminal. ● 100% (4/4)
-- [Engine](./src/README.md "engine"): Reads the Markdown files, builds one model of all nodes, trees, and tasks, and checks and fixes the files from that model. ◐ 93% (27/29) · 1 deferred
+- [Command line](./bin/README.md "cli"): Runs the commands check, fix, tree, model, site, and serve. It is the only part that reads arguments and writes to the terminal. ● 100% (5/5)
+- [Engine](./src/README.md "engine"): Reads the Markdown files, builds one model of all nodes, trees, and tasks, and checks and fixes the files from that model. ◐ 93% (28/30) · 1 deferred
 - [Tested viewers](./docs/compatibility.md "compatibility"): The viewers that we test the Markdown files and the site with, and what each one shows differently. ● 100% (6/6)
 - [Release a version](./docs/release.md "release"): How a maintainer releases a new version of idk-plans. A version tag starts a workflow that publishes to npm and makes a GitHub release.
 <!-- idk-plans:children:end -->
@@ -48,17 +48,17 @@ Zoom in: [Specification](./SPEC.md "spec") · [Command line](./bin/README.md "cl
 ## Other views
 
 <!-- idk-plans:trees:start (generated) -->
-**Viewers** ◐ 91% (22/24) · 1 deferred
+**Viewers** ◐ 92% (24/26) · 1 deferred
 
-- [Site builder](./src/site.md "site") ◐ 75% (6/8)
+- [Site builder](./src/site.md "site") ◐ 77% (7/9)
   - [Publish the site](./docs/publish-site.md "publish-site") ● 100% (2/2)
 - Markdown ● 100% (12/12) · 1 deferred
   - [Tested viewers](./docs/compatibility.md "compatibility") ● 100% (6/6)
     - [Working in Obsidian](./obsidian/README.md "obsidian") ● 100% (3/3)
   - [Fix](./src/fix.md "fix") ● 100% (4/4)
   - [Prose unwrap](./src/wrap.md "wrap") ● 100% (2/2) · 1 deferred
-- Terminal ● 100% (4/4)
-  - [Command line](./bin/README.md "cli") ● 100% (4/4)
+- Terminal ● 100% (5/5)
+  - [Command line](./bin/README.md "cli") ● 100% (5/5)
 <!-- idk-plans:trees:end -->
 
 ## Use
@@ -75,6 +75,7 @@ npx idk-plans tree     # show progress in the terminal
 npx idk-plans tree --tree concern
 npx idk-plans model    # the whole model as JSON
 npx idk-plans site     # build the static site into _site/
+npx idk-plans serve    # see the site at http://127.0.0.1:4747/; it reloads when you save
 ```
 
 To use it from code:
@@ -114,7 +115,9 @@ Turn them on with `git config core.hooksPath .githooks`.
 
 ## Site
 
-`idk-plans site --out _site` builds a static site that any static host can serve. See [Publish the site](./docs/publish-site.md "publish-site").
+`idk-plans site --out _site` builds a static site that any static host can serve.
+
+`idk-plans serve` serves the site on your computer while you work. When you save a Markdown file, the open page reloads, so you can keep the plans open next to the code and change both. Add it to `package.json` as `"plans": "idk-plans serve"`, and run `npm run plans`. See [Publish the site](./docs/publish-site.md "publish-site").
 
 ## Tasks
 
