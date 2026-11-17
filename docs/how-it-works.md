@@ -29,10 +29,10 @@ Every command starts with the same four steps:
 
 Then the command does its job:
 
-5. **`check`** finds problems, such as broken links, missing parents, and generated blocks that are out of date. It exits with an error if it finds one, so CI can stop a broken change.
+5. **`check`** finds problems, such as broken links, missing parents, and generated blocks that are out of date. An error means pages can not be built, for example when two pages have the same id. Everything else is a warning. `check --strict` fails on warnings too, so CI can stop a broken change.
 6. **`fix`** writes the parts of the files that the tool owns: generated blocks, link paths, task marks, aliases, and tags. It also joins prose that is wrapped by hand ([Fix](../src/fix.md "fix")). With `--dry-run`, it shows the changes and writes nothing.
 7. **`tree`** shows each tree and its progress in the terminal.
-8. **`site`** builds a static website, with search, a sidebar for each tree, and diagrams that link to pages ([Site builder](../src/site.md "site")).
+8. **`site`** builds a static website, with search, a sidebar for each tree, and diagrams that link to pages ([Site builder](../src/site.md "site")). If `check` finds an error, `site` stops and prints it. Warnings do not stop it.
 9. **`serve`** does the same as `site`, then serves the site on your computer. When a Markdown file changes, it builds the site again, and open pages reload.
 10. **`model`** writes the model as JSON, so that other tools can use it.
 

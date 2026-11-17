@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { parseMarkdown } from '../src/parse.js';
 import { buildModel } from '../src/model.js';
-import { resolveConfig, DEFAULT_RULES } from '../src/config.js';
+import { resolveConfig, DEFAULT_RULES, ERROR_RULES } from '../src/config.js';
 import { check, fixDocument } from '../src/index.js';
 
 // One test for each rule in SPEC.md section 10. Each case starts from a clean
@@ -43,7 +43,9 @@ test('rules: a clean project has no problems after fix', () => {
 });
 
 const CASES = {
+  'no-root': { 'README.md': null },
   'frontmatter': { 'bad.md': '---\nid: Not An Id\n---\n# Bad\n' },
+  'bad-field': { 'b.md': '---\nid: b\ntitle: B\nparent: root\nstatus: todo\n---\n# B\n' },
   'duplicate-id': { 'a2.md': page('a', { parent: 'root' }) },
   'missing-parent': { 'b.md': page('b', { parent: 'nope', status: 'todo' }) },
   'no-primary-parent': { 'b.md': page('b', { status: 'todo' }) },
@@ -68,31 +70,41 @@ const CASES = {
   'no-progress': { 'a.md': page('a', { parent: 'root', kind: 'module' }, 'No tasks.') },
 };
 
-test('rules: every rule in the defaults has a case', () => {
-  assert.deepEqual(Object.keys(CASES).sort(), Object.keys(DEFAULT_RULES).sort());
+test('rules: every rule has a case', () => {
+  assert.deepEqual(Object.keys(CASES).sort(), [...ERROR_RULES, ...Object.keys(DEFAULT_RULES)].sort());
 });
+
+/** Files with a change applied. A null file is removed. */
+const apply = (files, change) => Object.fromEntries(Object.entries({ ...files, ...change }).filter(([, t]) => t != null));
 
 for (const [rule, change] of Object.entries(CASES)) {
   test(`rule ${rule}`, () => {
-    const files = fixed({ ...CLEAN, ...change });
-    // fix corrects some rules, so check the change itself for those.
-    const source = ['stale-generated', 'hard-wrap', 'task-parent-mismatch'].includes(rule)
-      ? { ...fixed(CLEAN), ...change }
-      : files;
-    const p = project(source);
+    // fix corrects some rules, so check the change itself for those. fix needs a root.
+    const source = ['stale-generated', 'hard-wrap', 'task-parent-mismatch', 'no-root'].includes(rule)
+      ? apply(fixed(CLEAN), change)
+      : fixed(apply(CLEAN, change));
+    const p = project(source, rule === 'no-root' ? {} : CONFIG);
     assert.ok(rulesIn(p).includes(rule), `${rule} not reported: ${JSON.stringify(check(p))}`);
-    const expected = [DEFAULT_RULES[rule]].flat()[0];
+    const expected = ERROR_RULES.includes(rule) ? 'error' : [DEFAULT_RULES[rule]].flat()[0];
     assert.equal(check(p).find((x) => x.rule === rule).severity, expected);
+    if (ERROR_RULES.includes(rule)) return;
 
     const off = project(source, { ...CONFIG, rules: { [rule]: 'off' } });
     assert.ok(!rulesIn(off).includes(rule), `${rule} still reported when off`);
   });
 }
 
+test('rules: only the problems that stop pages from being built are errors', () => {
+  assert.ok(Object.values(DEFAULT_RULES).every((v) => [v].flat()[0] !== 'error'));
+  assert.throws(() => resolveConfig({ rules: { 'duplicate-id': 'warn' } }), /rule "duplicate-id" can not be changed/);
+  assert.throws(() => resolveConfig({ rules: { 'broken-link': 'error' } }), /can not be "error".*check --strict/);
+  assert.throws(() => resolveConfig({ rules: { 'summary-max-words': ['error', 10] } }), /can not be "error"/);
+});
+
 test('rules: severity and options come from the configuration', () => {
   const files = fixed({ ...CLEAN, ...CASES['summary-max-words'] });
-  const loud = project(files, { ...CONFIG, rules: { 'summary-max-words': ['error', 40] } });
+  const loud = project(files, { ...CONFIG, rules: { 'summary-max-words': ['warn', 40] } });
   assert.ok(!rulesIn(loud).includes('summary-max-words'), '40 words allowed');
-  const strict = project(files, { ...CONFIG, rules: { 'summary-max-words': ['error', 10] } });
-  assert.equal(check(strict).find((x) => x.rule === 'summary-max-words').severity, 'error');
+  const quiet = project(files, { ...CONFIG, rules: { 'summary-max-words': ['info', 10] } });
+  assert.equal(check(quiet).find((x) => x.rule === 'summary-max-words').severity, 'info');
 });

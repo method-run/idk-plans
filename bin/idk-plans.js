@@ -1,17 +1,18 @@
 #!/usr/bin/env node
-import { parseArgs } from 'node:util';
+import { parseArgs, styleText } from 'node:util';
 import path from 'node:path';
-import { loadProject, check, fix, planFixes, renderTree, toJSON } from '../src/index.js';
+import { loadProject, check, checkBuild, fix, planFixes, renderTree, toJSON } from '../src/index.js';
 import { buildSite } from '../src/site.js';
 import { serveSite } from '../src/serve.js';
 import { initProject } from '../src/init.js';
 import { diffLines } from '../src/diff.js';
+import { LABELS, problemText, countText } from '../src/problems.js';
 
 const USAGE = `Usage: idk-plans <command> [options]
 
 Commands:
   init               Write starter files that do not exist yet.
-  check              Report problems. Exits 1 if there is an error.
+  check              Report problems. Exits 1 if there is an error (or a warning, with --strict).
   fix                Write generated blocks and correct what can be corrected.
   tree               Show a tree with progress.
   model              Print the model as JSON.
@@ -25,7 +26,8 @@ Options:
   --dry-run          Show what would change, and write nothing (fix command)
   --tree <name>      Tree to show (tree command; default: the primary tree)
   --depth <n>        Depth to show (tree command)
-  --quiet            Show only errors (check command)
+  --strict           Fail on warnings too (check and fix commands)
+  --quiet            Show only the problems that make the command fail (check command)
   --out <dir>        Output folder (site command; default: _site)
   --source-url <url> Base URL for links to files in the repository (site and serve commands)
   --port <n>         Port (serve command; default: 4747)
@@ -42,6 +44,7 @@ const { values, positionals } = parseArgs({
     'dry-run': { type: 'boolean' },
     tree: { type: 'string' },
     depth: { type: 'string' },
+    strict: { type: 'boolean' },
     quiet: { type: 'boolean' },
     out: { type: 'string' },
     'source-url': { type: 'string' },
@@ -58,15 +61,34 @@ if (values.help || !command) {
 }
 
 const cwd = values.cwd ?? process.cwd();
+// Options of site and serve that override "site" in the configuration.
+const siteOptions = values['source-url'] ? { sourceUrl: values['source-url'] } : {};
+
+const color = process.stdout.isTTY && !process.env.NO_COLOR;
+const paint = (format, text) => (color ? styleText(format, text) : text);
+const STYLES = { error: 'red', warn: 'yellow', info: 'dim' };
+const ICONS = { error: '✖', warn: '⚠', info: 'ℹ' };
 
 function printProblems(problems) {
-  const icon = { error: '✖', warn: '⚠', info: 'ℹ' };
   for (const p of problems) {
-    const where = p.file ? `${p.file}${p.line ? `:${p.line}` : ''}` : '(project)';
-    console.log(`${icon[p.severity]} ${where}  ${p.message}  [${p.rule}]`);
+    const label = paint(STYLES[p.severity], `${ICONS[p.severity]} ${LABELS[p.severity].padEnd(7)}`);
+    console.log(`${label} ${problemText(p)}`);
   }
-  const count = (s) => problems.filter((p) => p.severity === s).length;
-  console.log(`\n${count('error')} errors, ${count('warn')} warnings, ${count('info')} info`);
+  console.log(`\n${countText(problems)}`);
+}
+
+/** The problems that make check and fix fail: errors, and warnings with --strict. */
+const failing = (problems) => problems.filter((p) => p.severity === 'error' || (values.strict && p.severity === 'warn'));
+
+/** Stop a command that builds from the model when there is an error. Same text as check. */
+function stopOnErrors(project) {
+  const { errors, warnings } = checkBuild(project);
+  if (errors.length) {
+    printProblems(errors);
+    console.log(`idk-plans ${command} stopped: fix the errors above, then run it again`);
+    process.exit(1);
+  }
+  return warnings;
 }
 
 async function init() {
@@ -88,7 +110,7 @@ try {
     const server = await serveSite(cwd, {
       port: values.port ? Number(values.port) : undefined,
       host: values.host,
-      siteOptions: values['source-url'] ? { sourceUrl: values['source-url'] } : {},
+      siteOptions,
       log: (message) => console.log(message),
     });
     console.log(`serving ${server.url}\nwatching ${path.relative(process.cwd(), cwd) || '.'} for changes; press Ctrl+C to stop`);
@@ -100,10 +122,9 @@ try {
   const project = await loadProject(cwd);
   switch (command) {
     case 'check': {
-      let problems = check(project);
-      if (values.quiet) problems = problems.filter((p) => p.severity === 'error');
-      printProblems(problems);
-      process.exit(problems.some((p) => p.severity === 'error') ? 1 : 0);
+      const problems = check(project);
+      printProblems(values.quiet ? failing(problems) : problems);
+      process.exit(failing(problems).length ? 1 : 0);
       break;
     }
     case 'fix': {
@@ -120,18 +141,24 @@ try {
       for (const file of changed) console.log(`fixed ${file}`);
       const after = check(await loadProject(cwd));
       printProblems(after.filter((p) => p.severity !== 'info'));
-      process.exit(after.some((p) => p.severity === 'error') ? 1 : 0);
+      process.exit(failing(after).length ? 1 : 0);
       break;
     }
     case 'tree': {
+      stopOnErrors(project);
       const depth = values.depth ? Number(values.depth) : Infinity;
       console.log(renderTree(project.model, values.tree, depth).join('\n'));
       break;
     }
     case 'site': {
+      const warnings = stopOnErrors(project);
       const out = path.resolve(cwd, values.out ?? '_site');
-      const pages = await buildSite(project, out, values['source-url'] ? { sourceUrl: values['source-url'] } : {});
+      const pages = await buildSite(project, out, siteOptions);
       console.log(`wrote ${pages.length} pages to ${path.relative(process.cwd(), out) || '.'}`);
+      if (warnings.length) {
+        console.log();
+        printProblems(warnings);
+      }
       break;
     }
     case 'model':

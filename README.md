@@ -1,14 +1,14 @@
 # idk-plans
 
 <!-- idk-plans:progress:start (generated) -->
-◐ 93% (41/44) · 4 deferred
+◐ 93% (42/45) · 4 deferred
 <!-- idk-plans:progress:end -->
 
 Keep your project's architecture and progress in Markdown files next to the code. idk-plans checks the files, keeps their generated parts current, and builds a website from them. Progress rolls up from tasks to the top of the project.
 
 - **[Specification](./SPEC.md "spec")**: the format. Start here.
 - **[How it works](./docs/how-it-works.md "how-it-works")**: what the tool does when you run a command, step by step.
-- **Status:** 0.1.0 draft. The format can change.
+- **Status:** 0.3.0 draft. The format can change.
 - **AI use:** this project was made with the help of an AI coding assistant (Claude). AI wrote much of the code and the docs. The tool itself does not use AI.
 - **Demo:** these docs use idk-plans. See them as a site at [method-run.github.io/idk-plans](https://method-run.github.io/idk-plans/), or run `npm run docs:site` to build it yourself.
 
@@ -39,7 +39,7 @@ Zoom in: [Specification](./SPEC.md "spec") · [Command line](./bin/README.md "cl
 <!-- idk-plans:children:start (generated) -->
 - [Specification](./SPEC.md "spec"): The format of idk-plans files. It defines nodes, trees, tasks, rollups, links, generated blocks, and the checks. · no tasks · 3 deferred
 - [How it works](./docs/how-it-works.md "how-it-works"): What idk-plans does when you run a command, step by step. The tool is deterministic, and it does not use AI or the network.
-- [Command line](./bin/README.md "cli"): Runs the commands check, fix, tree, model, site, and serve. It is the only part that reads arguments and writes to the terminal. ● 100% (5/5)
+- [Command line](./bin/README.md "cli"): Runs the commands check, fix, tree, model, site, and serve. It is the only part that reads arguments and writes to the terminal. ● 100% (6/6)
 - [Engine](./src/README.md "engine"): Reads the Markdown files, builds one model of all nodes, trees, and tasks, and checks and fixes the files from that model. ◐ 93% (28/30) · 1 deferred
 - [Tested viewers](./docs/compatibility.md "compatibility"): The viewers that we test the Markdown files and the site with, and what each one shows differently. ● 100% (6/6)
 - [Release a version](./docs/release.md "release"): How a maintainer releases a new version of idk-plans. A version tag starts a workflow that publishes to npm and makes a GitHub release.
@@ -48,7 +48,7 @@ Zoom in: [Specification](./SPEC.md "spec") · [Command line](./bin/README.md "cl
 ## Other views
 
 <!-- idk-plans:trees:start (generated) -->
-**Viewers** ◐ 92% (24/26) · 1 deferred
+**Viewers** ◐ 92% (25/27) · 1 deferred
 
 - [Site builder](./src/site.md "site") ◐ 77% (7/9)
   - [Publish the site](./docs/publish-site.md "publish-site") ● 100% (2/2)
@@ -57,8 +57,8 @@ Zoom in: [Specification](./SPEC.md "spec") · [Command line](./bin/README.md "cl
     - [Working in Obsidian](./obsidian/README.md "obsidian") ● 100% (3/3)
   - [Fix](./src/fix.md "fix") ● 100% (4/4)
   - [Prose unwrap](./src/wrap.md "wrap") ● 100% (2/2) · 1 deferred
-- Terminal ● 100% (5/5)
-  - [Command line](./bin/README.md "cli") ● 100% (5/5)
+- Terminal ● 100% (6/6)
+  - [Command line](./bin/README.md "cli") ● 100% (6/6)
 <!-- idk-plans:trees:end -->
 
 ## Use
@@ -68,7 +68,8 @@ npm install --save-dev @method-run/idk-plans
 
 npx idk-plans init     # write a starter config and README
 npx idk-plans init --ci github --hooks
-npx idk-plans check    # report problems (CI, pre-push)
+npx idk-plans check    # report problems
+npx idk-plans check --strict   # fail on warnings too (CI, pre-push)
 npx idk-plans fix      # update generated blocks (pre-commit)
 npx idk-plans fix --dry-run
 npx idk-plans tree     # show progress in the terminal
@@ -108,7 +109,7 @@ echo "$out" | sed -n 's/^fixed //p' | while read -r file; do git add -- "$file";
 
 ```sh
 #!/bin/sh
-npx idk-plans check --quiet
+npx idk-plans check --strict --quiet
 ```
 
 Turn them on with `git config core.hooksPath .githooks`.

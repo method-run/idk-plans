@@ -12,7 +12,11 @@
     "site": {
       "type": "object",
       "additionalProperties": false,
-      "properties": { "title": { "type": "string" }, "sourceUrl": { "type": "string" }, "mermaid": { "enum": ["cdn", "local"] } }
+      "properties": {
+        "title": { "type": "string" },
+        "sourceUrl": { "type": "string" },
+        "mermaid": { "enum": ["cdn", "local"] }
+      }
     },
     "root": {
       "type": "object",
@@ -29,10 +33,11 @@
     },
     "rules": {
       "type": "object",
+      "propertyNames": { "not": { "enum": ["no-root", "frontmatter", "duplicate-id"] } },
       "additionalProperties": {
         "oneOf": [
-          { "enum": ["error", "warn", "info", "off"] },
-          { "type": "array", "prefixItems": [{ "enum": ["error", "warn", "info", "off"] }] }
+          { "enum": ["warn", "info", "off"] },
+          { "type": "array", "prefixItems": [{ "enum": ["warn", "info", "off"] }] }
         ]
       }
     }

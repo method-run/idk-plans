@@ -45,13 +45,42 @@ test('serve: serves the site with live reload, and rebuilds when a file changes'
     page = await (await fetch(server.url)).text();
     assert.match(page, /Second version\./);
 
-    const failed = nextEvent(await fetch(`${server.url}__idk-plans/events`), 'build-error');
+    const failed = nextEvent(await fetch(`${server.url}__idk-plans/events`), 'problems');
     await writeFile(path.join(dir, 'idk-plans.config.json'), '{ not json');
-    assert.match(await failed, /idk-plans\.config\.json/);
-    // The last good site is still served.
-    assert.match(await (await fetch(server.url)).text(), /Second version\./);
+    const [problem] = await failed;
+    assert.equal(problem.severity, 'error');
+    assert.match(problem.text, /^error {2}\(project\) {2}idk-plans\.config\.json:/);
+    // The last good site is still served, with the error on it.
+    page = await (await fetch(server.url)).text();
+    assert.match(page, /Second version\./);
+    assert.match(page, /idk-plans\.config\.json:/);
   } finally {
     await server.close();
     await rm(dir, { recursive: true });
   }
 });
+
+test('serve: starts without a site when there is an error, and builds it when the error is fixed', async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'idk-serve-'));
+  await writeFile(path.join(dir, 'README.md'), README('No frontmatter.'));
+  const lines = [];
+  const server = await serveSite(dir, { port: 0, log: (line) => lines.push(line) });
+  try {
+    assert.match(lines.join('\n'), /not built: 1 error[^]*error {2}\(project\) {2}there is no root page.*\[no-root\]/);
+    const waiting = await fetch(`${server.url}any/page/`);
+    assert.equal(waiting.status, 200);
+    assert.match(await waiting.text(), /there is no root page/);
+
+    const reloaded = nextEvent(await fetch(`${server.url}__idk-plans/events`), 'reload');
+    await writeFile(path.join(dir, 'README.md'), `---\nid: demo\ntitle: Demo\n---\n${README('Now a node.')}`);
+    await reloaded;
+    const page = await (await fetch(server.url)).text();
+    assert.match(page, /Now a node\./);
+    // Pages build with a warning, and show it.
+    assert.match(page, /warning {2}README\.md:1 {2}summary is required {2}\[bad-field\]/);
+  } finally {
+    await server.close();
+    await rm(dir, { recursive: true });
+  }
+});
+

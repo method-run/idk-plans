@@ -24,7 +24,7 @@ A good setup builds the site in CI on each push to the main branch:
 3. Run `idk-plans site`. Give `--source-url`, so links to code files go to the exact commit that the site describes.
 4. Give the folder to the host.
 
-The two sections below do this on GitHub and on GitLab. This repository has both workflows, in [.github/workflows/pages.yml](../.github/workflows/pages.yml) and [.gitlab-ci.yml](../.gitlab-ci.yml). They run `npm run docs:check` and `npm run docs:site`. In your project, use `npx idk-plans check --quiet` and `npx idk-plans site --out _site` instead.
+The two sections below do this on GitHub and on GitLab. This repository has both workflows, in [.github/workflows/pages.yml](../.github/workflows/pages.yml) and [.gitlab-ci.yml](../.gitlab-ci.yml). They run `npm run docs:check` and `npm run docs:site`. In your project, use `npx idk-plans check --strict --quiet` and `npx idk-plans site --out _site` instead.
 
 `idk-plans init --ci github` or `idk-plans init --ci gitlab` writes the workflow for that host, as shown below.
 
@@ -64,7 +64,7 @@ jobs:
 
       - run: npm ci
 
-      - run: npx idk-plans check --quiet
+      - run: npx idk-plans check --strict --quiet
 
       - run: >-
           npx idk-plans site --out _site
@@ -97,7 +97,7 @@ image: node:22
 pages:
   script:
     - npm ci
-    - npx idk-plans check --quiet
+    - npx idk-plans check --strict --quiet
     - npx idk-plans site --out public --source-url "$CI_PROJECT_URL/-/blob/$CI_COMMIT_SHA"
   artifacts:
     paths: [public]

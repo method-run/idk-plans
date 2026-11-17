@@ -10,7 +10,7 @@ tags: [system/spec]
 ---
 # idk-plans specification
 
-**Version:** 0.1.0-draft · **Status:** draft, expect breaking changes
+**Version:** 0.3.0-draft · **Status:** draft, expect breaking changes
 
 idk-plans is a convention for keeping a project's architecture and progress in plain Markdown files that live next to the code. A tool reads those files, checks them, keeps generated parts current, and can build a website from them.
 
@@ -493,26 +493,35 @@ The configuration is `idk-plans.config.json` in the project root.
 | `site.mermaid` | `"cdn"` | `"local"`: copy the project's `mermaid` package into the site, so diagrams work offline (13). The project must install `mermaid`. |
 | `site.sourceUrl` | none | Base URL for links to repository files, for example `https://<host>/<owner>/<repo>/src/branch/main`. `--source-url` overrides it. |
 | `trees.<name>.groups` | `[]` | Paths of virtual nodes that this tree may use without a page (4.4). A one-id group sits at the top level of the tree. |
-| `rules` | see section 10 | Severity (`error`, `warn`, `info`, `off`) and options for each rule. |
+| `rules` | see section 10 | Severity (`warn`, `info`, `off`) and options for each warning rule. Error rules can not be changed. |
 
 ## 10. Checks
 
-`check` reports problems. It does not change files. It exits with a code that is not zero if it finds an error.
+`check` reports problems. It does not change files.
+
+A problem is an **error** when pages can not be built: the site has no root, or a page would be left out. Errors can not be changed in the configuration. `check` exits with 1 when it finds one, and `site`, `serve`, and `tree` stop with the same text.
+
+| Rule | Problem |
+|---|---|
+| `no-root` | The project has no root page (3.4). |
+| `frontmatter` | The frontmatter is not valid YAML, or the `id` is not valid. The page is not built. |
+| `duplicate-id` | Two nodes have the same id. The second page is not built. |
+
+Every other problem is a **warning** or **info**. Pages are still built. The configuration can make each of these rules `warn`, `info`, or `off`, but not `error`. `check --strict` exits with 1 on warnings too, so CI and hooks use it.
 
 | Rule | Default | Problem |
 |---|---|---|
-| `frontmatter` | error | The frontmatter is not valid YAML, or a required field is missing or has a bad value. |
-| `duplicate-id` | error | Two nodes have the same id. |
-| `missing-parent` | error | A parent id does not exist and is not a valid virtual node. |
-| `no-primary-parent` | error | A non-root node has no primary parent. |
-| `cycle` | error | A tree has a cycle. |
-| `path-mismatch` | error | A path does not agree with the position of a node in it (4.4). |
-| `unknown-tree` | error | `parents` names a tree that the configuration does not have. |
-| `broken-ref` | error | A reference link label is not a node id or an alias. |
-| `broken-link` | error | A relative link points to a file that does not exist. |
-| `missing-code` | error | A path in `code` does not exist. |
-| `stale-generated` | error | A generated block is not current. `fix` corrects it. |
-| `bad-status` | error | A node status is not allowed for that node (5.4). |
+| `bad-field` | warn | A required field is missing, or a field has a bad value. |
+| `missing-parent` | warn | A parent id does not exist and is not a valid virtual node. |
+| `no-primary-parent` | warn | A non-root node has no primary parent. |
+| `cycle` | warn | A tree has a cycle. |
+| `path-mismatch` | warn | A path does not agree with the position of a node in it (4.4). |
+| `unknown-tree` | warn | `parents` names a tree that the configuration does not have. |
+| `broken-ref` | warn | A reference link label is not a node id or an alias. |
+| `broken-link` | warn | A relative link points to a file that does not exist. |
+| `missing-code` | warn | A path in `code` does not exist. |
+| `stale-generated` | warn | A generated block is not current. `fix` corrects it. |
+| `bad-status` | warn | A node status is not allowed for that node (5.4). |
 | `task-parent-mismatch` | warn | A task mark does not agree with its subtasks. |
 | `unknown-mark` | warn | A list item has a mark in brackets that is not a task mark (5.1). |
 | `hard-wrap` | warn | A paragraph, list item, or quote is wrapped across lines (6.3). `fix` joins it. Off when `proseWrap` is `"preserve"`. |
@@ -526,19 +535,20 @@ The configuration is `idk-plans.config.json` in the project root.
 
 | Command | Changes files | Use |
 |---|---|---|
-| `idk-plans check` | no | In CI and in a pre-push hook. |
+| `idk-plans check [--strict] [--quiet]` | no | In CI and in a pre-push hook, with `--strict`. |
 | `idk-plans fix` | yes | Before you commit. Writes generated blocks and corrects what it can. |
 | `idk-plans tree [--tree <name>] [--depth <n>]` | no | Shows a tree with rollups in the terminal. |
 | `idk-plans model` | no | Writes the model (section 12) as JSON to standard output. |
-| `idk-plans site [--out <dir>] [--source-url <url>]` | no | Builds the static site (section 13). |
+| `idk-plans site [--out <dir>] [--source-url <url>]` | no | Builds the static site (section 13). Stops if there is an error. |
+| `idk-plans serve [--port <n>] [--host <host>]` | no | Serves the site on your computer, and rebuilds and reloads it when a file changes. Shows errors and warnings on the page. |
 
 ### 11.1 Hooks
 
 Recommended setup:
 
 - **pre-commit:** `idk-plans fix`, then add the changed files to the commit.
-- **pre-push:** `idk-plans check`.
-- **CI:** `idk-plans check`.
+- **pre-push:** `idk-plans check --strict`.
+- **CI:** `idk-plans check --strict`.
 
 ## 12. Model
 
@@ -546,7 +556,7 @@ Recommended setup:
 
 ```jsonc
 {
-  "version": "0.1",
+  "version": "0.3",
   "root": "my-app",
   "primaryTree": "system",
   "trees": { "system": { "title": "System", "top": "my-app" }, "concern": { "title": "Concerns", "top": "concern" } },

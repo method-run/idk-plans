@@ -3,7 +3,7 @@ id: site
 title: Site builder
 summary: Builds a static website from the model, with diagrams that link to pages, a sidebar for each tree, search, and a list of open tasks.
 parent: engine
-code: [src/site.js, src/serve.js, site-assets/]
+code: [src/site.js, src/serve.js, src/problems.js, site-assets/]
 order: 7
 aliases: [Site builder]
 tags: [system/engine/site, viewer/site]
@@ -29,7 +29,7 @@ It renders Markdown with `marked`. Links to nodes go to their pages. Links to ot
 
 [site-assets/](../site-assets/) holds the stylesheet and the browser script. The script makes boxes in Mermaid diagrams into links, and runs the search and the sidebar tabs.
 
-[src/serve.js](serve.js) `serveSite` builds the site into a temporary folder, and serves it with `node:http`. It watches the project with `fs.watch`, and builds again 100 ms after a Markdown file or the configuration changes. Each build goes into a new folder, so a request never gets a half-built site. Each HTML page gets a short script that listens for server-sent events: it reloads the page after a build, and shows the error if a build fails. The last good site stays up. `serve` does not write to the project, and does not run `fix`.
+[src/serve.js](serve.js) `serveSite` builds the site into a temporary folder, and serves it with `node:http`. It watches the project with `fs.watch`, and builds again 100 ms after a Markdown file or the configuration changes. Each build goes into a new folder, so a request never gets a half-built site. Each HTML page gets a short script that listens for server-sent events, and reloads the page after a build. When `check` finds an error, `serve` does not build: the last good site stays up, with the errors across the top of the page. Warnings show in a closed box at the bottom. Both use the same text as `check` ([src/problems.js](problems.js)). `serve` does not write to the project, and does not run `fix`.
 
 Mermaid runs in the browser, with `securityLevel: 'strict'`. By default, pages load Mermaid from a CDN. With `"site": { "mermaid": "local" }` in the configuration, `buildSite` copies the project's own single-file build (`mermaid.min.js`, about 2.5 MB) into the site, so diagrams work offline. idk-plans does not depend on Mermaid, so the project must install it.
 

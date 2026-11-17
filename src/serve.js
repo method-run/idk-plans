@@ -3,9 +3,10 @@ import { mkdtemp, readFile, rm, stat } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { loadProject } from './index.js';
+import { loadProject, checkBuild } from './index.js';
 import { buildSite } from './site.js';
 import { CONFIG_FILE } from './config.js';
+import { LABELS, problemText, countText } from './problems.js';
 
 const EVENTS = '/__idk-plans/events';
 const TYPES = {
@@ -17,23 +18,39 @@ const TYPES = {
   '.png': 'image/png',
 };
 
-// Reloads the page after each build, and shows a build error at the top of the page.
-const CLIENT = `<script>
+// Reloads the page after each build. Shows errors at the top of the page, and
+// warnings in a closed box at the bottom, in the same words as `check`.
+const client = (problems) => `<script>
 (() => {
+  const show = (problems) => {
+    document.getElementById('idk-problems')?.remove();
+    if (!problems.length) return;
+    const errors = problems.some((p) => p.severity === 'error');
+    const box = document.createElement(errors ? 'div' : 'details');
+    box.id = 'idk-problems';
+    box.style.cssText = 'position:fixed;z-index:9999;margin:0;padding:.75em 1em;font:13px/1.4 ui-monospace,monospace;white-space:pre-wrap;overflow:auto;max-height:50vh;'
+      + (errors ? 'inset:0 0 auto;background:#b00020;color:#fff' : 'right:1em;bottom:1em;max-width:min(60em,calc(100vw - 2em));background:#fff4cc;color:#4d3b00;border:1px solid #d9b500;border-radius:6px');
+    const head = document.createElement(errors ? 'strong' : 'summary');
+    head.textContent = errors ? 'idk-plans: the site was not built. Fix these errors:' : 'idk-plans: ' + problems[0].count;
+    head.style.cursor = 'pointer';
+    box.append(head, '\\n' + problems.map((p) => p.text).join('\\n'));
+    document.body.append(box);
+  };
+  show(${JSON.stringify(problems).replace(/</g, '\\u003c')});
   const events = new EventSource(${JSON.stringify(EVENTS)});
   events.addEventListener('reload', () => location.reload());
-  events.addEventListener('build-error', (e) => {
-    let box = document.getElementById('idk-build-error');
-    if (!box) {
-      box = document.createElement('pre');
-      box.id = 'idk-build-error';
-      box.style.cssText = 'position:fixed;inset:0 0 auto;z-index:9999;margin:0;padding:1em;background:#b00020;color:#fff;white-space:pre-wrap';
-      document.body.prepend(box);
-    }
-    box.textContent = 'idk-plans: ' + JSON.parse(e.data);
-  });
+  events.addEventListener('problems', (e) => show(JSON.parse(e.data)));
 })();
 </script>`;
+
+/** Problems for the page: one line of text each, as `check` prints them. */
+function forPage(problems) {
+  const count = countText(problems);
+  return problems.map((p) => ({ severity: p.severity, text: `${LABELS[p.severity]}  ${problemText(p)}`, count }));
+}
+
+// Before the first good build, every page is this one.
+const WAITING = '<!doctype html>\n<meta charset="utf-8">\n<title>idk-plans</title>\n<body>\n</body>\n';
 
 /** True for a changed file that can change the site: a Markdown file or the configuration. */
 function isWatched(file) {
@@ -51,23 +68,48 @@ export async function serveSite(cwd, options = {}) {
   const { port = 4747, host = '127.0.0.1', siteOptions = {}, log = () => {} } = options;
   const clients = new Set();
   let outDir = null;
+  // Errors and warnings of the last build, shown on every page.
+  let shown = [];
+
+  // A change starts a build 100 ms later, so a save that writes several files builds once.
+  let timer = null;
+  const changed = () => {
+    clearTimeout(timer);
+    timer = setTimeout(rebuild, 100);
+  };
 
   const send = (event, data) => {
     for (const res of clients) res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
   };
 
   // Each build goes into a new folder, so the server never serves a half-built site.
+  // When there is an error, the last good site stays up, with the errors on top.
+  // A configuration that is not valid stops every command, so it shows as an error too.
   const build = async () => {
-    const next = await mkdtemp(path.join(tmpdir(), 'idk-plans-serve-'));
+    let next = null;
     try {
-      const pages = await buildSite(await loadProject(cwd), next, siteOptions);
+      const project = await loadProject(cwd);
+      const { errors, warnings } = checkBuild(project);
+      if (errors.length) return { errors, warnings };
+      next = await mkdtemp(path.join(tmpdir(), 'idk-plans-serve-'));
+      const pages = await buildSite(project, next, siteOptions);
       const old = outDir;
       outDir = next;
       if (old) await rm(old, { recursive: true, force: true });
-      return pages;
+      return { pages, errors, warnings };
     } catch (err) {
-      await rm(next, { recursive: true, force: true });
-      throw err;
+      if (next && next !== outDir) await rm(next, { recursive: true, force: true });
+      return { errors: [{ rule: 'idk-plans', severity: 'error', file: null, line: null, message: err.message }], warnings: [] };
+    }
+  };
+
+  const report = ({ pages, errors, warnings }) => {
+    shown = forPage([...errors, ...warnings]);
+    if (errors.length) {
+      log(`not built: ${countText(errors)}`);
+      for (const p of errors) log(`  ${LABELS.error}  ${problemText(p)}`);
+    } else {
+      log(`built ${pages.length} pages${warnings.length ? `; ${countText(warnings)}` : ''}`);
     }
   };
 
@@ -79,21 +121,18 @@ export async function serveSite(cwd, options = {}) {
     running = (async () => {
       do {
         again = false;
-        try {
-          const pages = await build();
-          log(`rebuilt ${pages.length} pages`);
-          send('reload', '');
-        } catch (err) {
-          log(`build failed: ${err.message}`);
-          send('build-error', err.message);
-        }
+        const result = await build();
+        report(result);
+        // A good build reloads the page. Errors show on the page that is open.
+        if (result.errors.length) send('problems', shown);
+        else send('reload', '');
       } while (again);
       running = null;
     })();
     return running;
   };
 
-  await build();
+  report(await build());
 
   const server = createServer(async (req, res) => {
     const url = new URL(req.url, 'http://localhost');
@@ -102,6 +141,12 @@ export async function serveSite(cwd, options = {}) {
       res.write(': connected\n\n');
       clients.add(res);
       req.on('close', () => clients.delete(res));
+      return;
+    }
+    if (!outDir) {
+      const page = url.pathname.endsWith('/') || url.pathname.endsWith('.html');
+      res.writeHead(page ? 200 : 404, { 'content-type': page ? TYPES['.html'] : 'text/plain', 'cache-control': 'no-store' })
+        .end(page ? WAITING.replace('</body>', () => `${client(shown)}\n</body>`) : 'Not found');
       return;
     }
     let rel;
@@ -121,7 +166,7 @@ export async function serveSite(cwd, options = {}) {
       }
       let body = await readFile(file);
       const type = TYPES[path.extname(file)] ?? 'application/octet-stream';
-      if (type.startsWith('text/html')) body = body.toString('utf8').replace(/<\/body>/i, () => `${CLIENT}\n</body>`);
+      if (type.startsWith('text/html')) body = body.toString('utf8').replace(/<\/body>/i, () => `${client(shown)}\n</body>`);
       res.writeHead(200, { 'content-type': type, 'cache-control': 'no-store' }).end(body);
     } catch {
       res.writeHead(404, { 'content-type': 'text/plain' }).end('Not found');
@@ -132,11 +177,8 @@ export async function serveSite(cwd, options = {}) {
     server.listen(port, host, resolve);
   });
 
-  let timer = null;
   const watcher = watch(cwd, { recursive: true }, (_, filename) => {
-    if (!filename || !isWatched(filename.toString())) return;
-    clearTimeout(timer);
-    timer = setTimeout(rebuild, 100);
+    if (filename && isWatched(filename.toString())) changed();
   });
 
   const { port: actualPort } = server.address();
