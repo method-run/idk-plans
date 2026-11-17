@@ -37,7 +37,7 @@
     "docs:serve": "node --watch --watch-preserve-output bin/idk-plans.js serve"
   },
   "dependencies": {
-    "marked": "^15.0.12",
+    "marked": "^18.2.0",
     "picomatch": "^4.0.7",
     "yaml": "^2.9.1"
   },
