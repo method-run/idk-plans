@@ -30,7 +30,8 @@ Options:
   --quiet            Show only the problems that make the command fail (check command)
   --out <dir>        Output folder (site command; default: _site)
   --source-url <url> Base URL for links to files in the repository (site and serve commands)
-  --theme <file>     A themetron CSS theme, in place of site.theme (site and serve commands)
+  --theme <file>     A themetron theme: an inputs file (.json) or a CSS export, in place of
+                     site.theme (site and serve commands)
   --port <n>         Port (serve command; default: 4747)
   --host <host>      Host (serve command; default: 127.0.0.1)
   --help             Show this message

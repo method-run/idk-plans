@@ -1,7 +1,11 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-// The themes that the site reads: a stylesheet from idk-themetron, in its "css" format (the
+// The themes that the site reads. The easy one is a themetron inputs file (.json), as the
+// playground downloads it: the site builds the theme from it with themetron, and wears the
+// looks of the same themetron. Themetron runs only here, at build time; the site gets CSS.
+// The site also reads a stylesheet from idk-themetron, in its "css" format (the
 // tokens only), its "looks" format (the tokens and the tm-look-* classes, which the site then
 // wears), or its "stylesheet" format (the tokens, the looks, and the components; the site does
 // not use the components). Made with the default token prefix (tm) and class prefix (theme-).
@@ -47,19 +51,61 @@ export async function readLooks(cwd, file) {
   return { file: path.resolve(cwd, file), css };
 }
 
+/** True for a themetron inputs file, which the site builds into a theme. */
+export const isInputs = (file) => /\.json$/i.test(file);
+
+// Themetron is loaded only for an inputs file, so a site without one never loads it.
+const themetron = () => import('@method-run/idk-themetron');
+
+/** Build the tokens ("css" format) from a themetron inputs file. */
+async function buildFromInputs(full, file) {
+  let inputs;
+  try {
+    inputs = JSON.parse(await readFile(full, 'utf8'));
+  } catch (err) {
+    if (err.code === 'ENOENT') throw new Error(`site.theme: ${file} does not exist`);
+    throw new Error(`site.theme: ${file} is not a themetron inputs file: ${err.message}`);
+  }
+  const { buildThemes, toCss } = await themetron();
+  try {
+    return toCss(buildThemes(inputs));
+  } catch (err) {
+    throw new Error(`site.theme: ${file}: ${err.message}`);
+  }
+}
+
 /**
- * Read a themetron theme stylesheet (the "css" or "looks" export). Returns its text, the theme
- * class for each colorway that the theme has, and whether it has the root class, icons, and looks.
+ * The looks of the installed themetron, or null when it has none (before themetron 0.4). The
+ * looks of an inputs theme come from here, so the tokens and the looks are from one version.
+ */
+export async function packageLooks() {
+  const pkg = fileURLToPath(import.meta.resolve('@method-run/idk-themetron/package.json'));
+  try {
+    const file = path.join(path.dirname(pkg), 'components', 'looks.css');
+    return { file, css: await readFile(file, 'utf8') };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Read a themetron theme: an inputs file (.json), which it builds, or a stylesheet (the "css" or
+ * "looks" export). Returns its CSS, the theme class for each colorway that the theme has, and
+ * whether it has the root class, icons, and looks, and was built from inputs.
  * Throws when the file is missing, or is not a themetron theme.
  */
 export async function readTheme(cwd, file) {
   const full = path.resolve(cwd, file);
   let css;
-  try {
-    css = await readFile(full, 'utf8');
-  } catch (err) {
-    if (err.code === 'ENOENT') throw new Error(`site.theme: ${file} does not exist`);
-    throw err;
+  if (isInputs(file)) {
+    css = await buildFromInputs(full, file);
+  } else {
+    try {
+      css = await readFile(full, 'utf8');
+    } catch (err) {
+      if (err.code === 'ENOENT') throw new Error(`site.theme: ${file} does not exist`);
+      throw err;
+    }
   }
   if (!/--tm-bg-canvas\s*:/.test(css)) {
     const other = css.match(/--([a-z][a-z0-9]*)-bg-canvas\s*:/);
@@ -86,5 +132,6 @@ export async function readTheme(cwd, file) {
     icons: /--tm-font-icon\s*:/.test(css),
     // The looks export, or the stylesheet export, which has the looks too.
     looks: /\.tm-look-fill\b/.test(css),
+    inputs: isInputs(file),
   };
 }

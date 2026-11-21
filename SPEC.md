@@ -491,8 +491,8 @@ The configuration is `idk-plans.config.json` in the project root.
 | `proseWrap` | `"never"` | `"never"`: one line per paragraph; `check` reports wrapped text and `fix` joins it. `"preserve"`: keep line breaks as they are (6.3). |
 | `site.title` | the root title | The site name. |
 | `site.mermaid` | `"cdn"` | `"local"`: copy the project's `mermaid` package into the site, so diagrams work offline (13). The project must install `mermaid`. |
-| `site.theme` | none | The path of an [idk-themetron](https://www.npmjs.com/package/@method-run/idk-themetron) theme, from the project root: the `css` format, for token contract 0.2, 0.3, or 0.4 (13). `--theme` overrides it. |
-| `site.looks` | none | The path of themetron's `looks.css`, from the project root. The site's buttons, search field, cards, and settings menu then wear themetron's `tm-look-*` classes. Needs a theme. |
+| `site.theme` | none | The path of an [idk-themetron](https://www.npmjs.com/package/@method-run/idk-themetron) theme, from the project root: an inputs file (`.json`), which the site builds with themetron, or a CSS export, the `css` format, for token contract 0.2, 0.3, or 0.4 (13). `--theme` overrides it. |
+| `site.looks` | none | The path of themetron's `looks.css`, from the project root. The site's buttons, search field, cards, and settings menu then wear themetron's `tm-look-*` classes. A theme from an inputs file gets the looks of the installed themetron without it; `false` turns them off. Needs a theme. |
 | `site.sourceUrl` | none | Base URL for links to repository files, for example `https://<host>/<owner>/<repo>/src/branch/main`. `--source-url` overrides it. |
 | `trees.<name>.groups` | `[]` | Paths of virtual nodes that this tree may use without a page (4.4). A one-id group sits at the top level of the tree. |
 | `rules` | see section 10 | Severity (`warn`, `info`, `off`) and options for each warning rule. Error rules can not be changed. |
@@ -598,7 +598,7 @@ Recommended setup:
 - A Tasks page lists every open task by state, and a Glossary page lists every title and alias.
 - Links to files that are not nodes go to `site.sourceUrl`, if it is set.
 - Pages load Mermaid from a CDN. With `"site": { "mermaid": "local" }`, the site copies the project's own `mermaid` package instead, so diagrams work offline.
-- With `site.theme`, the site loads a themetron theme (the `css` format, for [token contract 0.2 to 0.4](https://method-run.github.io/idk-themetron/schema/0.3.0/tokens.manifest.json)) before its own stylesheet, and takes its colors, fonts, edges, and shadows from it. Task states and callouts take the colors of the theme's `success`, `warning`, `danger`, `info`, and `important` themes, when the theme has them. With `site.looks`, or a theme in the `looks` format, the site's parts wear themetron's looks. Without a theme, the site keeps its own look.
+- With `site.theme`, the site loads a themetron theme (an inputs file, which it builds, or the `css` format, for [token contract 0.2 to 0.4](https://method-run.github.io/idk-themetron/schema/0.3.0/tokens.manifest.json)) before its own stylesheet, and takes its colors, fonts, edges, and shadows from it. Task states and callouts take the colors of the theme's `success`, `warning`, `danger`, `info`, and `important` themes, when the theme has them. With `site.looks`, or a theme in the `looks` format, the site's parts wear themetron's looks. Without a theme, the site keeps its own look.
 
 ## 14. Versions
 
