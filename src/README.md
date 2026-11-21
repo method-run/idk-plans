@@ -10,7 +10,7 @@ tags: [system/engine]
 # Engine
 
 <!-- idk-plans:progress:start (generated) -->
-◐ 88% (32/36) · 1 deferred
+◐ 89% (33/37) · 1 deferred
 <!-- idk-plans:progress:end -->
 
 The engine does the work behind every command. It reads the files once, and builds a model. Every check, fix, and page comes from that model, so they always agree.
@@ -39,7 +39,7 @@ Zoom in: [Init](./init.md "init") · [Configuration](./config.md "config") · [S
 - [Model](./model.md "model"): Joins the parsed files into nodes and trees, calculates every rollup, and finds problems that need more than one file. ● 100% (3/3)
 - [Fix](./fix.md "fix"): Writes the parts of each file that the tool owns: generated blocks, link paths, task marks, aliases, and tree tags. ● 100% (4/4)
 - [Prose unwrap](./wrap.md "wrap"): Joins prose that is wrapped by hand into one line for each paragraph, so that viewers which show line breaks do not break sentences. ● 100% (2/2) · 1 deferred
-- [Site builder](./site.md "site"): Builds a static website from the model, with diagrams that link to pages, a sidebar for each tree, search, and a list of open tasks. ◐ 73% (11/15)
+- [Site builder](./site.md "site"): Builds a static website from the model, with diagrams that link to pages, a sidebar for each tree, search, and a list of open tasks. ◐ 75% (12/16)
 - [Init](./init.md "init"): Writes starter files for a new project. It does not change a file that exists, so you can run it again safely. ● 100% (3/3)
 <!-- idk-plans:children:end -->
 

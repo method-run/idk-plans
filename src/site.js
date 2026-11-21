@@ -6,7 +6,7 @@ import { Marked } from 'marked';
 import { normalizeLabel } from './parse.js';
 import { rollupText } from './fix.js';
 import { titleFromId } from './model.js';
-import { readTheme, readLooks } from './theme.js';
+import { readTheme, readLooks, packageLooks } from './theme.js';
 
 export const ASSETS = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'site-assets');
 const MERMAID_URL = 'https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs';
@@ -115,9 +115,11 @@ export async function buildSite(project, outDir, options = {}) {
 
   // A themetron theme (site.theme): loaded before site.css, which reads its tokens.
   const theme = siteConfig.theme ? await readTheme(cwd ?? '.', siteConfig.theme) : null;
-  // themetron's looks.css (site.looks), loaded after the theme: the looks read its tokens.
+  // themetron's looks.css, loaded after the theme: the looks read its tokens. From site.looks,
+  // or, for a theme built from inputs, from the same themetron, unless site.looks is false.
   if (siteConfig.looks && !theme) throw new Error('site.looks needs a theme: set site.theme, or use --theme');
-  const looksFile = siteConfig.looks ? await readLooks(cwd ?? '.', siteConfig.looks) : null;
+  const looksFile = siteConfig.looks ? await readLooks(cwd ?? '.', siteConfig.looks)
+    : theme?.inputs && siteConfig.looks !== false ? await packageLooks() : null;
   if (looksFile) theme.looks = true;
   const colorway = (name) => theme?.classes[name] ?? null;
   const classes = (...names) => names.filter(Boolean).join(' ');

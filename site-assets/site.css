@@ -200,7 +200,7 @@ th { background: var(--bg-sunken); }
 .gear { anchor-name: --settings; }
 .ghost .icon { margin: 0; font-size: 1.1em; }
 .collapse .glyph { font-size: 1.3em; line-height: 1; }
-:root:not(.tm-looks) .ghost:hover, .gear:has(+ :popover-open) {
+:root:not(.tm-looks) .ghost:hover, :root .gear:has(+ :popover-open) {
   background: color-mix(in oklab, var(--tm-tint-base, var(--bg-sunken)) calc(var(--tm-tint-alpha, 1) * 100%), transparent);
   color: var(--tm-on-tint-base, var(--text));
 }

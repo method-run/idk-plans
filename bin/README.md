@@ -52,7 +52,7 @@ Exit codes:
 
 `fix --dry-run` calls `planFixes`, and prints a short line diff for each file ([src/diff.js](../src/diff.js)). It writes nothing, and exits with 0.
 
-`site` and `serve` take `--theme <file>`, a themetron theme that replaces `site.theme` ([Themes](../docs/themes.md "themes")).
+`site` and `serve` take `--theme <file>`, a themetron theme (an inputs file, or a CSS export) that replaces `site.theme` ([Themes](../docs/themes.md "themes")).
 
 `serve` does not stop until you press Ctrl+C. Give `--port` and `--host` to change where it listens.
 

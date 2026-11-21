@@ -187,10 +187,38 @@ test('site: a theme with looks (the "looks" export) puts themetron\'s look class
   }
 });
 
-test('site: a real themetron theme (this repository\'s docs/theme.css) gives every colorway', async () => {
-  const theme = await readTheme(path.join(path.dirname(fileURLToPath(import.meta.url)), '..'), 'docs/theme.css');
+test('site: a themetron inputs file (this repository\'s docs/theme.inputs.json) builds a theme with every colorway', async () => {
+  const theme = await readTheme(path.join(path.dirname(fileURLToPath(import.meta.url)), '..'), 'docs/theme.inputs.json');
+  assert.ok(theme.inputs);
+  assert.match(theme.css, /^\/\* Made by themetron/);
   assert.equal(theme.root, 'theme-default');
-  assert.equal(theme.contract, '0.3.0');
+  assert.match(theme.contract, /^0\.[34]\./);
   assert.ok(theme.icons);
   for (const colorway of ['success', 'warning', 'danger']) assert.ok(theme.classes[colorway], colorway);
+});
+
+test('site: a theme from an inputs file: its errors, and site.looks false', async () => {
+  const cwd = await mkdtemp(path.join(tmpdir(), 'idk-inputs-'));
+  const out = path.join(cwd, '_site');
+  try {
+    const config = resolveConfig({ root: { file: 'README.md', id: 'demo' } });
+    const parsed = Object.entries(files).map(([f, t]) => parseMarkdown(f, t));
+    const model = buildModel({ config, parsed, exists: () => true });
+    const project = { model, config, cwd };
+    await writeFile(path.join(cwd, 'theme.json'), JSON.stringify({ version: 2, themes: { default: { base: '#336699' }, danger: { parent: 'default', action: { color: '#cc0000' } } } }));
+    await buildSite(project, out, { theme: 'theme.json', looks: false });
+    const css = await readFile(path.join(out, 'assets/theme.css'), 'utf8');
+    assert.match(css, /--tm-bg-canvas:/);
+    const gw = await readFile(path.join(out, 'gateway/index.html'), 'utf8');
+    assert.match(gw, /class="tag blocked theme-danger">#blocked/);
+    assert.doesNotMatch(gw, /tm-look|looks\.css/, 'site.looks false: no looks');
+
+    await assert.rejects(buildSite(project, out, { theme: 'nope.json' }), /site\.theme: nope\.json does not exist/);
+    await writeFile(path.join(cwd, 'broken.json'), '{ nope');
+    await assert.rejects(buildSite(project, out, { theme: 'broken.json' }), /broken\.json is not a themetron inputs file/);
+    await writeFile(path.join(cwd, 'bad.json'), JSON.stringify({ version: 2, themes: { default: { base: 'not a color' } } }));
+    await assert.rejects(buildSite(project, out, { theme: 'bad.json' }), /site\.theme: bad\.json: /);
+  } finally {
+    await rm(cwd, { recursive: true });
+  }
 });
