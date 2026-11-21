@@ -98,7 +98,7 @@ test('site: uses the CDN by default, and the project\'s own Mermaid with site.me
 test('site: without a theme, no theme stylesheet, theme classes, icons, or contrast switch', async () => {
   const { out, read } = await build();
   const gw = await read('gateway/index.html');
-  assert.doesNotMatch(gw, /theme\.css|theme-|class="icon"|data-look="tmContrast"/);
+  assert.doesNotMatch(gw, /theme\.css|theme-|tm-look|tm-looks|class="icon"|data-look="tmContrast"/);
   assert.match(gw, /data-look="tmMode"/);
   await rm(out, { recursive: true });
 });
@@ -126,6 +126,7 @@ test('site: a themetron theme (site.theme) is loaded first, and colors the parts
     assert.match(gw, /class="tag blocked theme-error">#blocked/);
     assert.match(gw, /<span class="icon" aria-hidden="true">menu<\/span>/);
     assert.match(gw, /data-look="tmContrast"/);
+    assert.doesNotMatch(gw, /tm-look/, 'a theme without looks: site.css draws the parts');
 
     // Errors: a missing file, and a file that is not a themetron theme.
     await assert.rejects(buildSite(project, out, { theme: 'nope.css' }), /site\.theme: nope\.css does not exist/);
@@ -137,14 +138,50 @@ test('site: a themetron theme (site.theme) is loaded first, and colors the parts
 
     // The themetron token contract: the same breaking version, or no "token contract" line, is read.
     const made = (version) => `/* Made by themetron, token contract ${version}: https://example.org */\n${css}`;
-    for (const version of ['0.2.0', '0.2.5']) {
+    for (const version of ['0.2.0', '0.2.5', '0.3.0', '0.4.0']) {
       await writeFile(path.join(cwd, 'versioned.css'), made(version));
       await buildSite(project, out, { theme: 'versioned.css' });
     }
-    for (const version of ['0.1.0', '0.3.0', '1.0.0']) {
+    for (const version of ['0.1.0', '0.5.0', '1.0.0']) {
       await writeFile(path.join(cwd, 'versioned.css'), made(version));
-      await assert.rejects(buildSite(project, out, { theme: 'versioned.css' }), new RegExp(`token contract ${version.replace(/\./g, '\\.')}, but idk-plans reads contract 0\\.2\\.x`));
+      await assert.rejects(buildSite(project, out, { theme: 'versioned.css' }), new RegExp(`token contract ${version.replace(/\./g, '\\.')}, but idk-plans reads contracts 0\\.2\\.x, 0\\.3\\.x, 0\\.4\\.x`));
     }
+  } finally {
+    await rm(cwd, { recursive: true });
+  }
+});
+
+test('site: a theme with looks (the "looks" export) puts themetron\'s look classes on the site\'s parts', async () => {
+  const cwd = await mkdtemp(path.join(tmpdir(), 'idk-looks-'));
+  const out = path.join(cwd, '_site');
+  try {
+    const config = resolveConfig({ root: { file: 'README.md', id: 'demo' }, trees: { system: { primary: true }, concern: { title: 'Concerns' } } });
+    const parsed = Object.entries(files).map(([f, t]) => parseMarkdown(f, t));
+    const model = buildModel({ config, parsed, exists: () => true });
+    const css = ':root, .theme-default { --tm-bg-canvas: white; }\n.theme-danger { --tm-fill-action: red; }\n.tm-look-fill, .tm-look-tint { color: red; }\n';
+    await writeFile(path.join(cwd, 'theme.css'), css);
+    await buildSite({ model, config, cwd }, out, { theme: 'theme.css' });
+    const gw = await readFile(path.join(out, 'gateway/index.html'), 'utf8');
+    assert.match(gw, /<html lang="en" class="theme-default tm-looks">/);
+    assert.match(gw, /class="menu tm-look-quiet"/);
+    assert.match(gw, /<input type="search" class="tm-look-field"/);
+    assert.match(gw, /class="ghost gear tm-look-ghost"/);
+    assert.match(gw, /class="ghost collapse tm-look-ghost"/);
+    assert.match(gw, /class="settings tm-look-surface tm-enter-pop"/);
+    assert.match(gw, /class="tag blocked theme-danger tm-look-tint">#blocked/);
+    assert.match(await readFile(path.join(out, 'index.html'), 'utf8'), /<li class="card tm-look-surface">/);
+
+    // The looks as their own file (site.looks), after the theme's tokens.
+    await writeFile(path.join(cwd, 'tokens.css'), ':root, .theme-default { --tm-bg-canvas: white; }\n');
+    await writeFile(path.join(cwd, 'looks.css'), '.tm-look-fill { color: red; }\n');
+    await buildSite({ model, config, cwd }, out, { theme: 'tokens.css', looks: 'looks.css' });
+    const page = await readFile(path.join(out, 'gateway/index.html'), 'utf8');
+    assert.match(page, /assets\/theme\.css">\n<link rel="stylesheet" href="\.\.\/assets\/looks\.css">\n<link rel="stylesheet" href="\.\.\/assets\/site\.css">/);
+    assert.match(page, /class="ghost gear tm-look-ghost"/);
+    assert.equal(await readFile(path.join(out, 'assets/looks.css'), 'utf8'), '.tm-look-fill { color: red; }\n');
+    await assert.rejects(buildSite({ model, config, cwd }, out, { looks: 'looks.css' }), /site\.looks needs a theme/);
+    await assert.rejects(buildSite({ model, config, cwd }, out, { theme: 'tokens.css', looks: 'tokens.css' }), /not themetron's looks\.css/);
+    assert.throws(() => resolveConfig({ site: { looks: '' } }), /"site\.looks" must be/);
   } finally {
     await rm(cwd, { recursive: true });
   }
@@ -153,7 +190,7 @@ test('site: a themetron theme (site.theme) is loaded first, and colors the parts
 test('site: a real themetron theme (this repository\'s docs/theme.css) gives every colorway', async () => {
   const theme = await readTheme(path.join(path.dirname(fileURLToPath(import.meta.url)), '..'), 'docs/theme.css');
   assert.equal(theme.root, 'theme-default');
-  assert.equal(theme.contract, '0.2.0');
+  assert.equal(theme.contract, '0.3.0');
   assert.ok(theme.icons);
   for (const colorway of ['success', 'warning', 'danger']) assert.ok(theme.classes[colorway], colorway);
 });

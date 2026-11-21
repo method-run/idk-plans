@@ -6,7 +6,7 @@ import { Marked } from 'marked';
 import { normalizeLabel } from './parse.js';
 import { rollupText } from './fix.js';
 import { titleFromId } from './model.js';
-import { readTheme } from './theme.js';
+import { readTheme, readLooks } from './theme.js';
 
 export const ASSETS = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'site-assets');
 const MERMAID_URL = 'https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs';
@@ -115,13 +115,20 @@ export async function buildSite(project, outDir, options = {}) {
 
   // A themetron theme (site.theme): loaded before site.css, which reads its tokens.
   const theme = siteConfig.theme ? await readTheme(cwd ?? '.', siteConfig.theme) : null;
+  // themetron's looks.css (site.looks), loaded after the theme: the looks read its tokens.
+  if (siteConfig.looks && !theme) throw new Error('site.looks needs a theme: set site.theme, or use --theme');
+  const looksFile = siteConfig.looks ? await readLooks(cwd ?? '.', siteConfig.looks) : null;
+  if (looksFile) theme.looks = true;
   const colorway = (name) => theme?.classes[name] ?? null;
   const classes = (...names) => names.filter(Boolean).join(' ');
   // A part that shows a task state: its own class, the state, and the state's colorway.
   const stateClass = (part, state) => classes(part, state, colorway(STATE_COLORWAYS[state === 'partial' ? 'doing' : state]));
   const markClass = (state) => classes('task-mark', colorway(STATE_COLORWAYS[state]));
   const icon = (name) => (theme?.icons && name ? `<span class="icon" aria-hidden="true">${name}</span>` : '');
-  const blockedTag = (html) => tagBlocked(html, colorway('danger'));
+  // A theme with looks (the "looks" export) draws the site's buttons, field, panels, and tags
+  // with themetron's own tm-look-* classes. Without them, site.css draws these parts itself.
+  const look = (name) => (theme?.looks ? `tm-look-${name}` : null);
+  const blockedTag = (html) => tagBlocked(html, classes(colorway('danger'), colorway('danger') && look('tint')));
   const bar = (r) => progressBar(r, stateClass);
 
   await rm(outDir, { recursive: true, force: true });
@@ -130,6 +137,7 @@ export async function buildSite(project, outDir, options = {}) {
     await copyFile(path.join(ASSETS, asset), path.join(outDir, 'assets', asset));
   }
   if (theme) await writeFile(path.join(outDir, 'assets', 'theme.css'), theme.css);
+  if (looksFile) await writeFile(path.join(outDir, 'assets', 'looks.css'), looksFile.css);
   if (localMermaid) await copyFile(localMermaid, path.join(outDir, 'assets', 'mermaid.min.js'));
 
   // Search index, as a script so that the site also works from file://.
@@ -260,7 +268,7 @@ export async function buildSite(project, outDir, options = {}) {
     const tabs = treeOrder.map((tree) => `<button type="button" role="tab" data-tree="${esc(tree)}" aria-selected="${tree === selected}" title="${esc(model.trees[tree].title)}">${esc(model.trees[tree].title)}</button>`).join('');
     const panels = treeOrder.map((tree) => `<div class="tree-panel" data-tree="${esc(tree)}"${tree === selected ? '' : ' hidden'}>${sidebarTree(page, tree, currentId)}</div>`).join('');
     return `<!doctype html>
-<html lang="en"${theme?.root ? ` class="${theme.root}"` : ''}>
+<html lang="en"${theme?.root || theme?.looks ? ` class="${classes(theme.root, theme.looks && 'tm-looks')}"` : ''}>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -271,15 +279,15 @@ export async function buildSite(project, outDir, options = {}) {
   for (const k of ['tmMode', 'tmContrast', 'sidebar']) if (look[k]) html.dataset[k] = look[k];
   if (look.sidebarWidth > 0) html.style.setProperty('--sidebar', look.sidebarWidth + 'px');
 } catch { /* storage may be blocked */ }</script>
-${theme ? `<link rel="stylesheet" href="${root('assets/theme.css')}">\n` : ''}<link rel="stylesheet" href="${root('assets/site.css')}">
+${theme ? `<link rel="stylesheet" href="${root('assets/theme.css')}">\n` : ''}${looksFile ? `<link rel="stylesheet" href="${root('assets/looks.css')}">\n` : ''}<link rel="stylesheet" href="${root('assets/site.css')}">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <header class="topbar" data-tm-mode="dark">
-  <button type="button" class="menu" aria-label="Show navigation" aria-expanded="false">${icon('menu') || '☰'}</button>
+  <button type="button" class="${classes('menu', look('quiet'))}" aria-label="Show navigation" aria-expanded="false">${icon('menu') || '☰'}</button>
   <a class="site-title" href="${root('index.html')}">${esc(siteTitle)}</a>
   <nav class="top-links"><a href="${root('tasks.html')}">Tasks</a><a href="${root('glossary.html')}">Glossary</a></nav>
-  <div class="search"><input type="search" placeholder="Search pages" aria-label="Search pages"><ul class="results" hidden></ul></div>
+  <div class="search"><input type="search"${theme?.looks ? ` class="${look('field')}"` : ''} placeholder="Search pages" aria-label="Search pages"><ul class="results" hidden></ul></div>
 </header>
 <div class="shell">
 <nav class="sidebar" aria-label="Site map" data-tm-mode="dark">
@@ -288,9 +296,9 @@ ${theme ? `<link rel="stylesheet" href="${root('assets/theme.css')}">\n` : ''}<l
   ${panels}
   </div>
   <div class="sidebar-foot">
-    <button type="button" class="ghost gear" popovertarget="settings" aria-label="Settings" title="Settings">${icon('settings') || '⚙\uFE0E'}</button>
-    <div class="settings" id="settings" popover>${lookSwitch('tmMode', 'Mode', ['Auto', 'Light', 'Dark'])}${theme ? lookSwitch('tmContrast', 'Contrast', ['Auto', 'Base', 'More']) : ''}</div>
-    <button type="button" class="ghost collapse" aria-controls="sidebar-content" aria-expanded="true" aria-label="Collapse the sidebar" title="Collapse the sidebar">${icon('chevron_left') || '<span class="glyph">‹</span>'}</button>
+    <button type="button" class="${classes('ghost gear', look('ghost'))}" popovertarget="settings" aria-label="Settings" title="Settings">${icon('settings') || '⚙\uFE0E'}</button>
+    <div class="${classes('settings', look('surface'), theme?.looks && 'tm-enter-pop')}" id="settings" popover>${lookSwitch('tmMode', 'Mode', ['Auto', 'Light', 'Dark'])}${theme ? lookSwitch('tmContrast', 'Contrast', ['Auto', 'Base', 'More']) : ''}</div>
+    <button type="button" class="${classes('ghost collapse', look('ghost'))}" aria-controls="sidebar-content" aria-expanded="true" aria-label="Collapse the sidebar" title="Collapse the sidebar">${icon('chevron_left') || '<span class="glyph">‹</span>'}</button>
   </div>
   <div class="resize" role="separator" aria-orientation="vertical" aria-label="Sidebar width" aria-controls="sidebar-content" tabindex="0"></div>
 </nav>
@@ -348,7 +356,7 @@ ${main}
 
   const card = (page, id, tree) => {
     const n = model.nodes.get(id);
-    return `<li class="card"><a href="${esc(href(page, pagePath(model, id)))}"><span class="card-title">${esc(n.title)}</span>${n.virtual ? '<span class="kind">group</span>' : n.kind ? `<span class="kind">${esc(n.kind)}</span>` : ''}</a>
+    return `<li class="${classes('card', look('surface'))}"><a href="${esc(href(page, pagePath(model, id)))}"><span class="card-title">${esc(n.title)}</span>${n.virtual ? '<span class="kind">group</span>' : n.kind ? `<span class="kind">${esc(n.kind)}</span>` : ''}</a>
   ${n.summary ? `<p>${esc(n.summary)}</p>` : ''}${bar(n.rollup?.[tree])}</li>`;
   };
 

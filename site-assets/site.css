@@ -87,8 +87,8 @@ th { background: var(--bg-sunken); }
 .top-links a { color: var(--text-muted); }
 .menu { display: none; font-size: 20px; line-height: 1; padding: 4px 6px; }
 .search { position: relative; margin-left: auto; width: min(320px, 40vw); }
-.search input {
-  width: 100%; padding: 7px 10px; font: inherit; font-size: 0.92em;
+.search input { width: 100%; padding: 7px 10px; font: inherit; font-size: 0.92em; }
+:root:not(.tm-looks) .search input {
   color: var(--text); background: var(--bg-field);
   border: var(--line) solid var(--border-field); border-radius: var(--tm-radius-control, var(--radius));
   box-shadow: var(--tm-elevation-field, none);
@@ -123,11 +123,12 @@ th { background: var(--bg-sunken); }
 /* The menu button (on narrow screens). With a theme, it is the theme's
    buttons: a quiet button, and, when selected, the action fill, with its gradient and shine.
    The shine is the theme's --tm-shine-image, from the gloss grades of the fill (themetron's
-   consumer contract, "Shine"). Without a theme, the fallbacks are the site's flat look. */
-.menu {
+   consumer contract, "Shine"). Without a theme, the fallbacks are the site's flat look. With
+   the theme's looks (html.tm-looks), the button wears tm-look-quiet instead. */
+.menu { cursor: pointer; }
+:root:not(.tm-looks) .menu {
   --tm-shine-rim: var(--tm-gloss-quiet-rim); --tm-shine-top: var(--tm-gloss-quiet-top);
   --tm-shine-shadow: var(--tm-gloss-quiet-shadow); --tm-shine-bottom: var(--tm-gloss-quiet-bottom);
-  cursor: pointer;
   color: var(--tm-on-fill-quiet, var(--text-muted));
   background-color: var(--tm-fill-quiet, transparent);
   background-image: var(--tm-shine-image, none);
@@ -136,8 +137,8 @@ th { background: var(--bg-sunken); }
   box-shadow: var(--tm-elevation-1, none);
   transition: background-color var(--tm-duration-fast, 0s), color var(--tm-duration-fast, 0s), box-shadow var(--tm-duration-base, 0s), transform var(--tm-duration-base, 0s) var(--tm-ease-enter, ease);
 }
-.menu { color: var(--tm-on-fill-quiet, var(--text)); border-color: var(--tm-fill-quiet-active, transparent); }
-.menu:hover {
+:root:not(.tm-looks) .menu { color: var(--tm-on-fill-quiet, var(--text)); border-color: var(--tm-fill-quiet-active, transparent); }
+:root:not(.tm-looks) .menu:hover {
   color: var(--tm-on-fill-quiet-hover, var(--text));
   background-color: var(--tm-fill-quiet-hover, transparent);
   transform: translateY(calc(-1 * var(--tm-lift, 0px)));
@@ -188,30 +189,33 @@ th { background: var(--bg-sunken); }
   border: solid currentColor; border-width: 1.5px 1.5px 0 0; rotate: 45deg;
 }
 /* Ghost buttons in the sidebar's footer: the settings gear, which opens the settings popover
-   above it, and the chevron that collapses the sidebar. */
+   above it, and the chevron that collapses the sidebar. With looks, they wear tm-look-ghost. */
 .sidebar-foot { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
 .ghost {
   display: inline-grid; place-items: center; flex: none;
   width: var(--tm-control-height, 32px); height: var(--tm-control-height, 32px); padding: 0;
-  border: 0; border-radius: var(--tm-radius-control, var(--radius-sm));
-  background: none; color: var(--text-muted); font-size: 1.2em; cursor: pointer;
+  font-size: 1.2em; cursor: pointer;
 }
+:root:not(.tm-looks) .ghost { border: 0; border-radius: var(--tm-radius-control, var(--radius-sm)); background: none; color: var(--text-muted); }
 .gear { anchor-name: --settings; }
 .ghost .icon { margin: 0; font-size: 1.1em; }
 .collapse .glyph { font-size: 1.3em; line-height: 1; }
-.ghost:hover, .gear:has(+ :popover-open) {
+:root:not(.tm-looks) .ghost:hover, .gear:has(+ :popover-open) {
   background: color-mix(in oklab, var(--tm-tint-base, var(--bg-sunken)) calc(var(--tm-tint-alpha, 1) * 100%), transparent);
   color: var(--tm-on-tint-base, var(--text));
 }
 /* The settings popover, drawn like the theme's menus: an opaque surface, the panel edge, and
    the deepest shadow. It sits above the gear: with anchor positioning where the browser has it,
-   and at the bottom of the sidebar where it does not. */
+   and at the bottom of the sidebar where it does not. With looks, it wears tm-look-surface, and
+   pops in with tm-enter-pop. */
 .settings {
   inset: auto auto calc(var(--tm-control-height, 32px) + 24px) 14px;
   margin: 0; padding: 12px 14px;
   display: none; grid-template-columns: auto 1fr; gap: 8px 10px; align-items: center;
-  min-width: 260px;
-  background: var(--bg-raised); color: var(--text-muted); font-size: 0.88em;
+  min-width: 260px; color: var(--text-muted); font-size: 0.88em; transform-origin: bottom left;
+}
+:root:not(.tm-looks) .settings {
+  background: var(--bg-raised);
   border: var(--panel-line) solid var(--panel-border); border-radius: var(--tm-radius-md, var(--radius));
   box-shadow: var(--shadow-raised);
 }
@@ -367,8 +371,8 @@ pre.mermaid g.linked:hover circle, pre.mermaid g.linked:hover path { stroke: var
 .tag { font-size: 0.85em; padding: 0 5px; border-radius: var(--radius-sm); background: var(--bg-sunken); color: var(--text-muted); }
 .tag.blocked { background: color-mix(in srgb, var(--ink) 15%, transparent); color: var(--ink); }
 /* A #blocked tag in the danger colorway: the theme's badge, a tint with half the shine and a
-   pill edge. */
-.tag.blocked[class*=" theme-"] {
+   pill edge. With looks, it wears tm-look-tint. */
+:root:not(.tm-looks) .tag.blocked[class*=" theme-"] {
   --tm-shine-strength: 0.5;
   --tm-shine-rim: var(--tm-gloss-tint-action-rim); --tm-shine-top: var(--tm-gloss-tint-action-top);
   --tm-shine-shadow: var(--tm-gloss-tint-action-shadow); --tm-shine-bottom: var(--tm-gloss-tint-action-bottom);
@@ -382,10 +386,14 @@ pre.mermaid g.linked:hover circle, pre.mermaid g.linked:hover path { stroke: var
 
 /* Cards */
 .cards { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+/* With looks, a card wears tm-look-surface, and keeps its lift on hover. */
 .card {
-  background: var(--tm-bg-panel, var(--bg-raised)); border: var(--panel-line) solid var(--panel-border); border-radius: var(--tm-radius-lg, var(--radius));
-  padding: 12px 14px; box-shadow: var(--tm-elevation-2, none);
+  padding: 12px 14px;
   transition: transform var(--tm-duration-base, 0s) var(--tm-ease-enter, ease), box-shadow var(--tm-duration-base, 0s);
+}
+:root:not(.tm-looks) .card {
+  background: var(--tm-bg-panel, var(--bg-raised)); border: var(--panel-line) solid var(--panel-border); border-radius: var(--tm-radius-lg, var(--radius));
+  box-shadow: var(--tm-elevation-2, none);
 }
 .card:hover { transform: translateY(calc(-1 * var(--tm-lift, 0px))); box-shadow: var(--tm-elevation-3, none); }
 .card > a { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
@@ -448,7 +456,7 @@ pre.mermaid g.linked:hover circle, pre.mermaid g.linked:hover path { stroke: var
    button still shows its highlight and shadow, like glass. A theme with opaque parts paints the
    layers in the fill's colors instead (--tm-shine-paint). Each state sets only the --b-* values:
    the fill, its gradient ends, the label, the edge, and the opacity. */
-:root.theme-default .menu {
+:root.theme-default:not(.tm-looks) .menu {
   --b-bg: var(--tm-fill-quiet);
   --b-from: var(--b-bg);
   --b-to: var(--b-bg);
@@ -473,18 +481,18 @@ pre.mermaid g.linked:hover circle, pre.mermaid g.linked:hover path { stroke: var
   font-size: var(--tm-font-size-sm);
   line-height: var(--tm-leading-tight-sm);
 }
-:root.theme-default .menu:hover {
+:root.theme-default:not(.tm-looks) .menu:hover {
   --b-bg: var(--tm-fill-quiet-hover);
   --b-fg: var(--tm-on-fill-quiet-hover);
   background-color: transparent;
 }
-:root.theme-default .menu:active {
+:root.theme-default:not(.tm-looks) .menu:active {
   transform: translateY(0) scale(0.97);
   box-shadow: var(--tm-elevation-inset);
   transition-duration: var(--tm-duration-fast);
 }
-:root.theme-default .menu::before,
-:root.theme-default .menu::after {
+:root.theme-default:not(.tm-looks) .menu::before,
+:root.theme-default:not(.tm-looks) .menu::after {
   content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
   /* The layers keep 60% of their strength as the fill fades, so a clear button still shines. */
   opacity: calc(var(--b-alpha) + (1 - var(--b-alpha)) * 0.6);
@@ -495,7 +503,7 @@ pre.mermaid g.linked:hover circle, pre.mermaid g.linked:hover path { stroke: var
 }
 /* The top: a fade from the top edge to the middle, and a band along the top edge, half as wide
    down the left edge, which follows the corners. */
-:root.theme-default .menu::before {
+:root.theme-default:not(.tm-looks) .menu::before {
   -webkit-backdrop-filter: var(--tm-shine-backdrop-top);
   backdrop-filter: var(--tm-shine-backdrop-top);
   filter: var(--tm-shine-filter-top);
@@ -511,7 +519,7 @@ pre.mermaid g.linked:hover circle, pre.mermaid g.linked:hover path { stroke: var
 }
 /* The bottom. Darkening shades a light fill much harder than a mid-tone one, so the shade's
    strength comes from the fill's own lightness. */
-:root.theme-default .menu::after {
+:root.theme-default:not(.tm-looks) .menu::after {
   -webkit-backdrop-filter: var(--tm-shine-backdrop-bottom);
   backdrop-filter: var(--tm-shine-backdrop-bottom);
   filter: var(--tm-shine-filter-bottom);
@@ -520,10 +528,10 @@ pre.mermaid g.linked:hover circle, pre.mermaid g.linked:hover path { stroke: var
   -webkit-mask-image: linear-gradient(to bottom, transparent 50%, var(--b-shade) 80%, var(--b-shade-half) 100%);
   mask-image: linear-gradient(to bottom, transparent 50%, var(--b-shade) 80%, var(--b-shade-half) 100%);
 }
-:root.theme-default .menu { width: var(--tm-control-height); padding: 0; }
+:root.theme-default .menu { width: var(--tm-control-height); min-height: var(--tm-control-height); padding: 0; }
 
 /* #blocked tags: a tint at the theme's clarity. */
-:root.theme-default .tag.blocked[class*=" theme-"] {
+:root.theme-default:not(.tm-looks) .tag.blocked[class*=" theme-"] {
   background-color: transparent;
   background-image: var(--tm-shine-image), var(--tint-clear);
 }
@@ -532,6 +540,8 @@ pre.mermaid g.linked:hover circle, pre.mermaid g.linked:hover path { stroke: var
 :root.theme-default .search input {
   height: var(--tm-control-height);
   padding: 0 max(var(--tm-control-padding-x), calc(var(--tm-radius-control) - var(--tm-border-width)));
+}
+:root.theme-default:not(.tm-looks) .search input {
   border-radius: var(--tm-radius-control);
   background-color: color-mix(in oklab, var(--tm-bg-field) calc(var(--tm-field-alpha) * 100%), transparent);
 }
@@ -550,8 +560,8 @@ pre.mermaid g.linked:hover circle, pre.mermaid g.linked:hover path { stroke: var
 :root.theme-default .task-mark { background-color: color-mix(in oklab, var(--tm-bg-field) calc(var(--tm-field-alpha) * 100%), transparent); }
 
 /* Panels: cards, callouts, details, and diagrams. */
-:root.theme-default .card {
-  padding: calc(var(--tm-space-lg) - var(--tm-panel-border-width));
+:root.theme-default .card { padding: calc(var(--tm-space-lg) - var(--tm-panel-border-width)); }
+:root.theme-default:not(.tm-looks) .card {
   border-color: var(--panel-edge);
   -webkit-backdrop-filter: var(--tm-backdrop);
   backdrop-filter: var(--tm-backdrop);

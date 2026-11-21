@@ -1,7 +1,7 @@
 # idk-plans
 
 <!-- idk-plans:progress:start (generated) -->
-◐ 91% (45/49) · 4 deferred
+◐ 90% (46/51) · 4 deferred
 <!-- idk-plans:progress:end -->
 
 Keep your project's architecture and progress in Markdown files next to the code. idk-plans checks the files, keeps their generated parts current, and builds a website from them. Progress rolls up from tasks to the top of the project.
@@ -40,7 +40,7 @@ Zoom in: [Specification](./SPEC.md "spec") · [Command line](./bin/README.md "cl
 - [Specification](./SPEC.md "spec"): The format of idk-plans files. It defines nodes, trees, tasks, rollups, links, generated blocks, and the checks. · no tasks · 3 deferred
 - [How it works](./docs/how-it-works.md "how-it-works"): What idk-plans does when you run a command, step by step. The tool is deterministic, and it does not use AI or the network.
 - [Command line](./bin/README.md "cli"): Runs the commands check, fix, tree, model, site, and serve. It is the only part that reads arguments and writes to the terminal. ● 100% (6/6)
-- [Engine](./src/README.md "engine"): Reads the Markdown files, builds one model of all nodes, trees, and tasks, and checks and fixes the files from that model. ◐ 91% (31/34) · 1 deferred
+- [Engine](./src/README.md "engine"): Reads the Markdown files, builds one model of all nodes, trees, and tasks, and checks and fixes the files from that model. ◐ 88% (32/36) · 1 deferred
 - [Tested viewers](./docs/compatibility.md "compatibility"): The viewers that we test the Markdown files and the site with, and what each one shows differently. ● 100% (6/6)
 - [Release a version](./docs/release.md "release"): How a maintainer releases a new version of idk-plans. A version tag starts a workflow that stages the version on npm and makes a GitHub release. The maintainer approves the staged version.
 <!-- idk-plans:children:end -->
@@ -48,11 +48,11 @@ Zoom in: [Specification](./SPEC.md "spec") · [Command line](./bin/README.md "cl
 ## Other views
 
 <!-- idk-plans:trees:start (generated) -->
-**Viewers** ◐ 90% (28/31) · 1 deferred
+**Viewers** ◐ 87% (29/33) · 1 deferred
 
-- [Site builder](./src/site.md "site") ◐ 76% (10/13)
+- [Site builder](./src/site.md "site") ◐ 73% (11/15)
   - [Publish the site](./docs/publish-site.md "publish-site") ● 100% (2/2)
-  - [Themes](./docs/themes.md "themes") ◐ 75% (3/4)
+  - [Themes](./docs/themes.md "themes") ◐ 66% (4/6)
 - Markdown ● 100% (12/12) · 1 deferred
   - [Tested viewers](./docs/compatibility.md "compatibility") ● 100% (6/6)
     - [Working in Obsidian](./obsidian/README.md "obsidian") ● 100% (3/3)

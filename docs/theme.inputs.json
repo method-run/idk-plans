@@ -1,0 +1,91 @@
+{
+  "$schema": "https://method-run.github.io/idk-themetron/schema/inputs.schema.json",
+  "version": 2,
+  "themes": {
+    "default": {
+      "action": {
+        "color": "#6b97ff",
+        "to": "#c800ff",
+        "solid": 0.57,
+        "angle": 180
+      },
+      "feel": {
+        "roundness": 0.77,
+        "spaciousness": 0.11,
+        "depth": 0.82,
+        "softness": 0.77,
+        "thinness": 0.8,
+        "shininess": 0.68,
+        "clarity": 0.5,
+        "playfulness": 0,
+        "energy": 0.55
+      },
+      "icons": {
+        "style": "rounded",
+        "weight": 350
+      },
+      "typeVariance": 0.13,
+      "font": {
+        "family": "Open Sans",
+        "fallback": "sans-serif"
+      },
+      "headingFont": {
+        "family": "Open Sans",
+        "fallback": "sans-serif"
+      },
+      "contrast": {
+        "method": "wcag",
+        "model": "okhsl"
+      },
+      "base": "#16161d",
+      "animation": "move"
+    },
+    "danger": {
+      "parent": "default",
+      "action": {
+        "color": "#c52b75",
+        "to": "#ff0000",
+        "solid": 0,
+        "angle": 180
+      }
+    },
+    "warning": {
+      "parent": "default",
+      "action": {
+        "color": "#f0b105",
+        "to": "#ff810a",
+        "solid": 0,
+        "angle": 180
+      }
+    },
+    "success": {
+      "parent": "default",
+      "action": {
+        "color": "#2b8a3e",
+        "to": "#008a9e",
+        "solid": 0,
+        "angle": 180
+      }
+    },
+    "info": {
+      "parent": "default",
+      "action": {
+        "color": "#82bdf7",
+        "to": "#b1e2b9",
+        "solid": 0,
+        "angle": 180
+      }
+    },
+    "secondary": {
+      "parent": "default",
+      "action": "#b8b1e2"
+    },
+    "child-1": {
+      "parent": "default",
+      "contrast": {
+        "model": "okhsl"
+      },
+      "action": "#00ff1e"
+    }
+  }
+}
