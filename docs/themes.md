@@ -1,7 +1,7 @@
 ---
 id: themes
 title: Themes
-summary: Skin the site with a theme from idk-themetron. Export the theme as CSS, put the file in your project, and name it in the configuration.
+summary: Skin the site with a theme from idk-themetron. Build the theme's tokens from its inputs, add themetron's looks, and name both files in the configuration.
 parent: site
 parents:
   viewer: site
@@ -11,46 +11,68 @@ tags: [system/engine/site/themes, viewer/site/themes]
 # Themes
 
 <!-- idk-plans:progress:start (generated) -->
-◐ 75% (3/4)
+◐ 66% (4/6)
 <!-- idk-plans:progress:end -->
 
 The site can take its colors, fonts, edges, and shadows from a theme made with [idk-themetron](https://www.npmjs.com/package/@method-run/idk-themetron). Without a theme, the site keeps its own look.
 
 ## Use a theme
 
-1. Make the theme in the [themetron playground](https://method-run.github.io/idk-themetron/), or from an inputs file.
-2. Export it in the **css** format. This is the theme's tokens only. In the playground, download "CSS". From the command line:
+1. Make the theme in the [themetron playground](https://method-run.github.io/idk-themetron/), and download its inputs file. Keep it in your project, such as `docs/theme.inputs.json`. To change the theme later, edit this file.
+2. Build the theme's tokens from it, in the **css** format, with themetron. Add a script, so the build is one command:
 
    ```sh
-   npx themetron build inputs.json --format css --out docs/theme.css
+   npm install --save-dev @method-run/idk-themetron
+   npx themetron build docs/theme.inputs.json --out docs/theme.css
    ```
 
-3. Put the file in your project, and name it in `idk-plans.config.json`, as `site.theme`. The path starts at the project root. We suggest `docs/theme.css`.
+3. Name the tokens in `idk-plans.config.json`, as `site.theme`, and themetron's looks as `site.looks`. The paths start at the project root.
 
    ```json
    {
-     "site": { "theme": "docs/theme.css" }
+     "site": {
+       "theme": "docs/theme.css",
+       "looks": "node_modules/@method-run/idk-themetron/looks.css"
+     }
    }
    ```
 
-4. Run `idk-plans serve` to see it. `serve` builds the site again when you save the theme file. `idk-plans site`, and so CI, builds the site with the theme too.
+4. Run `idk-plans serve` to see it. `serve` builds the site again when you save either file. `idk-plans site`, and so CI, builds the site with the theme too.
+
+The tokens and the looks are two files, as themetron suggests. The looks are the same for every theme, so a browser keeps them, and a change of theme changes only the tokens. `site.looks` is optional: without it, the site draws its parts from the tokens itself.
 
 The configuration is the place for a project's theme, so every build uses it. To try another theme for a moment, give it on the command line. `--theme` replaces `site.theme` for that command only: `idk-plans serve --theme ~/Downloads/theme.css`.
 
 ## Theme files that idk-plans reads
 
-idk-plans reads one kind of file: a stylesheet that **idk-themetron** made for **token contract 0.2**.
+idk-plans reads stylesheets that **idk-themetron** made for **token contract 0.2, 0.3, or 0.4**.
 
 | | Read | Not read |
 |---|---|---|
-| Maker | [idk-themetron](https://www.npmjs.com/package/@method-run/idk-themetron) 0.2.x | Other CSS. A file that sets no `--tm-*` tokens stops the build. |
-| Format | `css`: the tokens only. Use this one. `stylesheet` works too: the tokens and themetron's components. The site does not use the components. | `dtcg`, `tailwind`, `shadcn`, `bootstrap`, `bootstrap-css`, `mui`, and `daisyui` |
-| Token contract | 0.2.x: the [token manifest](https://method-run.github.io/idk-themetron/schema/0.2.0/tokens.manifest.json), and the [consumer contract](https://github.com/method-run/idk-themetron/blob/main/spec/consumers.md) | Any other version. The build stops, and says which version the file is for. |
+| Maker | [idk-themetron](https://www.npmjs.com/package/@method-run/idk-themetron) 0.2 and later | Other CSS. A file that sets no `--tm-*` tokens stops the build. |
+| `site.theme` format | `css`: the tokens only. Use this one, with `site.looks`. `looks` works too: the tokens and the looks in one file. `stylesheet` also works: the tokens, the looks, and themetron's components. The site does not use the components. | `dtcg`, `tailwind`, `shadcn`, `bootstrap`, `bootstrap-css`, `mui`, and `daisyui` |
+| `site.looks` | `looks.css` from the themetron package: the `tm-look-*` classes | Any other file. A file with no `tm-look-*` classes stops the build. |
+| Token contract | 0.2.x, 0.3.x, and 0.4.x: the [token manifest](https://method-run.github.io/idk-themetron/schema/0.3.0/tokens.manifest.json), and the [consumer contract](https://github.com/method-run/idk-themetron/blob/main/spec/consumers.md) | Any other version. The build stops, and says which version the file is for. |
 | Prefixes | The defaults: tokens `--tm-*`, theme classes `.theme-*` | Other prefixes (`--prefix`, `--class-prefix`). The build stops. |
 
-A theme names its contract on its first line, for example `/* Made by themetron for my-site, token contract 0.2.0: … */`. Exports from before themetron 0.2.1 have no such line. idk-plans reads them as contract 0.2.
+A theme names its contract on its first line, for example `/* Made by themetron for my-site, token contract 0.3.0: … */`. Exports from before themetron 0.2.1 have no such line. idk-plans reads them as contract 0.2. Contracts 0.3 and 0.4 only added to 0.2, so the site reads them all the same way.
 
-When a new version of themetron changes the contract, a new version of idk-plans reads it. Until then, export the theme with themetron 0.2.x.
+When a new version of themetron changes the contract, a new version of idk-plans reads it. Until then, build the theme with a themetron version for one of these contracts.
+
+## Looks
+
+With looks, from `site.looks` or from a theme in the `looks` format, the site's parts wear themetron's own look classes, so they look exactly like themetron's parts. The site's own drawing of these parts turns off. Looks are experimental in themetron, so their names can still change.
+
+| Part | Look |
+|---|---|
+| The menu button (on narrow screens) | `tm-look-quiet` |
+| The search field | `tm-look-field` |
+| The settings and collapse buttons | `tm-look-ghost` |
+| The settings menu | `tm-look-surface`, and it pops in with `tm-enter-pop` |
+| Cards | `tm-look-surface` |
+| `#blocked` tags | `tm-look-tint`, in the danger colorway |
+
+Without looks, the site draws these parts from the tokens, following themetron's recipes.
 
 ## Colorways
 
@@ -88,7 +110,9 @@ The top bar and the sidebar are always in dark mode, with or without a theme. Th
 <details>
 <summary>How it works</summary>
 
-[src/theme.js](../src/theme.js) reads the theme file. It checks that the file sets `--tm-bg-canvas`, and that its token contract is the one that `THEMETRON_CONTRACT` names. Then it finds the theme classes in the file, and picks a class for each colorway. The site builder copies the file into the site as `assets/theme.css`, and links it before `site.css`.
+[src/theme.js](../src/theme.js) reads the theme file. It checks that the file sets `--tm-bg-canvas`, and that its token contract is one that `THEMETRON_CONTRACTS` names. Then it finds the theme classes in the file, and picks a class for each colorway. The site builder copies the file into the site as `assets/theme.css`, and the looks as `assets/looks.css`, and links them in that order, before `site.css`.
+
+With looks, `<html>` also gets the `tm-looks` class. The rules in `site.css` that draw the looked parts are scoped to `:root:not(.tm-looks)`, so they do not fight the looks. Their layout rules apply either way: a look sets no layout.
 
 [site-assets/site.css](../site-assets/site.css) follows themetron's consumer contract: it reads the tokens only with `var()`, and each token has a fallback, which is the site's own look. A part in a colorway has the theme class itself, such as `class="task-mark theme-success"`, and reads the theme's action tokens inside it. `npx themetron check site-assets/site.css` reports 0 unknown tokens.
 
@@ -101,4 +125,6 @@ The top bar and the sidebar are always in dark mode, with or without a theme. Th
 - [x] Read a themetron CSS theme from `site.theme` or `--theme`
 - [x] Color task states and callouts with the theme's colorways, and keep the site's own colors where the theme has none
 - [x] Rebuild in `serve` when the theme file changes
+- [x] Wear themetron's looks on the site's parts, from `site.looks` or a `looks` theme
+- [ ] Load `site.looks` from the themetron package, when themetron releases `looks.css`
 - [ ] Check the site with the theme in the more-contrast mode, in a screen reader

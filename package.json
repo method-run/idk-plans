@@ -34,7 +34,8 @@
     "test": "node --test test/*.test.js",
     "docs:check": "node bin/idk-plans.js check --strict --quiet",
     "docs:site": "node bin/idk-plans.js site --out _site",
-    "docs:serve": "node --watch --watch-preserve-output bin/idk-plans.js serve"
+    "docs:serve": "node --watch --watch-preserve-output bin/idk-plans.js serve",
+    "theme": "themetron build docs/theme.inputs.json --set idk-plans --out docs/theme.css"
   },
   "dependencies": {
     "marked": "^18.2.0",
@@ -43,5 +44,8 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "devDependencies": {
+    "@method-run/idk-themetron": "^0.3.0"
   }
 }

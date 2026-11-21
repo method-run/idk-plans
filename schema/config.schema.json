@@ -16,7 +16,8 @@
         "title": { "type": "string" },
         "sourceUrl": { "type": "string" },
         "mermaid": { "enum": ["cdn", "local"] },
-        "theme": { "type": "string", "minLength": 1, "description": "The path of an idk-themetron theme, from the project root: the \"css\" format, for token contract 0.2 (https://method-run.github.io/idk-themetron/schema/0.2.0/tokens.manifest.json). The site loads it before its own stylesheet. --theme overrides it." }
+        "theme": { "type": "string", "minLength": 1, "description": "The path of an idk-themetron theme, from the project root: the \"css\" format (or \"looks\"), for token contract 0.2, 0.3, or 0.4 (https://method-run.github.io/idk-themetron/schema/0.3.0/tokens.manifest.json). The site loads it before its own stylesheet. --theme overrides it." },
+        "looks": { "type": "string", "minLength": 1, "description": "The path of themetron's looks.css, from the project root, such as node_modules/@method-run/idk-themetron/looks.css. With it, the site's buttons, search field, cards, and settings menu wear themetron's tm-look-* classes. Needs site.theme or --theme." }
       }
     },
     "root": {
