@@ -7,7 +7,7 @@ import { parseMarkdown } from '../src/parse.js';
 import { buildModel } from '../src/model.js';
 import { resolveConfig } from '../src/config.js';
 import { buildSite } from '../src/site.js';
-import { readTheme } from '../src/theme.js';
+import { readTheme, packageLooks } from '../src/theme.js';
 import { fileURLToPath } from 'node:url';
 
 const files = {
@@ -206,6 +206,13 @@ test('site: a theme from an inputs file: its errors, and site.looks false', asyn
     const model = buildModel({ config, parsed, exists: () => true });
     const project = { model, config, cwd };
     await writeFile(path.join(cwd, 'theme.json'), JSON.stringify({ version: 2, themes: { default: { base: '#336699' }, danger: { parent: 'default', action: { color: '#cc0000' } } } }));
+    // The looks come from the installed themetron.
+    await buildSite(project, out, { theme: 'theme.json' });
+    const looks = await readFile(path.join(out, 'assets/looks.css'), 'utf8');
+    assert.equal(looks, (await packageLooks()).css);
+    assert.match(looks, /\.tm-look-fill\b/);
+    assert.match(await readFile(path.join(out, 'gateway/index.html'), 'utf8'), /assets\/looks\.css/);
+
     await buildSite(project, out, { theme: 'theme.json', looks: false });
     const css = await readFile(path.join(out, 'assets/theme.css'), 'utf8');
     assert.match(css, /--tm-bg-canvas:/);

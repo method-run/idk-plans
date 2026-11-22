@@ -598,7 +598,7 @@ Recommended setup:
 - A Tasks page lists every open task by state, and a Glossary page lists every title and alias.
 - Links to files that are not nodes go to `site.sourceUrl`, if it is set.
 - Pages load Mermaid from a CDN. With `"site": { "mermaid": "local" }`, the site copies the project's own `mermaid` package instead, so diagrams work offline.
-- With `site.theme`, the site loads a themetron theme (an inputs file, which it builds, or the `css` format, for [token contract 0.2 to 0.4](https://method-run.github.io/idk-themetron/schema/0.3.0/tokens.manifest.json)) before its own stylesheet, and takes its colors, fonts, edges, and shadows from it. Task states and callouts take the colors of the theme's `success`, `warning`, `danger`, `info`, and `important` themes, when the theme has them. With `site.looks`, or a theme in the `looks` format, the site's parts wear themetron's looks. Without a theme, the site keeps its own look.
+- With `site.theme`, the site loads a themetron theme (an inputs file, which it builds, or the `css` format, for [token contract 0.2 to 0.4](https://method-run.github.io/idk-themetron/schema/0.4.0/tokens.manifest.json)) before its own stylesheet, and takes its colors, fonts, edges, and shadows from it. Task states and callouts take the colors of the theme's `success`, `warning`, `danger`, `info`, and `important` themes, when the theme has them. With `site.looks`, or a theme in the `looks` format, the site's parts wear themetron's looks. Without a theme, the site keeps its own look.
 
 ## 14. Versions
 

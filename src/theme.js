@@ -12,10 +12,10 @@ import { fileURLToPath } from 'node:url';
 // The site reads these versions of themetron's token contract. Each added tokens and changed
 // none that the site reads, so they all work. A theme for another version stops the build, so a
 // theme never half works. A theme without the "token contract" line, from before themetron
-// 0.2.1, is read as 0.2. 0.4 adds the looks to the manifest; its manifest is not out yet.
+// 0.2.1, is read as 0.2. 0.4 adds the looks to the manifest.
 export const THEMETRON_CONTRACTS = ['0.2', '0.3', '0.4'];
-// The newest contract with a published manifest, for links.
-export const THEMETRON_CONTRACT = '0.3.0';
+// The newest contract, for links.
+export const THEMETRON_CONTRACT = '0.4.0';
 export const THEMETRON_MANIFEST_URL = `https://method-run.github.io/idk-themetron/schema/${THEMETRON_CONTRACT}/tokens.manifest.json`;
 
 /** The part of a version that a breaking change raises: the minor version before 1.0, then the major. */
@@ -75,17 +75,12 @@ async function buildFromInputs(full, file) {
 }
 
 /**
- * The looks of the installed themetron, or null when it has none (before themetron 0.4). The
- * looks of an inputs theme come from here, so the tokens and the looks are from one version.
+ * The looks of the installed themetron. The looks of an inputs theme come from here, so the
+ * tokens and the looks are from one version.
  */
 export async function packageLooks() {
-  const pkg = fileURLToPath(import.meta.resolve('@method-run/idk-themetron/package.json'));
-  try {
-    const file = path.join(path.dirname(pkg), 'components', 'looks.css');
-    return { file, css: await readFile(file, 'utf8') };
-  } catch {
-    return null;
-  }
+  const file = fileURLToPath(import.meta.resolve('@method-run/idk-themetron/looks.css'));
+  return { file, css: await readFile(file, 'utf8') };
 }
 
 /**
