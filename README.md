@@ -8,7 +8,7 @@ Keep your project's architecture and progress in Markdown files next to the code
 
 - **[Specification](./SPEC.md "spec")**: the format. Start here.
 - **[How it works](./docs/how-it-works.md "how-it-works")**: what the tool does when you run a command, step by step.
-- **Status:** 0.3.0 draft. The format can change.
+- **Status:** 0.4.0 draft. The format can change.
 - **AI use:** this project was made with the help of an AI coding assistant (Claude). AI wrote much of the code and the docs. The tool itself does not use AI.
 - **Demo:** these docs use idk-plans. See them as a site at [method-run.github.io/idk-plans](https://method-run.github.io/idk-plans/), or run `npm run docs:site` to build it yourself.
 

@@ -14,6 +14,7 @@ A release needs two commands on your computer, and one approval on npmjs.com. A 
 
 ## Steps
 
+1. For a minor or major version, first change the version that the files name, in a pull request: the status line in `README.md`, the version line in `SPEC.md`, and the model's `version` (major and minor) in `src/model.js` and in the example in section 12 of `SPEC.md`. A patch version leaves them.
 1. On `main`, with a clean working tree, run `npm version patch`, `npm version minor`, or `npm version major`. This changes the version in `package.json`, makes a commit, and adds a tag such as `v0.3.0`.
 2. Run `git push --follow-tags`. This pushes the commit and the tag.
 3. When the workflow is done, approve the staged version: on npmjs.com, open the package, find the staged version, and approve it with 2FA. Only then can people install it.

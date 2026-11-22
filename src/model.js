@@ -516,7 +516,7 @@ export function toJSON(model) {
   const { nodes, trees, rootId, primary, problems } = model;
   const treeNames = Object.keys(trees);
   const out = {
-    version: '0.3',
+    version: '0.4',
     root: rootId,
     primaryTree: primary,
     trees: Object.fromEntries(treeNames.map((t) => [t, { title: trees[t].title, top: trees[t].top }])),

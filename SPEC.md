@@ -10,7 +10,7 @@ tags: [system/spec]
 ---
 # idk-plans specification
 
-**Version:** 0.3.0-draft · **Status:** draft, expect breaking changes
+**Version:** 0.4.0-draft · **Status:** draft, expect breaking changes
 
 idk-plans is a convention for keeping a project's architecture and progress in plain Markdown files that live next to the code. A tool reads those files, checks them, keeps generated parts current, and can build a website from them.
 
@@ -558,7 +558,7 @@ Recommended setup:
 
 ```jsonc
 {
-  "version": "0.3",
+  "version": "0.4",
   "root": "my-app",
   "primaryTree": "system",
   "trees": { "system": { "title": "System", "top": "my-app" }, "concern": { "title": "Concerns", "top": "concern" } },
