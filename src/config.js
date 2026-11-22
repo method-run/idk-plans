@@ -64,7 +64,7 @@ function siteConfig(site) {
     throw new Error(`${CONFIG_FILE}: "site.theme" must be the path of a themetron inputs file (.json) or CSS theme`);
   }
   if (site.looks != null && site.looks !== false && (typeof site.looks !== 'string' || !site.looks.trim())) {
-    throw new Error(`${CONFIG_FILE}: "site.looks" must be the path of themetron's looks.css, or false`);
+    throw new Error(`${CONFIG_FILE}: "site.looks" must be themetron's looks.css (@method-run/idk-themetron/looks.css, or a path), or false`);
   }
   return site;
 }
