@@ -179,6 +179,10 @@ test('site: a theme with looks (the "looks" export) puts themetron\'s look class
     assert.match(page, /assets\/theme\.css">\n<link rel="stylesheet" href="\.\.\/assets\/looks\.css">\n<link rel="stylesheet" href="\.\.\/assets\/site\.css">/);
     assert.match(page, /class="ghost gear tm-look-ghost"/);
     assert.equal(await readFile(path.join(out, 'assets/looks.css'), 'utf8'), '.tm-look-fill { color: red; }\n');
+    // A package name, as themetron's docs give it: found through the package's exports.
+    await buildSite({ model, config, cwd }, out, { theme: 'tokens.css', looks: '@method-run/idk-themetron/looks.css' });
+    assert.equal(await readFile(path.join(out, 'assets/looks.css'), 'utf8'), (await packageLooks()).css);
+    await assert.rejects(buildSite({ model, config, cwd }, out, { theme: 'tokens.css', looks: '@method-run/nope/looks.css' }), /nope\/looks\.css does not exist, as a path from the project root or as a package file/);
     await assert.rejects(buildSite({ model, config, cwd }, out, { looks: 'looks.css' }), /site\.looks needs a theme/);
     await assert.rejects(buildSite({ model, config, cwd }, out, { theme: 'tokens.css', looks: 'tokens.css' }), /not themetron's looks\.css/);
     assert.throws(() => resolveConfig({ site: { looks: '' } }), /"site\.looks" must be/);

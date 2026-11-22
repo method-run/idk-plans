@@ -492,7 +492,7 @@ The configuration is `idk-plans.config.json` in the project root.
 | `site.title` | the root title | The site name. |
 | `site.mermaid` | `"cdn"` | `"local"`: copy the project's `mermaid` package into the site, so diagrams work offline (13). The project must install `mermaid`. |
 | `site.theme` | none | The path of an [idk-themetron](https://www.npmjs.com/package/@method-run/idk-themetron) theme, from the project root: an inputs file (`.json`), which the site builds with themetron, or a CSS export, the `css` format, for token contract 0.2, 0.3, or 0.4 (13). `--theme` overrides it. |
-| `site.looks` | none | The path of themetron's `looks.css`, from the project root. The site's buttons, search field, cards, and settings menu then wear themetron's `tm-look-*` classes. A theme from an inputs file gets the looks of the installed themetron without it; `false` turns them off. Needs a theme. |
+| `site.looks` | none | Themetron's `looks.css`: its package name, `@method-run/idk-themetron/looks.css`, or its path from the project root. The site's buttons, search field, cards, and settings menu then wear themetron's `tm-look-*` classes. A theme from an inputs file gets the looks of the installed themetron without it; `false` turns them off. Needs a theme. |
 | `site.sourceUrl` | none | Base URL for links to repository files, for example `https://<host>/<owner>/<repo>/src/branch/main`. `--source-url` overrides it. |
 | `trees.<name>.groups` | `[]` | Paths of virtual nodes that this tree may use without a page (4.4). A one-id group sits at the top level of the tree. |
 | `rules` | see section 10 | Severity (`warn`, `info`, `off`) and options for each warning rule. Error rules can not be changed. |

@@ -37,13 +37,13 @@ To try another theme for a moment, give it on the command line. `--theme` replac
 
 ### A CSS theme
 
-`site.theme` can also be a stylesheet that themetron exported, such as `npx themetron build inputs.json --out docs/theme.css`. Use it to pin a theme to one build of themetron, or for a theme from another tool's build. A CSS theme gets looks only from `site.looks`, the path of a `looks.css`, or when it is a `looks` or `stylesheet` export:
+`site.theme` can also be a stylesheet that themetron exported, such as `npx themetron build inputs.json --out docs/theme.css`. Use it to pin a theme to one build of themetron, or for a theme from another tool's build. A CSS theme gets looks only from `site.looks`, or when it is a `looks` or `stylesheet` export. `site.looks` takes the package name of themetron's `looks.css`, as themetron's docs give it, or the path of a `looks.css` from the project root:
 
 ```json
 {
   "site": {
     "theme": "docs/theme.css",
-    "looks": "node_modules/@method-run/idk-themetron/components/looks.css"
+    "looks": "@method-run/idk-themetron/looks.css"
   }
 }
 ```
@@ -56,7 +56,7 @@ idk-plans reads a themetron **inputs file** (`.json`), and builds it with the th
 |---|---|---|
 | Maker | [idk-themetron](https://www.npmjs.com/package/@method-run/idk-themetron) 0.2 and later | Other CSS. A file that sets no `--tm-*` tokens stops the build. |
 | `site.theme` format | `css`: the tokens only. Use this one, with `site.looks`. `looks` works too: the tokens and the looks in one file. `stylesheet` also works: the tokens, the looks, and themetron's components. The site does not use the components. | `dtcg`, `tailwind`, `shadcn`, `bootstrap`, `bootstrap-css`, `mui`, and `daisyui` |
-| `site.looks` | `looks.css` from the themetron package: the `tm-look-*` classes. Or `false`, for no looks. A theme from an inputs file needs no `site.looks`. | Any other file. A file with no `tm-look-*` classes stops the build. |
+| `site.looks` | `looks.css` from the themetron package, by its package name (`@method-run/idk-themetron/looks.css`) or by its path: the `tm-look-*` classes. Or `false`, for no looks. A theme from an inputs file needs no `site.looks`. | Any other file. A file with no `tm-look-*` classes stops the build. |
 | Token contract | 0.2.x, 0.3.x, and 0.4.x: the [token manifest](https://method-run.github.io/idk-themetron/schema/0.4.0/tokens.manifest.json), and the [consumer contract](https://github.com/method-run/idk-themetron/blob/main/spec/consumers.md) | Any other version. The build stops, and says which version the file is for. |
 | Prefixes | The defaults: tokens `--tm-*`, theme classes `.theme-*` | Other prefixes (`--prefix`, `--class-prefix`). The build stops. |
 
@@ -80,7 +80,7 @@ With looks, the site's parts wear themetron's own look classes, so they look exa
 The site has looks:
 
 - with a theme from an inputs file, from the installed themetron. Set `site.looks` to `false` to turn them off.
-- with `site.looks`, the path of a `looks.css`.
+- with `site.looks`: `@method-run/idk-themetron/looks.css`, or the path of a `looks.css`.
 - with a theme in the `looks` or `stylesheet` format.
 
 Without looks, the site draws these parts from the tokens, following themetron's recipes. Without a theme, the site keeps its own look.

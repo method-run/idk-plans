@@ -1,4 +1,6 @@
+import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
+import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -36,19 +38,36 @@ export const COLORWAYS = {
 };
 
 /**
+ * The file that site.looks names: a path from the project root, or a package name, such as
+ * @method-run/idk-themetron/looks.css, as themetron's docs give it. A package name is found
+ * through the package's exports, in the project's packages, then in idk-plans' own.
+ */
+function looksPath(cwd, file) {
+  const full = path.resolve(cwd, file);
+  if (existsSync(full) || file.startsWith('.') || path.isAbsolute(file)) return full;
+  for (const from of [path.join(path.resolve(cwd), 'package.json'), import.meta.url]) {
+    try {
+      return createRequire(from).resolve(file);
+    } catch { /* not a package there */ }
+  }
+  return full;
+}
+
+/**
  * Read themetron's looks.css (site.looks): the tm-look-* classes, the same for every theme.
  * Throws when the file is missing, or has no looks.
  */
 export async function readLooks(cwd, file) {
+  const full = looksPath(cwd, file);
   let css;
   try {
-    css = await readFile(path.resolve(cwd, file), 'utf8');
+    css = await readFile(full, 'utf8');
   } catch (err) {
-    if (err.code === 'ENOENT') throw new Error(`site.looks: ${file} does not exist`);
+    if (err.code === 'ENOENT') throw new Error(`site.looks: ${file} does not exist, as a path from the project root or as a package file`);
     throw err;
   }
   if (!/\.tm-look-fill\b/.test(css)) throw new Error(`site.looks: ${file} is not themetron's looks.css (it has no tm-look-* classes)`);
-  return { file: path.resolve(cwd, file), css };
+  return { file: full, css };
 }
 
 /** True for a themetron inputs file, which the site builds into a theme. */
