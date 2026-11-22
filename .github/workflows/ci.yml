@@ -22,3 +22,5 @@ jobs:
       - run: npm test
 
       - run: npm run docs:check
+
+      - run: npm run css:check

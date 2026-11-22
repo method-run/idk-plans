@@ -11,7 +11,7 @@ tags: [system/engine/site/themes, viewer/site/themes]
 # Themes
 
 <!-- idk-plans:progress:start (generated) -->
-◐ 71% (5/7)
+◐ 87% (7/8)
 <!-- idk-plans:progress:end -->
 
 The site can take its colors, fonts, edges, and shadows from a theme made with [idk-themetron](https://www.npmjs.com/package/@method-run/idk-themetron). Without a theme, the site keeps its own look.
@@ -43,7 +43,7 @@ To try another theme for a moment, give it on the command line. `--theme` replac
 {
   "site": {
     "theme": "docs/theme.css",
-    "looks": "node_modules/@method-run/idk-themetron/looks.css"
+    "looks": "node_modules/@method-run/idk-themetron/components/looks.css"
   }
 }
 ```
@@ -57,7 +57,7 @@ idk-plans reads a themetron **inputs file** (`.json`), and builds it with the th
 | Maker | [idk-themetron](https://www.npmjs.com/package/@method-run/idk-themetron) 0.2 and later | Other CSS. A file that sets no `--tm-*` tokens stops the build. |
 | `site.theme` format | `css`: the tokens only. Use this one, with `site.looks`. `looks` works too: the tokens and the looks in one file. `stylesheet` also works: the tokens, the looks, and themetron's components. The site does not use the components. | `dtcg`, `tailwind`, `shadcn`, `bootstrap`, `bootstrap-css`, `mui`, and `daisyui` |
 | `site.looks` | `looks.css` from the themetron package: the `tm-look-*` classes. Or `false`, for no looks. A theme from an inputs file needs no `site.looks`. | Any other file. A file with no `tm-look-*` classes stops the build. |
-| Token contract | 0.2.x, 0.3.x, and 0.4.x: the [token manifest](https://method-run.github.io/idk-themetron/schema/0.3.0/tokens.manifest.json), and the [consumer contract](https://github.com/method-run/idk-themetron/blob/main/spec/consumers.md) | Any other version. The build stops, and says which version the file is for. |
+| Token contract | 0.2.x, 0.3.x, and 0.4.x: the [token manifest](https://method-run.github.io/idk-themetron/schema/0.4.0/tokens.manifest.json), and the [consumer contract](https://github.com/method-run/idk-themetron/blob/main/spec/consumers.md) | Any other version. The build stops, and says which version the file is for. |
 | Prefixes | The defaults: tokens `--tm-*`, theme classes `.theme-*` | Other prefixes (`--prefix`, `--class-prefix`). The build stops. |
 
 A theme names its contract on its first line, for example `/* Made by themetron for my-site, token contract 0.3.0: … */`. Exports from before themetron 0.2.1 have no such line. idk-plans reads them as contract 0.2. Contracts 0.3 and 0.4 only added to 0.2, so the site reads them all the same way.
@@ -79,7 +79,7 @@ With looks, the site's parts wear themetron's own look classes, so they look exa
 
 The site has looks:
 
-- with a theme from an inputs file, from the installed themetron, when it has looks (0.4 and later). Set `site.looks` to `false` to turn them off.
+- with a theme from an inputs file, from the installed themetron. Set `site.looks` to `false` to turn them off.
 - with `site.looks`, the path of a `looks.css`.
 - with a theme in the `looks` or `stylesheet` format.
 
@@ -125,7 +125,7 @@ The top bar and the sidebar are always in dark mode, with or without a theme. Th
 
 With looks, `<html>` also gets the `tm-looks` class. The rules in `site.css` that draw the looked parts are scoped to `:root:not(.tm-looks)`, so they do not fight the looks. Their layout rules apply either way: a look sets no layout.
 
-[site-assets/site.css](../site-assets/site.css) follows themetron's consumer contract: it reads the tokens only with `var()`, and each token has a fallback, which is the site's own look. A part in a colorway has the theme class itself, such as `class="task-mark theme-success"`, and reads the theme's action tokens inside it. `npx themetron check site-assets/site.css` reports 0 unknown tokens.
+[site-assets/site.css](../site-assets/site.css) follows themetron's consumer contract: it reads the tokens only with `var()`, and each token has a fallback, which is the site's own look. A part in a colorway has the theme class itself, such as `class="task-mark theme-success"`, and reads the theme's action tokens inside it. `npm run css:check` runs `themetron check site-assets/site.css`, and CI runs it too: it fails when the stylesheet reads a token that the contract does not have.
 
 `<html>` gets the `theme-default` class, so the root theme applies even when the theme was made with `--no-root`. The rules for clarity, shape, and space are scoped to `:root.theme-default`, because a see-through fill has no fallback that looks like the site without a theme. They follow the recipes in themetron's consumer contract.
 
@@ -138,5 +138,6 @@ With looks, `<html>` also gets the `tm-looks` class. The rules in `site.css` tha
 - [x] Rebuild in `serve` when the theme file changes
 - [x] Wear themetron's looks on the site's parts, from `site.looks` or a `looks` theme
 - [x] Build a theme from a themetron inputs file, with the looks of the same themetron
-- [ ] Drop this repository's copy of `looks.css` (`docs/looks.css`), when themetron releases it
+- [x] Take the looks from the themetron package, not a copy in this repository
+- [x] Check `site.css` against the token contract in CI, with `themetron check`
 - [ ] Check the site with the theme in the more-contrast mode, in a screen reader

@@ -16,7 +16,7 @@
         "title": { "type": "string" },
         "sourceUrl": { "type": "string" },
         "mermaid": { "enum": ["cdn", "local"] },
-        "theme": { "type": "string", "minLength": 1, "description": "The path of an idk-themetron theme, from the project root: an inputs file (.json), as the themetron playground downloads it, which the site builds; or a CSS export, the \"css\" format (or \"looks\"), for token contract 0.2, 0.3, or 0.4 (https://method-run.github.io/idk-themetron/schema/0.3.0/tokens.manifest.json). The site loads it before its own stylesheet. --theme overrides it." },
+        "theme": { "type": "string", "minLength": 1, "description": "The path of an idk-themetron theme, from the project root: an inputs file (.json), as the themetron playground downloads it, which the site builds; or a CSS export, the \"css\" format (or \"looks\"), for token contract 0.2, 0.3, or 0.4 (https://method-run.github.io/idk-themetron/schema/0.4.0/tokens.manifest.json). The site loads it before its own stylesheet. --theme overrides it." },
         "looks": { "oneOf": [{ "type": "string", "minLength": 1 }, { "const": false }], "description": "The path of themetron's looks.css, from the project root. With looks, the site's buttons, search field, cards, and settings menu wear themetron's tm-look-* classes. A theme built from an inputs file gets the looks of the installed themetron without this; false turns them off. Needs site.theme or --theme." }
       }
     },

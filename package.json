@@ -33,11 +33,12 @@
   "scripts": {
     "test": "node --test test/*.test.js",
     "docs:check": "node bin/idk-plans.js check --strict --quiet",
+    "css:check": "themetron check site-assets/site.css",
     "docs:site": "node bin/idk-plans.js site --out _site",
     "docs:serve": "node --watch --watch-preserve-output bin/idk-plans.js serve"
   },
   "dependencies": {
-    "@method-run/idk-themetron": "^0.3.0",
+    "@method-run/idk-themetron": "^0.4.0",
     "marked": "^18.2.0",
     "picomatch": "^4.0.7",
     "yaml": "^2.9.1"
