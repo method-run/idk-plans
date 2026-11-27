@@ -50,17 +50,17 @@ To try another theme for a moment, give it on the command line. `--theme` replac
 
 ## Theme files that idk-plans reads
 
-idk-plans reads a themetron **inputs file** (`.json`), and builds it with the themetron that it installs. It also reads stylesheets that **idk-themetron** made for **token contract 0.2, 0.3, or 0.4**.
+idk-plans reads a themetron **inputs file** (`.json`), and builds it with the themetron that it installs. It also reads stylesheets that **idk-themetron** made for **token contract 0.2, 0.3, 0.4, or 0.5**.
 
 | | Read | Not read |
 |---|---|---|
 | Maker | [idk-themetron](https://www.npmjs.com/package/@method-run/idk-themetron) 0.2 and later | Other CSS. A file that sets no `--tm-*` tokens stops the build. |
 | `site.theme` format | `css`: the tokens only. Use this one, with `site.looks`. `looks` works too: the tokens and the looks in one file. `stylesheet` also works: the tokens, the looks, and themetron's components. The site does not use the components. | `dtcg`, `tailwind`, `shadcn`, `bootstrap`, `bootstrap-css`, `mui`, and `daisyui` |
 | `site.looks` | `looks.css` from the themetron package, by its package name (`@method-run/idk-themetron/looks.css`) or by its path: the `tm-look-*` classes. Or `false`, for no looks. A theme from an inputs file needs no `site.looks`. | Any other file. A file with no `tm-look-*` classes stops the build. |
-| Token contract | 0.2.x, 0.3.x, and 0.4.x: the [token manifest](https://method-run.github.io/idk-themetron/schema/0.4.0/tokens.manifest.json), and the [consumer contract](https://github.com/method-run/idk-themetron/blob/main/spec/consumers.md) | Any other version. The build stops, and says which version the file is for. |
+| Token contract | 0.2.x, 0.3.x, 0.4.x, and 0.5.x: the [token manifest](https://method-run.github.io/idk-themetron/schema/0.5.0/tokens.manifest.json), and the [consumer contract](https://github.com/method-run/idk-themetron/blob/main/spec/consumers.md) | Any other version. The build stops, and says which version the file is for. |
 | Prefixes | The defaults: tokens `--tm-*`, theme classes `.theme-*` | Other prefixes (`--prefix`, `--class-prefix`). The build stops. |
 
-A theme names its contract on its first line, for example `/* Made by themetron for my-site, token contract 0.3.0: … */`. Exports from before themetron 0.2.1 have no such line. idk-plans reads them as contract 0.2. Contracts 0.3 and 0.4 only added to 0.2, so the site reads them all the same way.
+A theme names its contract on its first line, for example `/* Made by themetron for my-site, token contract 0.3.0: … */`. Exports from before themetron 0.2.1 have no such line. idk-plans reads them as contract 0.2. Contracts 0.3, 0.4, and 0.5 only added to 0.2, so the site reads them all the same way.
 
 When a new version of themetron changes the contract, a new version of idk-plans reads it. Until then, build the theme with a themetron version for one of these contracts.
 

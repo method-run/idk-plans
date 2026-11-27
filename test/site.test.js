@@ -138,13 +138,13 @@ test('site: a themetron theme (site.theme) is loaded first, and colors the parts
 
     // The themetron token contract: the same breaking version, or no "token contract" line, is read.
     const made = (version) => `/* Made by themetron, token contract ${version}: https://example.org */\n${css}`;
-    for (const version of ['0.2.0', '0.2.5', '0.3.0', '0.4.0']) {
+    for (const version of ['0.2.0', '0.2.5', '0.3.0', '0.4.0', '0.5.0']) {
       await writeFile(path.join(cwd, 'versioned.css'), made(version));
       await buildSite(project, out, { theme: 'versioned.css' });
     }
-    for (const version of ['0.1.0', '0.5.0', '1.0.0']) {
+    for (const version of ['0.1.0', '0.6.0', '1.0.0']) {
       await writeFile(path.join(cwd, 'versioned.css'), made(version));
-      await assert.rejects(buildSite(project, out, { theme: 'versioned.css' }), new RegExp(`token contract ${version.replace(/\./g, '\\.')}, but idk-plans reads contracts 0\\.2\\.x, 0\\.3\\.x, 0\\.4\\.x`));
+      await assert.rejects(buildSite(project, out, { theme: 'versioned.css' }), new RegExp(`token contract ${version.replace(/\./g, '\\.')}, but idk-plans reads contracts 0\\.2\\.x, 0\\.3\\.x, 0\\.4\\.x, 0\\.5\\.x`));
     }
   } finally {
     await rm(cwd, { recursive: true });
@@ -196,7 +196,7 @@ test('site: a themetron inputs file (this repository\'s docs/theme.inputs.json) 
   assert.ok(theme.inputs);
   assert.match(theme.css, /^\/\* Made by themetron/);
   assert.equal(theme.root, 'theme-default');
-  assert.match(theme.contract, /^0\.[34]\./);
+  assert.match(theme.contract, /^0\.5\./);
   assert.ok(theme.icons);
   for (const colorway of ['success', 'warning', 'danger']) assert.ok(theme.classes[colorway], colorway);
 });

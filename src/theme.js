@@ -14,10 +14,11 @@ import { fileURLToPath } from 'node:url';
 // The site reads these versions of themetron's token contract. Each added tokens and changed
 // none that the site reads, so they all work. A theme for another version stops the build, so a
 // theme never half works. A theme without the "token contract" line, from before themetron
-// 0.2.1, is read as 0.2. 0.4 adds the looks to the manifest.
-export const THEMETRON_CONTRACTS = ['0.2', '0.3', '0.4'];
+// 0.2.1, is read as 0.2. 0.4 adds the looks to the manifest. 0.5 adds the edge twins of an
+// inverted panel.
+export const THEMETRON_CONTRACTS = ['0.2', '0.3', '0.4', '0.5'];
 // The newest contract, for links.
-export const THEMETRON_CONTRACT = '0.4.0';
+export const THEMETRON_CONTRACT = '0.5.0';
 export const THEMETRON_MANIFEST_URL = `https://method-run.github.io/idk-themetron/schema/${THEMETRON_CONTRACT}/tokens.manifest.json`;
 
 /** The part of a version that a breaking change raises: the minor version before 1.0, then the major. */
